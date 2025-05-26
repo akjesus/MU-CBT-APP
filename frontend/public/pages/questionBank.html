@@ -1,0 +1,435 @@
+<div class="container mt-4">
+  <h2>Question Bank</h2>
+  <div class="mb-3">
+    <label for="courseSelect" class="form-label">Select Course</label>
+    <select id="courseSelect" class="form-select" style="width: 300px; display: inline-block;">
+      <option value="">-- Choose a Course --</option>
+    </select>
+    <button class="btn btn-secondary" id="btnLoadQuestions">Load Questions</button>
+    <button class="btn btn-primary" id="btnAddQuestion">+ Add Question</button>
+    <button class="btn btn-info" id="btnBulkUpload">Bulk CSV Upload</button>
+  </div>
+
+  <!-- DataTable for Questions -->
+  <table id="questionBankTable" class="display nowrap table table-striped" style="width: 100%;">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Text</th>
+      <th>Correct Option</th>
+      <th>Score</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody><!-- Filled by DataTables --></tbody>
+  </table>
+</div>
+
+<!-- Modal: Add/Edit Single Question -->
+<div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="questionForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="questionModalLabel">Add Question</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="questionId" />
+
+          <!-- We’ll store selectedCourseId in a hidden field if needed -->
+          <input type="hidden" id="questionCourseId" />
+
+          <!-- question text -->
+          <div class="mb-3">
+            <label for="questionText" class="form-label">Question Text</label>
+            <textarea id="questionText" class="form-control" rows="3" required></textarea>
+          </div>
+
+          <!-- Options A-D -->
+          <div class="mb-3">
+            <label for="optionA" class="form-label">Option A</label>
+            <input type="text" class="form-control" id="optionA" />
+          </div>
+          <div class="mb-3">
+            <label for="optionB" class="form-label">Option B</label>
+            <input type="text" class="form-control" id="optionB" />
+          </div>
+          <div class="mb-3">
+            <label for="optionC" class="form-label">Option C</label>
+            <input type="text" class="form-control" id="optionC" />
+          </div>
+          <div class="mb-3">
+            <label for="optionD" class="form-label">Option D</label>
+            <input type="text" class="form-control" id="optionD" />
+          </div>
+
+          <!-- Correct Option -->
+          <div class="mb-3">
+            <label for="correctOption" class="form-label">Correct Option</label>
+            <select class="form-select" id="correctOption">
+              <option value="">None</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+            </select>
+          </div>
+
+          <!-- Score Obtainable -->
+          <div class="mb-3">
+            <label for="scoreObtainable" class="form-label">Score Obtainable</label>
+            <input type="number" step="0.01" class="form-control" id="scoreObtainable" />
+          </div>
+
+          <!-- question_type & difficulty_level -->
+          <div class="mb-3">
+            <label for="questionType" class="form-label">Question Type</label>
+            <select class="form-select" id="questionType">
+              <option value="objective">Objective</option>
+              <option value="subjective">Subjective</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="difficultyLevel" class="form-label">Difficulty Level</label>
+            <select class="form-select" id="difficultyLevel">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+
+          <!-- level, file, answers, user_id (optional) -->
+          <div class="mb-3">
+            <label for="questionLevel" class="form-label">Level (e.g. 100, 200)</label>
+            <input type="text" class="form-control" id="questionLevel" />
+          </div>
+          <div class="mb-3">
+            <label for="questionFile" class="form-label">File (URL/path)</label>
+            <input type="text" class="form-control" id="questionFile" />
+          </div>
+          <div class="mb-3">
+            <label for="questionAnswers" class="form-label">Answers (JSON or text)</label>
+            <textarea class="form-control" id="questionAnswers"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="questionUserId" class="form-label">User ID</label>
+            <input type="number" class="form-control" id="questionUserId" />
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Bulk CSV Upload -->
+<div
+  class="modal fade"
+  id="bulkUploadModal"
+  tabindex="-1"
+  aria-labelledby="bulkUploadModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="bulkUploadForm" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bulkUploadModalLabel">Bulk CSV Upload for Question Bank</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Select a CSV file with question columns (except created_at, updated_at). Each question will be assigned to your chosen course.</p>
+          <input type="hidden" id="bulkCourseId" />
+          <div class="mb-3">
+            <label class="form-label">CSV File</label>
+            <input class="form-control" type="file" id="bulkCSVFile" accept=".csv" required/>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Cancel</button>
+          <button type="submit" class="btn btn-info" onclick="bulkUploadQuestions()">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    questionBankTable;
+    showingAll = false;
+
+  function loadQuestionBankPage() {
+    // 1) Load courses into #courseSelect
+    loadCourses();
+
+    // 2) Initialize questionBankTable
+    questionBankTable = $("#questionBankTable").DataTable({
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "QuestionBank_Export" },
+        { extend: "excelHtml5", title: "QuestionBank_Export" },
+        { extend: "print", title: "QuestionBank" }
+      ],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"]
+      ],
+      columns: [
+        { data: "id" },
+        { data: "text" },
+        { data: "correct_option" },
+        { data: "score_obtainable" },
+        {
+          data: null,
+          render: function (row) {
+            return `
+              <button class="btn btn-sm btn-primary me-1" onclick="editQuestion(${row.id})">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="removeQuestionFromDB(${row.id})">Delete</button>
+            `;
+          },
+          orderable: false
+        }
+      ]
+    });
+
+    // 3) "Load Questions" button
+    document.getElementById("btnLoadQuestions").addEventListener("click", function() {
+      loadQuestions();
+    });
+
+    // 4) "Add Question" => show questionModal
+    document.getElementById("btnAddQuestion").addEventListener("click", function() {
+      const courseId = document.getElementById("courseSelect").value;
+      if (!courseId) {
+        alert("Please select a course first.");
+        return;
+      }
+      clearQuestionForm();
+      document.getElementById("questionCourseId").value = courseId;
+      document.getElementById("questionModalLabel").textContent = "Add Question";
+      new bootstrap.Modal(document.getElementById("questionModal")).show();
+    });
+
+    // 5) "Bulk CSV Upload" => show modal
+    document.getElementById("btnBulkUpload").addEventListener("click", function() {
+      const courseId = document.getElementById("courseSelect").value;
+      if (!courseId) {
+        alert("Please select a course first.");
+        return;
+      }
+      document.getElementById("bulkCourseId").value = courseId;
+      document.getElementById("bulkCSVFile").value = "";
+      new bootstrap.Modal(document.getElementById("bulkUploadModal")).show();
+    });
+
+    // 6) questionForm submit => save single question
+    document.getElementById("questionForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      saveQuestion();
+    });
+
+    // 7) bulkUploadForm submit => do bulk CSV upload
+    document.getElementById("bulkUploadForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      bulkUploadQuestions();
+    });
+  }
+
+  // =================== LOAD COURSES
+  function loadCourses() {
+    fetch(API_URL + "courses")
+      .then(res => res.json())
+      .then(courses => {
+        const courseSel = document.getElementById("courseSelect");
+        courseSel.innerHTML = '<option value="">-- Choose a Course --</option>';
+        courses.forEach(c => {
+          let opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.name;
+          courseSel.appendChild(opt);
+        });
+      })
+      .catch(() => alert("Failed to load courses."));
+  }
+
+  // =================== LOAD QUESTIONS for selected course
+  function loadQuestions() {
+    const courseId = document.getElementById("courseSelect").value;
+    if (!courseId) {
+      alert("Please select a course first.");
+      return;
+    }
+    // e.g. GET /api/questions?course_id=xx
+    fetch(API_URL + `questions?course_id=${courseId}`)
+      .then(res => res.json())
+      .then(data => {
+        questionBankTable.clear();
+        questionBankTable.rows.add(data).draw();
+      })
+      .catch(() => alert("Failed to load questions."));
+  }
+
+  // =================== CLEAR question form
+  function clearQuestionForm() {
+    document.getElementById("questionId").value = "";
+    document.getElementById("questionText").value = "";
+    document.getElementById("optionA").value = "";
+    document.getElementById("optionB").value = "";
+    document.getElementById("optionC").value = "";
+    document.getElementById("optionD").value = "";
+    document.getElementById("correctOption").value = "";
+    document.getElementById("scoreObtainable").value = "";
+    document.getElementById("questionType").value = "objective";
+    document.getElementById("difficultyLevel").value = "easy";
+    document.getElementById("questionLevel").value = "";
+    document.getElementById("questionFile").value = "";
+    document.getElementById("questionAnswers").value = "";
+    document.getElementById("questionUserId").value = "";
+  }
+
+  // =================== EDIT question
+  function editQuestion(questionId) {
+    // e.g. GET /api/questions/:id
+    fetch(API_URL + "questions/" + questionId)
+      .then(res => res.json())
+      .then(q => {
+        // Fill form
+        clearQuestionForm();
+        document.getElementById("questionId").value = q.id;
+        document.getElementById("questionCourseId").value = q.course_id;
+        document.getElementById("questionText").value = q.text || "";
+        document.getElementById("optionA").value = q.option_a || "";
+        document.getElementById("optionB").value = q.option_b || "";
+        document.getElementById("optionC").value = q.option_c || "";
+        document.getElementById("optionD").value = q.option_d || "";
+        document.getElementById("correctOption").value = q.correct_option || "";
+        document.getElementById("scoreObtainable").value = q.score_obtainable || "";
+        document.getElementById("questionType").value = q.question_type || "objective";
+        document.getElementById("difficultyLevel").value = q.difficulty_level || "easy";
+        document.getElementById("questionLevel").value = q.level || "";
+        document.getElementById("questionFile").value = q.file || "";
+        document.getElementById("questionAnswers").value = q.answers || "";
+        document.getElementById("questionUserId").value = q.user_id || "";
+        
+        document.getElementById("questionModalLabel").textContent = "Edit Question";
+        new bootstrap.Modal(document.getElementById("questionModal")).show();
+      })
+      .catch(() => alert("Failed to fetch question data."));
+  }
+
+  // =================== SAVE single question
+  function saveQuestion() {
+    const id = document.getElementById("questionId").value;
+    const courseId = document.getElementById("questionCourseId").value;
+
+    const payload = {
+      course_id: courseId,
+      text: document.getElementById("questionText").value.trim(),
+      option_a: document.getElementById("optionA").value.trim(),
+      option_b: document.getElementById("optionB").value.trim(),
+      option_c: document.getElementById("optionC").value.trim(),
+      option_d: document.getElementById("optionD").value.trim(),
+      correct_option: document.getElementById("correctOption").value,
+      difficulty_level: document.getElementById("difficultyLevel").value,
+      question_type: document.getElementById("questionType").value,
+      score_obtainable: document.getElementById("scoreObtainable").value,
+      level: document.getElementById("questionLevel").value.trim(),
+      file: document.getElementById("questionFile").value.trim(),
+      answers: document.getElementById("questionAnswers").value.trim(),
+      user_id: document.getElementById("questionUserId").value || null
+    };
+
+    if (id) {
+      // Update existing question
+      fetch(API_URL + `questions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("questionModal")).hide();
+          alert("Question updated successfully.");
+          loadQuestions();
+        })
+        .catch(() => alert("Failed to update question."));
+    } else {
+      // Create new question => route e.g. POST /api/exam-questions/addNew or /api/questions
+      // We'll assume POST /api/questions if you have direct creation
+      fetch(API_URL + "questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("questionModal")).hide();
+          alert("Question created successfully.");
+          loadQuestions();
+        })
+        .catch(() => alert("Failed to create question."));
+    }
+  }
+
+  // =================== Bulk CSV Upload
+  function bulkUploadQuestions() {
+    const courseId = document.getElementById("bulkCourseId").value;
+    const fileInput = document.getElementById("bulkCSVFile");
+    if (!fileInput.files[0]) {
+      alert("Please select a CSV file.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("course_id", courseId); // If your server needs it
+
+        // Log FormData entries
+        for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+        }
+
+    // e.g. POST /api/questions/bulk-upload or /api/questions/bulk-upload
+    fetch(API_URL + `questions/bulk-upload`, {
+      method: "POST",  
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        bootstrap.Modal.getInstance(document.getElementById("bulkUploadModal")).hide();
+        alert(data.message || "Bulk upload completed.");
+        loadQuestions();
+      })
+      .catch(() => alert("Failed to bulk upload questions."));
+  }
+
+  // =================== Remove question from DB
+  function removeQuestionFromDB(questionId) {
+    if (!confirm("Are you sure you want to remove this question from the DB?")) return;
+    fetch(API_URL + `questions/move-from-db/${questionId}`, {
+      method: "DELETE"
+    })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || "Question removed from DB.");
+        loadQuestions(); // refresh the table
+      })
+      .catch(() => alert("Failed to remove question from DB."));
+  }
+</script>
+<script>
+    /* Re-init DataTable after dynamic load if needed */
+    setTimeout(loadQuestionBankPage(), 100);
+</script>

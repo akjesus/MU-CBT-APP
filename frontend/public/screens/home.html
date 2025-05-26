@@ -1,0 +1,195 @@
+<div id="page-home" class="flex" style="display:none; overflow:scroll; height: 100vh; background-color: #dadaff;background-image: linear-gradient(white, #dadaff);"> 
+    <!-- HEADER-->    
+    <!--
+    <div class="app-header">
+        <div class="top-icon-menu" style="flex-grow: 2"><img src="images/icons/bars.svg"> </div>
+        <div class="top-icon-logo page-home" style="flex-grow: 8"><img src="images/logo.png" class="page-home"></div>
+        <div class="top-icon-search show-product-searchX" style="flex-grow: 2">
+            <sub class="notifications-items-counter-icon notifications-main-cart-counter">3</sub>
+            <img src="images/icons/bell-outline.svg">     
+        </div>
+    </div>
+    -->
+        <!-- START FOOT MENU-->        
+        <div w3-include-script="screens/foot-menu.html"></div>
+        <!-- START END MENU--> 
+
+      <div class="width-20p float-left navy " style="color: white">
+          <br />  
+          <br />
+          <br />    
+          <br />  
+          <br />
+
+          <!-- Contents of the menu of the page        -->
+          <br />  
+          <div class="page-fliud-menu-list text-left padding-15">
+            <!-- <div class="logged-in-info show-profile"><img src="images/icons/user-circle.svg"><span class="update_first_name">@userfname</span> <span class="update_last_name">@userlname</span></div> -->
+            <!-- <div class="logged-in-info show-profile2"><img src="images/icons/shield-alt.svg"><span id="logged-user-fullname">Account Security</span></div> -->
+            <fieldset><legend>Candidate Info</legend>
+              <div class="logged-in-info show-profile"><strong>Name: </strong><span class="update_first_name">@userfname</span> <span class="update_last_name">@userlname</span></div>
+              <div class="logged-in-info show-profile2"><strong>Registration No.: </strong><span class="update_registration_number">@department</span></div>
+              <div class="logged-in-info show-profile2"><strong>Email: </strong><span class="update_email">@department</span></div>
+              <div class="logged-in-info show-profile2"><strong>Department: </strong><span class="update_department_name">@department</span></div>
+              <div class="logged-in-info show-profile2"><strong>Level: </strong><span class="update_level_id"></span>00 Level</div>
+            </fieldset>
+            <br />
+
+            <div class="show-logout logged-in-info" onclick="logout()"><img src="images/icons/sign-out-alt.svg">Logout</div>                                                    
+            <!--<div class="show-login logged-out-info"><img src="images/icons/sign-in-alt.svg">Login <img src="images/icons/angle-right.svg" align="right"></div>-->
+        </div>
+          
+          
+
+      </div>
+      <div class="width-80p float-left text-right text-18">
+          <br />  
+          <br />
+          <br />        
+          <div class="text-left padding-15" style="margin: 10px;border-radius: 15px; padding-top: 30px !important; padding-bottom: 30px !important;">
+              <div class="text-18" style="display:inline;position: relative;top: -20px;"> </div>
+              <!-- <hr style="border-top:1px white solid;border-bottom: none;" /> -->
+              <br />
+              <br />
+              <div class="text-25 text-bold" style="display:inline;position: relative;top: -20px;">
+                  Welcome, <span class="update_first_name"> Fname</span>  <span class="update_last_name"> Lname</span>  
+              </div>
+
+          </div>
+          <div id="eligible-exams-container" class="white margin-10 rad-10 vertical-layout padding-5" style="margin-bottom: 15px;">
+              <div class="text-18 text-left padding-5 theme-text">
+                  <div style="width: 100%;">
+                      <div class="text-bold" style="float:left; width: 50%;">Eligible Exams</div>
+                      <div style="clear: both;" class="flex"></div>
+                  </div>
+              </div>
+              <!-- We'll render the exams here dynamically -->
+              <div id="eligible-exams-list" class="padding-5 text-center">
+                Loading...
+              </div>
+            </div>
+      </div>
+        
+     
+    </div>
+
+    <run>
+        <script>
+            /**
+             * loadEligibleExams:
+             * Fetches the list of eligible exams for the currently logged-in student
+             * using your existing request function (reqAsyncJSON).
+             */
+            window.loadEligibleExams = function() {
+              /**
+               * We get the stored user data (from localStorage) that contains the student ID.
+               * If no user data is found, or it lacks an 'id' property, we cannot proceed.
+               */
+              let userString = localStorage.getItem("user_data");
+              if (!userString) {
+                console.log("No user data found in localStorage. Not logged in?");
+                return;
+              }
+          
+              let user = JSON.parse(userString);
+              if (!user.id) {
+                console.log("User data missing ID. Cannot load eligible exams.");
+                return;
+              }
+          
+              /**
+               * We construct the endpoint for your 'eligible-exams' route:
+               * '/api/eligible-exams/student/:student_id'
+               */
+              let endpoint = serverHost + api_prefix + "api/eligible-exams/student/" + user.id;
+          
+              /**
+               * We use reqAsyncJSON with a GET method. The callback is 'renderEligibleExams',
+               * and 'Loading eligible exams...' is the loading message.
+               */
+              reqAsyncJSON(
+                "GET",
+                endpoint,
+                {},
+                "renderEligibleExams",
+                "Loading eligible exams..."
+              );
+            };
+          
+            /**
+             * renderEligibleExams:
+             * Callback after fetching the student's eligible exams.
+             * The responseData is typically an array with the JSON string at index 0.
+             */
+            window.renderEligibleExams = function(responseData) {
+              let data = JSON.parse(responseData[0]);
+              let container = document.getElementById("eligible-exams-list");
+          
+              /**
+               * If 'data' is not an array, it might be an error or unexpected result.
+               * We display any messages accordingly.
+               */
+              if (!Array.isArray(data)) {
+                container.innerHTML = "Message: " + data.message;
+                return;
+              }
+          
+              /**
+               * If there are no eligible exams, we inform the user that no exams were found.
+               */
+              if (data.length === 0) {
+                container.innerHTML = "No eligible exams found.";
+                return;
+              }
+          
+              /**
+               * We build a simple HTML snippet for each exam and inject it into the container.
+               */
+              let html = "";
+              data.forEach(function(exam) {
+                html += `
+                  <div class="white text-left margin-5 rad-5 padding-5 shadow-10 width-40p float-left" style="float:left;">
+                    <div class="text-16 text-bold">${exam.exam_name}</div>
+                    <div class="text-14">Course: ${exam.course_name}</div>
+                    <div class="text-14">Start Time: ${exam.start_time || "N/A"}</div>
+                    <div class="text-14">Exam Date: ${exam.exam_date || "N/A"}</div>
+                    <button class="navy rad-5 text-bold show-exam" onclick="takeExam(${exam.exam_id})">
+                      Take Exam
+                    </button>
+                  </div>
+                `;
+              });
+          
+              container.innerHTML = html;
+            };
+          
+            /**
+             * takeExam:
+             * Called when a user clicks the "Take Exam" button.
+             * In this placeholder, we simply alert or redirect to an exam detail page.
+             */
+             window.takeExam = function(examId) {
+                /* Load the questions for this exam */
+              /* Store Active exam Id */      
+                loadExamQuestions(examId);
+                $('.app-page').hide();
+                $('#page-home').hide();
+                $('#page-exam').show();
+                resetScroll();
+            };
+            window.showHome = function(examId) {
+                /* Show Home page */
+                $('.app-page').hide();
+                $('#page-home').show();
+                $('#page-exam').hide();
+                resetScroll();
+            };
+          </script>
+          
+          
+        <script>
+            window.showNotifications = function (){
+                alert("No notifications yet!");
+            }
+        </script>
+    </run>

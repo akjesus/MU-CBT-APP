@@ -1,0 +1,239 @@
+<style>
+#page-profile{
+    width: 100vw;
+    height: 100vh;
+    background: white;  /*set from theme*/ 
+    z-index: 66666;
+    position:fixed;
+    top:0px;
+    left:0px;
+    overflow:auto;
+    text-align: center;
+}
+</style>
+<!--START PAGE PROFILE PROFILE--> 
+        <div id="page-profile" style="display: none;" class="app-page">
+            <div class="page-back fixed" style="z-index: 1122;">
+                <img class="invert trans-shadow-navy" src="images/icons/angle-left.svg">
+            </div>
+                <div class="page-fluid">
+                    <div class="page-fliud-header-large-icon  padding-15" style="z-index: 1111;">
+                        <img class="invert" src="images/icons/user-circle.svg">
+                    </div>
+                    <div class="page-fliud-body">
+                        <div class="login-form" id="login-form"><!--signup-form -->
+                            <div class="text-18 text-left padding-5">Personal Info</div><hr class="tin-hr" /><br />     
+                            <div class="login-form-item text-type">
+                                <input type="text" name="first_name" id="update_first_name" placeholder="First Name*" />
+                            </div>
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="last_name" id="update_last_name" placeholder="Last Name*" />
+                            </div>
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_phone" id="update_phone" placeholder="Contact Number" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_email" id="update_email" placeholder="Email" />
+                            </div>
+                            <br />
+                            <div class="login-form-item text-type">
+                                <select name="update_educational_status" id="update_educational_status">
+                                    <option value="">--Highest Educational Qualification--</option>
+                                    <option value="None">None</option>
+                                    <option value="Primary School">Primary School</option>
+                                    <option value="Secondary School">Secondary School</option>
+                                    <option value="College/Univerisity">College/Univerisity</option>
+                                    <option value="Post-graduate">Post-graduate</option>
+                                </select>
+                            </div>                  
+                            <br />                     
+                            <br />
+                            <div class="text-18 text-left padding-5">Address</div><hr class="tin-hr" /><br />
+                            <!-- <div class="login-form-item text-type">
+                                <input type="password" name="update_password" id="update_password" placeholder="Enter your password" />
+                            </div> -->
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_country" id="update_country" placeholder="Country" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_province_state" id="update_province_state" placeholder="Province/State" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_city" id="update_city" placeholder="City" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_house_street" id="update_house_street" placeholder="House No/Street" />
+                            </div>                                   
+                            <br />
+                            <div class="text-18 text-left padding-5">Working Information</div><hr class="tin-hr" /><br />
+                            <div class="login-form-item text-type">
+                                <select name="update_employment_status" id="update_employment_status">
+                                    <option value="">--Select Work Status--</option>
+                                    <option value="Unemployed">Unemployed</option>
+                                    <option value="Employed">Employed</option>
+                                    <option value="Self Employed">Self Employed</option>
+                                </select>
+                            </div>                  
+                            <br />                    
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_employer_name" id="update_employer_name1" placeholder="Name of Employer" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_employer_name" id="update_employer_name" placeholder="Address of Employer" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="date" name="update_employer_date" id="update_employer_date" placeholder="Date of Employed" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <select name="update_employment_salaray" id="update_employment_salaray">
+                                    <option value="">--Select Salary Range--</option>
+                                    <option value="0 - 10,0000">₦0 - ₦10,0000</option>
+                                    <option value="10,000 - 40,000">₦10,000 - ₦40,000</option>
+                                    <option value="40,000 - 100,000">₦40,000 - ₦100,000</option>
+                                    <option value="100,000 - 200,000">₦100,000 - ₦200,000</option>
+                                    <option value="200,000 - Above">₦200,000 - Above</option>
+                                    <option value="No fixed Amount">No fixed Amount</option>
+                                </select>
+                            </div>                  
+                            <br />              
+                            <div class="text-18 text-left padding-5">Family Information</div><hr class="tin-hr" /><br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_state_of_origin" id="update_state_of_origin" placeholder="State of Origin" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_lga_of_origin" id="update_lga_of_origin" placeholder="LGA of Origin" />
+                            </div>                  
+                            <br />
+                            <div class="login-form-item text-type">
+                                <select name="update_marital_status" id="update_marital_status">
+                                    <option value="">--Select Marital Status--</option>
+                                    <option value="">Single</option>
+                                    <option value="">Married</option>
+                                    <option value="">Diviorced</option>
+                                </select>
+                            </div>                  
+                            <br />
+                            <div class="text-18 text-left padding-5">1<sup>st</sup> Guarantors Information</div><hr class="tin-hr" /><br />
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_guarantor_name1" id="update_guarantor_name1" placeholder="1st Guarantor Name" />
+                            </div>                  
+                            <br />                                        
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_guarantor_phone1" id="update_guarantor_phone1" placeholder="1st Guarantor Phone Number" />
+                            </div>                  
+                            <br />                      
+                            <div class="login-form-item text-type">
+                                <select name="update_guarantor_relationship1" id="update_guarantor_relationship1">
+                                    <option value="">--Select Relationship--</option>
+                                    <option value="Father">Father</option>
+                                    <option value="Mother">Mother</option>
+                                    <option value="Brother">Brother</option>
+                                    <option value="Sister">Sister</option>
+                                    <option value="Uncle">Uncle</option>
+                                    <option value="Aunt">Aunt</option>
+                                    <option value="Cousin">Cousin</option>
+                                    <option value="Friend">Friend</option>
+                                    <option value="Co-worker">Co-worker</option>
+                                </select>
+                            </div>                  
+                            <br />                    
+                            <div class="text-18 text-left padding-5">2<sup>nd</sup> Guarantors Information</div>
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_guarantor_name2" id="update_guarantor_name2" placeholder="2nd Guarantor Name" />
+                            </div>                  
+                            <br />                                        
+                            <div class="login-form-item text-type">
+                                <input type="text" name="update_guarantor_phone2" id="update_guarantor_phone2" placeholder="2nd Guarantor Phone Number" />
+                            </div>                  
+                            <br />                      
+                            <div class="login-form-item text-type">
+                                <select name="update_guarantor_relationship2" id="update_guarantor_relationship2">
+                                    <option value="">--Select Relationship--</option>
+                                    <option value="Father">Father</option>
+                                    <option value="Mother">Mother</option>
+                                    <option value="Brother">Brother</option>
+                                    <option value="Sister">Sister</option>
+                                    <option value="Uncle">Uncle</option>
+                                    <option value="Aunt">Aunt</option>
+                                    <option value="Cousin">Cousin</option>
+                                    <option value="Friend">Friend</option>
+                                    <option value="Co-worker">Co-worker</option>
+                                </select>
+                            </div>                  
+                            <br />                                                
+                            <!---TERMS AND CONDITIONS -->
+                            <div class="login-form-item">
+                                <input type="button" name="signup" id="signup" class="show-signup2" value="Update" />
+                            </div>
+
+                            
+                        </div>
+                    </div>
+                </div>
+        
+        </div>
+        <!--END PAGE PROFILE PROFILE--> 
+
+<style>
+#page-profile2{
+    width: 100vw;
+    height: 100vh;
+    background: white;  /*set from theme*/ 
+    z-index: 66666;
+    position:fixed;
+    top:0px;
+    left:0px;
+    overflow:auto;
+    text-align: center;
+}
+</style>
+<!--START PAGE PROFILE PROFILE--> 
+        <div id="page-profile2" style="display: none;" class="app-page">
+            <div class="page-back show-setting fixed" style="z-index: 1122;">
+                <img class="" src="images/icons/angle-left.svg">
+            </div>
+                <div class="page-fluid">
+                    <div class="padding-15 text-25" style="z-index: 1111;">
+                        <h1>Account Security</h1>
+                    </div>
+                    <div class="page-fliud-body">
+                        <div class="login-form" id="login-form"><!--signup-form -->
+                            <br />
+                            <div class="login-form" id="login-form"><!--signup-form -->
+                            <div class="text-18 text-left padding-5">Old Password</div>  
+                            <div class="login-form-item text-type">
+                                <input type="password" name="update_password" id="update_password" placeholder="Password" />
+                            </div>                
+                            <br /> 
+                            <div class="text-18 text-left padding-5">New Password</div>
+                            <div class="login-form-item text-type">
+                                <input type="password" name="update_password2" id="update_password2" placeholder="Password" />
+                            </div>                
+                            <br /> 
+                            <div class="text-18 text-left padding-5">Transaction Pin
+                                <small><a href="https://itopmoney.com/transaction-pin"><span style="color:green">(What it is?)</span></a></small></div>
+                            <div class="login-form-item text-type">
+                                <input type="password" name="update_transaction_pin" id="update_transaction_pin" placeholder="Tranasaction Pin" />
+                            </div>                
+                      
+                            <br /><br /><br />
+                            <div class="login-form-item">
+                                <input type="button" name="signup" id="signup" class="show-profile2" onclick="" value="Update" />
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+        
+        </div>
+        <!--END PAGE PROFILE PROFILE--> 

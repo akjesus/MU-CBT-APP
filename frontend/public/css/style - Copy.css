@@ -1,0 +1,502 @@
+svg:hover path {
+    fill: red;
+}
+
+body {
+    background:white; 
+    width:100%;
+}
+.hidden {
+    display: hidden;
+}
+
+a{
+    color: red;
+    text-decoration: none; /*set from theme*/ 
+}
+#home-slide-menu{
+    width: 80vw;
+    height: 100vh;
+    background: white;  /*set from theme*/ 
+    z-index: 44444;
+    position:fixed;
+    top:0px;
+    left:0px;
+    overflow:scroll;
+    
+}
+
+.text-15 {
+    font-size: 15px;
+}
+
+.text-18 {
+    font-size: 18px;
+}
+
+.page-back{
+    text-align: left;
+    font-size: 30px;
+}
+
+.page-back img {
+   height: 30px;
+   padding:15px;
+}
+
+
+#page-login{
+    width: 100vw;
+    height: 100vh;
+    background: white;  /*set from theme*/ 
+    z-index: 55555;
+    position:fixed;
+    top:0px;
+    left:0px;
+    overflow:auto;
+    text-align: center;
+}
+
+#page-signup{
+    width: 100vw;
+    height: 100vh;
+    background: white;  /*set from theme*/ 
+    z-index: 66666;
+    position:fixed;
+    top:0px;
+    left:0px;
+    overflow:auto;
+    text-align: center;
+}
+
+.page-login-icon {
+   text-align: center;
+}
+
+.page-login-icon img {
+   height: 50px;
+}
+
+.login-form {
+    padding: 20px;
+}
+
+.login-form-item {
+    padding-top: 20px;
+}
+
+.login-form-item input {
+    
+}
+
+.text-type{
+    border-bottom:1px grey solid;
+}
+
+.checkbox-type{
+   text-align: left;
+   font-size: 20px;
+}
+
+.login-form-item input[type=text],input[type=password] {
+    border: none;
+    background: none;
+    height: 100%;
+    font-size:20px;
+}
+
+.login-form-item input[type=button] {
+    border: none;
+    background: none;
+    height: 100%;
+    font-size:20px;
+    background: red;
+    border-radius: 25px 25px;
+    width: 100%;
+    padding:15px;
+    color: white;
+}
+
+
+
+
+#core-side-menu-icon {
+   height: 50px;
+   text-align: left;
+   border-bottom: #dddddd solid 1px;
+}
+#core-side-menu-icon img {
+   height: 90%;
+}
+
+
+#core-side-menu-list > div {
+   font-size:20px;
+   padding-top: 10px;
+   padding-bottom: 15px;
+}
+
+
+#core-side-menu-list > div > img{
+    width: 25px;
+    padding-left: 15px;
+    padding-right: 30px;
+}
+
+.menu-by-category-header{
+    font-size:20px;
+    padding: 15px;
+    color: grey;
+}
+
+
+.menu-by-category-items{
+    font-size:15px;
+    padding: 15px;
+    color: grey;
+}
+
+#app-foot-menu{
+    position:fixed;
+    bottom: 0px;
+    left:0px;
+    width: 100%;
+    background: white;  /*set from theme*/
+    display: flex;
+}
+#app-foot-menu .foot-menu-item{
+   width: 20%;
+   text-align: center; 
+   padding: 10px;
+}
+
+#app-foot-menu .foot-menu-item img {
+   height: 20px; 
+}
+
+#menu-back-grey {
+    width: 100vw;
+    height: 100vh;
+    background: rgba(100,100,100,0.8); 
+    z-index: 33333;
+    position:fixed;
+    top:0px;
+    left:0px;
+    text-align: right;
+    font-size:50px;
+    
+}
+
+#main_app {
+    height:100%; 
+    width:100%;
+    background-image: url('/mobile/images/app_main_background.jpg');
+    background-size: 100% auto;
+    background-repeat:no-repeat;
+    background-position: top;
+}
+
+.app-header{
+    display: flex;
+    background:white;
+    width:100%;
+    box-shadow: #DDDDDD 0px 3px 3px;
+    position: fixed;
+    margin:0px;
+    left:0px;
+    top: 0px;
+    align-items: center;
+    z-index:22222;
+    
+}
+
+.app-header > div{
+   padding-left: 15px;
+   padding-right: 15px;
+   padding-top: 5px;
+   margin:0px;
+   font-size: 20px
+}
+
+.top-icon-logo{
+    text-align: center; /*set from theme*/
+    height: ;
+}
+
+.top-icon-menu{
+    text-align: left; /*set from theme*/
+    height: ;
+}
+
+.top-icon-search{
+    text-align: right; /*set from theme*/
+    height: ;
+}
+
+
+.top-icon-logo img{
+    height: 40px;
+}
+
+.top-icon-search img{
+    height: 20px;
+}
+
+.top-icon-menu img{
+    height: 20px;
+}
+
+.roll-text {
+    font-size:15px;
+    text-align: left;
+}
+
+.search-bar {
+    padding:10px;
+    text-align: left;
+    background:white;
+    width:70%;
+    border-radius: 25px 25px;
+    align-items: center;
+}
+
+.search-bar > input{
+    border:none;
+    width: 85%;
+    height: 95%;
+    font-size: 15px;
+}
+
+.search-bar > img{
+    height: 17px;
+}
+
+
+.home-category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: ; /*set from theme*/
+  width:100%;
+  
+}
+
+.home-category-grid > .category-grid-items {
+  background-color: ; /*set from theme*/
+  width: 25%;
+  margin: 0px;
+  text-align: center;
+  font-size: 9px;
+  border-radius: 0px 0px; /*set from script*/
+  text-align:center;
+}
+
+.category-grid-items > .category-grid-items-image{
+   background-color: white;  /*use image animantion*/
+   margin: 5px;
+   background:url('/mobile/images/categories_icons/1.png');
+   height: 50px; /*set from script*/
+   background-size: auto 100%;
+   background-repeat: no-repeat;
+   background-position: center;
+   text-align:right;
+}
+
+.grid-products{
+    
+}
+
+.grid-product-header{
+ display: flex;
+}
+
+.grid-product-header > div{
+   width: 50%;
+}
+
+.grid-product-label{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.grid-product-viewall{
+    font-size: 15px;
+    text-align: right;
+    align-self: flex-end;
+}
+
+
+
+.banner-container {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white; /*set from theme*/
+  width:100%;
+}
+
+.banner-container > .single-banner {
+  background-color: white; /*set from theme*/
+  width: 50%;
+  margin: 0px;
+  text-align: center;
+  font-size: 30px;
+  border-radius: 0px 0px; /*set from script*/
+  height: 100px;
+  text-align:right;
+}
+
+.single-banner > .single-banner-image{
+   background-color: white;  /*use image animantion*/
+   margin: 2px;
+   background:url('/mobile/images/test.png');
+   height: 100%; /*set from script*/
+   background-size: 100% 100%;
+   text-align:right;
+}
+
+
+.single-banner-percent{
+   background-color: rgba(255,250,50, 1);
+   color: black:4px;
+   padding-right:4px;
+   padding-top:2px;
+   padding-bottom:2px;
+   border-radius: 0px 0px 0px 0px;
+   font-weight:bold;
+   font-size: 8px;
+   min-width:10px;
+   width: 20%;
+   text-align: center;
+}
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white; /*set from theme*/
+  width:100%;
+}
+
+.flex-container > .single-grid-product {
+  background-color: white; /*set from theme*/
+  width: 50%; /* */
+  margin: 0px;
+  text-align: center;
+  font-size: 30px;
+  border-radius: 10px 10px;
+}
+
+.single-grid-product > .single-grid-product-image{
+   background-color: white;  /*use image animantion*/
+   margin-left: 10px;
+   margin-right: 10px;
+   background:url('/mobile/images/test.png');
+   height: 100cw; /*set to suit this div width*/
+   background-size: 100% 100%;
+   text-align:left;
+}
+
+.single-grid-product-percent{
+   background-color: rgba(255,50,50, 0.7);
+   color: white;
+   padding-left:10px;
+   padding-right:10px;
+   padding-top:5px;
+   padding-bottom:5px;
+   border-radius: 0px 0px 10px 0px;
+   font-weight:bold;
+   font-size: 13px;
+   min-width:10px;
+   width: 20%;
+   text-align: center;
+}
+.single-grid-product-wish{
+   text-align: right;
+   font-size: 15px;
+   color:red;
+}
+
+.single-grid-product-info{
+   padding-left:10px;
+   padding-right:10px;
+}
+
+.single-grid-product-price {
+   text-align: left;
+   padding:0px;
+   margin:0px;
+}
+
+.single-grid-product-name{
+   text-align: left;
+   color: black;
+   font-size: 16px;
+}
+
+.new-price{
+   color: #329423;
+   font-size: 14px;
+   margin:0px;
+}
+
+.old-price{
+   color: grey;
+   font-size: 12px;
+}
+.single-grid-product-cart-split{
+  display: flex;
+}
+.single-grid-product-cart-split img{
+  height:20px;
+}
+.single-grid-product-status{
+  width: 50%;
+}
+.single-grid-product-cart{
+  width: 50%;
+  text-align: right;
+  font-stretch: expanded;
+  font-size: 10px;
+  font-weight: bold;
+}
+.single-grid-product-instock {
+   text-align: left;
+   color: green;
+   font-size: 11px;
+   text-align: left;
+}
+.single-grid-product-rating {
+   text-align: left;
+   color: yellow;
+   font-size:20px;
+   text-align: left;
+}
+.single-grid-product-sold-by {
+   text-align: left;
+   color: black;
+   font-size: 12px;
+   text-align: left;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

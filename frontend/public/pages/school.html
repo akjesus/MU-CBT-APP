@@ -1,0 +1,748 @@
+<div class="container mt-4">
+  <h2>School Management</h2>
+  <ul class="nav nav-tabs" id="schoolTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active"
+        id="faculties-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#faculties"
+        type="button"
+        role="tab"
+        aria-controls="faculties"
+        aria-selected="true"
+      >
+        Faculties
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="departments-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#departments"
+        type="button"
+        role="tab"
+        aria-controls="departments"
+        aria-selected="false"
+      >
+        Departments
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="courses-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#courses"
+        type="button"
+        role="tab"
+        aria-controls="courses"
+        aria-selected="false"
+      >
+        Courses
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content mt-3" id="schoolTabContent">
+    <!-- FACULTIES TAB -->
+    <div
+      class="tab-pane fade show active"
+      id="faculties"
+      role="tabpanel"
+      aria-labelledby="faculties-tab"
+    >
+      <div class="mb-3">
+        <button class="btn btn-primary" id="btnAddFaculty">+ Add Faculty</button>
+        <button class="btn btn-secondary" id="btnToggleFacultyLength">Toggle All/Paginated</button>
+      </div>
+      <table id="facultyTable" class="display nowrap table table-striped" style="width:100%;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Faculty Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- DataTables will fill --></tbody>
+      </table>
+    </div>
+
+    <!-- DEPARTMENTS TAB -->
+    <div
+      class="tab-pane fade"
+      id="departments"
+      role="tabpanel"
+      aria-labelledby="departments-tab"
+    >
+      <div class="mb-3">
+        <button class="btn btn-primary" id="btnAddDepartment">+ Add Department</button>
+        <button class="btn btn-secondary" id="btnToggleDepartmentLength">Toggle All/Paginated</button>
+      </div>
+      <table id="departmentTable" class="display nowrap table table-striped" style="width:100%;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Department Name</th>
+            <th>Faculty</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- DataTables will fill --></tbody>
+      </table>
+    </div>
+
+    <!-- COURSES TAB -->
+    <div
+      class="tab-pane fade"
+      id="courses"
+      role="tabpanel"
+      aria-labelledby="courses-tab"
+    >
+      <div class="mb-3">
+        <button class="btn btn-primary" id="btnAddCourse">+ Add Course</button>
+        <button class="btn btn-secondary" id="btnToggleCourseLength">Toggle All/Paginated</button>
+      </div>
+      <table id="courseTable" class="display nowrap table table-striped" style="width:100%;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Course Name</th>
+            <th>Code</th>
+            <th>Credit Load</th>
+            <th>Department</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- DataTables will fill --></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Faculty -->
+<div
+  class="modal fade"
+  id="facultyModal"
+  tabindex="-1"
+  aria-labelledby="facultyModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="facultyForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="facultyModalLabel">Add Faculty</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="facultyId" />
+          <div class="mb-3">
+            <label for="facultyName" class="form-label">Faculty Name</label>
+            <input type="text" class="form-control" id="facultyName" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Cancel</button>
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Department -->
+<div
+  class="modal fade"
+  id="departmentModal"
+  tabindex="-1"
+  aria-labelledby="departmentModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="departmentForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="departmentModalLabel">Add Department</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="departmentId" />
+
+          <div class="mb-3">
+            <label for="departmentName" class="form-label">Department Name</label>
+            <input type="text" class="form-control" id="departmentName" required />
+          </div>
+          <div class="mb-3">
+            <label for="departmentFaculty" class="form-label">Faculty</label>
+            <select id="departmentFaculty" class="form-select" required>
+              <!-- load from /api/faculties -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Cancel</button>
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Course -->
+<div
+  class="modal fade"
+  id="courseModal"
+  tabindex="-1"
+  aria-labelledby="courseModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="courseForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="courseModalLabel">Add Course</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="courseId" />
+
+          <div class="mb-3">
+            <label for="courseName" class="form-label">Course Name</label>
+            <input type="text" class="form-control" id="courseName" required />
+          </div>
+          <div class="mb-3">
+            <label for="courseCode" class="form-label">Course Code</label>
+            <input type="text" class="form-control" id="courseCode" />
+          </div>
+          <div class="mb-3">
+            <label for="creditLoad" class="form-label">Credit Load</label>
+            <input type="number" class="form-control" id="creditLoad" />
+          </div>
+          <div class="mb-3">
+            <label for="courseLevel" class="form-label">Course Level</label>
+            <select id="courseLevel" class="form-select" required>
+              <!-- load from /api/departments -->
+            </select>
+          </div>          
+          <div class="mb-3">
+            <label for="courseDepartment" class="form-label">Department</label>
+            <select id="courseDepartment" class="form-select" required>
+              <!-- load from /api/departments -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Cancel</button>
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  facultyTable, departmentTable, courseTable;
+  showingFacultyAll = false;
+  showingDeptAll = false;
+  showingCourseAll = false;
+
+  function loadSchoolPage () {
+    initFacultyDataTable();
+    initDepartmentDataTable();
+    initCourseDataTable();
+
+    // Buttons
+    document.getElementById("btnAddFaculty").addEventListener("click", function () {
+      clearFacultyForm();
+      document.getElementById("facultyModalLabel").textContent = "Add Faculty";
+      new bootstrap.Modal(document.getElementById("facultyModal")).show();
+    });
+    document.getElementById("btnToggleFacultyLength").addEventListener("click", toggleFacultyLength);
+
+    document.getElementById("btnAddDepartment").addEventListener("click", function () {
+      clearDepartmentForm();
+      loadFacultiesForDept(); // so user can pick faculty
+      document.getElementById("departmentModalLabel").textContent = "Add Department";
+      new bootstrap.Modal(document.getElementById("departmentModal")).show();
+    });
+    document.getElementById("btnToggleDepartmentLength").addEventListener("click", toggleDepartmentLength);
+
+    document.getElementById("btnAddCourse").addEventListener("click", function () {
+      clearCourseForm();
+      loadDepartmentsForCourse(); // user can pick department
+      document.getElementById("courseModalLabel").textContent = "Add Course";
+      new bootstrap.Modal(document.getElementById("courseModal")).show();
+    });
+    document.getElementById("btnToggleCourseLength").addEventListener("click", toggleCourseLength);
+
+    // Form Submits
+    document.getElementById("facultyForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      saveFaculty();
+    });
+    document.getElementById("departmentForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      saveDepartment();
+    });
+    document.getElementById("courseForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      saveCourse();
+    });
+  }
+
+  // =================== FACULTY
+  function initFacultyDataTable() {
+    facultyTable = $("#facultyTable").DataTable({
+      processing: true,
+      ajax: {
+        url: API_URL + "faculties",
+        dataSrc: ""
+      },
+      columns: [
+        { data: "id" },
+        { data: "name" }, // e.g. "faculty name"
+        {
+          data: null,
+          render: function (row) {
+            return `
+              <button class="btn btn-sm btn-primary me-1" onclick="editFaculty(${row.id})">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteFaculty(${row.id})">Delete</button>
+            `;
+          },
+          orderable: false
+        }
+      ],
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "Faculties_Export" },
+        { extend: "excelHtml5", title: "Faculties_Export" },
+        { extend: "print", title: "Faculty List" }
+      ],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"]
+      ]
+    });
+  }
+
+  function toggleFacultyLength() {
+    showingFacultyAll = !showingFacultyAll;
+    facultyTable.page.len(showingFacultyAll ? -1 : 10).draw(false);
+  }
+
+  function clearFacultyForm() {
+    document.getElementById("facultyId").value = "";
+    document.getElementById("facultyName").value = "";
+  }
+
+  function editFaculty(id) {
+    // GET /api/faculties/:id
+    fetch(API_URL + "faculties/" + id)
+      .then(res => res.json())
+      .then(f => {
+        document.getElementById("facultyId").value = f.id;
+        document.getElementById("facultyName").value = f.name || "";
+        document.getElementById("facultyModalLabel").textContent = "Edit Faculty";
+        new bootstrap.Modal(document.getElementById("facultyModal")).show();
+      })
+      .catch(() => alert("Failed to fetch faculty info."));
+  }
+
+  function saveFaculty() {
+    const id = document.getElementById("facultyId").value;
+    const payload = {
+      name: document.getElementById("facultyName").value.trim()
+    };
+
+    if (id) {
+      // Update
+      fetch(API_URL + "faculties/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("facultyModal")).hide();
+          alert("Faculty updated successfully.");
+          facultyTable.ajax.reload(null, false);
+        })
+        .catch(() => alert("Failed to update faculty."));
+    } else {
+      // Create
+      fetch(API_URL + "faculties", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("facultyModal")).hide();
+          alert("Faculty created successfully.");
+          facultyTable.ajax.reload(null, false);
+        })
+        .catch(() => alert("Failed to create faculty."));
+    }
+  }
+
+  function deleteFaculty(id) {
+    if (!confirm("Are you sure you want to delete this faculty?")) return;
+    fetch(API_URL + "faculties/" + id, { method: "DELETE" })
+      .then(res => res.json())
+      .then(() => {
+        alert("Faculty deleted.");
+        facultyTable.ajax.reload(null, false);
+      })
+      .catch(() => alert("Failed to delete faculty."));
+  }
+
+  // =================== DEPARTMENT
+  function initDepartmentDataTable() {
+    departmentTable = $("#departmentTable").DataTable({
+      processing: true,
+      ajax: {
+        url: API_URL + "departments",
+        dataSrc: ""
+      },
+      columns: [
+        { data: "id" },
+        { data: "name" },
+        { data: "faculty_name", render: function(val, type, row) {
+            // If your dept object includes "faculty_name" from a join
+            // otherwise row.faculty_id
+            return val || "";
+          }
+        },
+        {
+          data: null,
+          render: function (row) {
+            return `
+              <button class="btn btn-sm btn-primary me-1" onclick="editDepartment(${row.id})">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteDepartment(${row.id})">Delete</button>
+            `;
+          },
+          orderable: false
+        }
+      ],
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "Departments_Export" },
+        { extend: "excelHtml5", title: "Departments_Export" },
+        { extend: "print", title: "Department List" }
+      ],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"]
+      ]
+    });
+  }
+
+  function toggleDepartmentLength() {
+    showingDeptAll = !showingDeptAll;
+    departmentTable.page.len(showingDeptAll ? -1 : 10).draw(false);
+  }
+
+  function clearDepartmentForm() {
+    document.getElementById("departmentId").value = "";
+    document.getElementById("departmentName").value = "";
+    document.getElementById("departmentFaculty").innerHTML = ""; // reload
+  }
+
+  function loadFacultiesForDept(selectedFacultyId = null) {
+    // GET /api/faculties
+    fetch(API_URL + "faculties")
+      .then(res => res.json())
+      .then(faculties => {
+        const deptFac = document.getElementById("departmentFaculty");
+        deptFac.innerHTML = "";
+        faculties.forEach(f => {
+          let opt = document.createElement("option");
+          opt.value = f.id;
+          opt.textContent = f.name;
+          if (selectedFacultyId && f.id == selectedFacultyId) {
+            opt.selected = true;
+          }
+          deptFac.appendChild(opt);
+        });
+      })
+      .catch(() => alert("Failed to load faculties for department."));
+  }
+
+  function editDepartment(id) {
+    // GET /api/departments/:id
+    fetch(API_URL + "departments/" + id)
+      .then(res => res.json())
+      .then(d => {
+        clearDepartmentForm();
+        document.getElementById("departmentId").value = d.id;
+        document.getElementById("departmentName").value = d.name || "";
+        loadFacultiesForDept(d.faculty_id);
+        document.getElementById("departmentModalLabel").textContent = "Edit Department";
+        new bootstrap.Modal(document.getElementById("departmentModal")).show();
+      })
+      .catch(() => alert("Failed to fetch department info."));
+  }
+
+  function saveDepartment() {
+    const id = document.getElementById("departmentId").value;
+    const payload = {
+      name: document.getElementById("departmentName").value.trim(),
+      faculty_id: +document.getElementById("departmentFaculty").value
+    };
+
+    if (id) {
+      // Update
+      fetch(API_URL + "departments/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("departmentModal")).hide();
+          alert("Department updated successfully.");
+          departmentTable.ajax.reload(null, false);
+        })
+        .catch(() => alert("Failed to update department."));
+    } else {
+      // Create
+      fetch(API_URL + "departments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("departmentModal")).hide();
+          alert("Department created successfully.");
+          departmentTable.ajax.reload(null, false);
+        })
+        .catch(() => alert("Failed to create department."));
+    }
+  }
+
+  function deleteDepartment(id) {
+    if (!confirm("Are you sure you want to delete this department?")) return;
+    fetch(API_URL + "departments/" + id, { method: "DELETE" })
+      .then(res => res.json())
+      .then(() => {
+        alert("Department deleted.");
+        departmentTable.ajax.reload(null, false);
+      })
+      .catch(() => alert("Failed to delete department."));
+  }
+
+  // =================== COURSE
+  function initCourseDataTable() {
+    courseTable = $("#courseTable").DataTable({
+      processing: true,
+      ajax: {
+        url: API_URL + "courses",
+        dataSrc: ""
+      },
+      columns: [
+        { data: "id" },
+        { data: "name" },
+        { data: "code" },
+        { data: "credit_load" },
+        {
+          data: "department_name", // or department_id => then do custom render
+          render: function(val, type, row) {
+            return val || "";
+          }
+        },
+        {
+          data: null,
+          render: function (row) {
+            return `
+              <button class="btn btn-sm btn-primary me-1" onclick="editCourse(${row.id})">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteCourse(${row.id})">Delete</button>
+            `;
+          },
+          orderable: false
+        }
+      ],
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "Courses_Export" },
+        { extend: "excelHtml5", title: "Courses_Export" },
+        { extend: "print", title: "Course List" }
+      ],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"]
+      ]
+    });
+  }
+
+  function toggleCourseLength() {
+    showingCourseAll = !showingCourseAll;
+    courseTable.page.len(showingCourseAll ? -1 : 10).draw(false);
+  }
+
+
+  function loadDepartmentsForCourse(selectedDeptId = null) {
+    // GET /api/departments
+    fetch(API_URL + "departments")
+      .then(res => res.json())
+      .then(depts => {
+        const deptSel = document.getElementById("courseDepartment");
+        deptSel.innerHTML = "";
+        depts.forEach(d => {
+          let opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.name;
+          if (selectedDeptId && d.id == selectedDeptId) {
+            opt.selected = true;
+          }
+          deptSel.appendChild(opt);
+        });
+      })
+      .catch(() => alert("Failed to load departments for course."));
+  }
+
+  function loadDepartmentsAndLevelsForCourse(selectedDeptId = null, selectedLevelId = null) {
+    // Load Departments
+    fetch(API_URL + "departments")
+      .then(res => res.json())
+      .then(depts => {
+        const deptSel = document.getElementById("courseDepartment");
+        deptSel.innerHTML = "";
+        depts.forEach(d => {
+          let opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.name;
+          if (selectedDeptId && d.id == selectedDeptId) {
+            opt.selected = true;
+          }
+          deptSel.appendChild(opt);
+        });
+      })
+      .catch(() => alert("Failed to load departments for course."));
+
+    // Load Levels
+    fetch(API_URL + "levels")
+      .then(res => res.json())
+      .then(levels => {
+        const levelSel = document.getElementById("courseLevel");
+        levelSel.innerHTML = "";
+        levels.forEach(l => {
+          let opt = document.createElement("option");
+          opt.value = l.id;
+          opt.textContent = l.name;
+          if (selectedLevelId && l.id == selectedLevelId) {
+            opt.selected = true;
+          }
+          levelSel.appendChild(opt);
+        });
+      })
+      .catch(() => alert("Failed to load levels for course."));
+}
+
+function clearCourseForm() {
+    document.getElementById("courseId").value = "";
+    document.getElementById("courseName").value = "";
+    document.getElementById("courseCode").value = "";
+    document.getElementById("creditLoad").value = "";
+    document.getElementById("courseLevel").value = "";
+    document.getElementById("courseDepartment").innerHTML = "";
+  }
+
+  function editCourse(id) {
+    // GET /api/courses/:id
+    fetch(API_URL + "courses/" + id)
+      .then(res => res.json())
+      .then(c => {
+        clearCourseForm();
+        //loadDepartmentsForCourse(c.department_id);
+        loadDepartmentsAndLevelsForCourse(c.department_id,c.level_id);
+        document.getElementById("courseId").value = c.id;
+        document.getElementById("courseName").value = c.name || "";
+        document.getElementById("courseCode").value = c.code || "";
+        document.getElementById("creditLoad").value = c.credit_load || "";
+        document.getElementById("courseLevel").value = c.level_id || "";
+        document.getElementById("courseModalLabel").textContent = "Edit Course";
+        new bootstrap.Modal(document.getElementById("courseModal")).show();
+      })
+      .catch(() => alert("Failed to fetch course info."));
+  }
+
+  function saveCourse() {
+    const id = document.getElementById("courseId").value;
+    const payload = {
+      name: document.getElementById("courseName").value.trim(),
+      code: document.getElementById("courseCode").value.trim(),
+      credit_load: document.getElementById("creditLoad").value.trim(),
+      department_id: +document.getElementById("courseDepartment").value
+    };
+
+    if (id) {
+      // Update
+      fetch(API_URL + "courses/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("courseModal")).hide();
+          alert("Course updated successfully.");
+          courseTable.ajax.reload(null, false);
+        })
+        .catch(() => alert("Failed to update course."));
+    } else {
+      // Create
+      fetch(API_URL + "courses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("courseModal")).hide();
+          alert("Course created successfully.");
+          courseTable.ajax.reload(null, false);
+        })
+        .catch(() => alert("Failed to create course."));
+    }
+  }
+
+  function deleteCourse(id) {
+    if (!confirm("Are you sure you want to delete this course?")) return;
+    fetch(API_URL + "courses/" + id, { method: "DELETE" })
+      .then(res => res.json())
+      .then(() => {
+        alert("Course deleted.");
+        courseTable.ajax.reload(null, false);
+      })
+      .catch(() => alert("Failed to delete course."));
+  }
+</script>
+<script>
+    /* Re-init DataTable after dynamic load if needed */
+    setTimeout(loadSchoolPage(), 100);
+</script>

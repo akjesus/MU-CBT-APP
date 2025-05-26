@@ -1,0 +1,337 @@
+<style>
+  #page-login {
+    width: 100vw;
+    height: 100vh;
+    background: white; /*set from theme*/
+    z-index: 9910;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    overflow: auto;
+    text-align: center;
+  }
+</style>
+<!--START LOGIN-->
+<!--START PAGE LOGIN-->
+<div
+  id="page-login"
+  style="
+    display: none;
+    background: url('Home _ Maduka CBT_files/study-group-african-people.png');
+    background-size: 100% auto;
+  "
+  class="app-page width-100p text-center"
+>
+  <div class="width-40p bg-white" style="background: white">
+    <div
+      class="text-18"
+      style="display: inline; position: relative; top: -20px"
+    >
+      Wallet Balance
+    </div>
+    <div class="page-back" style="display: none">
+      <img src="images/icons/angle-left.svg" />
+    </div>
+    <br />
+    <div class="page-login-icon">
+      <img
+        style="width: 100px !important; height: auto"
+        src="assets/logo.svg"
+      />
+    </div>
+    <h1 class="text-25 text-bold">Let's sign you in</h1>
+    <h3 class="text-15">Welcome back</h3>
+    <br />
+    <br />
+    <div class="login-form" id="login-form">
+      <!-- Email input -->
+      <div class="login-form-item text-type">
+        <input
+          type="text"
+          name="email"
+          id="email"
+          placeholder="Email Address"
+          value="otong.akan@madukauniversity.edu.ng"
+        />
+      </div>
+      <br />
+
+      <!-- Password input + show password checkbox -->
+      <div class="login-form-item text-type">
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Password"
+          value="password"
+        />
+        <!-- Show Password Checkbox -->
+        <div style="margin-top: 6px">
+          <input
+            type="checkbox"
+            id="showPassCheckbox"
+            onclick="togglePasswordVisibility()"
+          />
+          <label for="showPassCheckbox"><em>Show Password</em></label>
+        </div>
+      </div>
+
+      <div class="login-form-item">
+        <input
+          type="button"
+          onclick="doLogin()"
+          name="signin"
+          id="signin"
+          value="Sign in"
+        />
+      </div>
+      <br /><br />
+
+      <span class="show-forgot-password">Forgot Password?</span>
+      <br /><br />
+
+      ____________&nbsp;&nbsp;&nbsp;&nbsp; Contact Administrator
+      &nbsp;&nbsp;&nbsp;&nbsp; ____________
+      <br /><br />
+    </div>
+  </div>
+</div>
+<!--END PAGE LOGIN-->
+<!-- END LOGIN-->
+
+<style>
+  #page-forgot-password {
+    width: 100vw;
+    height: 100vh;
+    background: white; /*set from theme*/
+    z-index: 9910;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    overflow: auto;
+    text-align: center;
+  }
+</style>
+<!--START FORGOT PASSWORD-->
+<!--START PAGE FORGOT PASSWORD-->
+<div id="page-forgot-password" style="display: none" class="app-page">
+  <div class="page-back" style="display: none">
+    <img src="images/icons/angle-left.svg" />
+  </div>
+  <br />
+  <br />
+  <br />
+  <br />
+  <div class="page-login-icon">
+    <img
+      style="width: 100px !important; height: auto"
+      src="images/logo_full.png"
+    />
+  </div>
+  <br />
+  <br />
+  <br />
+  <div class="login-form" id="login-form">
+    <!--signup-form -->
+    <div class="login-form-item text-type">
+      <input
+        type="text"
+        name="p-email"
+        id="p-email"
+        placeholder="Email Address"
+      />
+    </div>
+    <div class="login-form-item">
+      <input
+        type="button"
+        onclick="doPassword()"
+        name="signin"
+        id="signin"
+        value="Recover Password"
+      />
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+    <div class="login-form-item-white">
+      <input type="button" class="show-login" value="Login" />
+    </div>
+    <br /><br />
+    <div class="login-form-item-white">
+      <input type="button" class="show-signup" value="Register" />
+    </div>
+  </div>
+</div>
+<!--END PAGE FORGOT PASSWORD-->
+<!-- END FORGOT PASSWORD-->
+<run>
+  <script>
+    window.getUserInfo = function (user) {
+      if (user.id) {
+        reqAsyncJSON(
+          "GET",
+          serverHost + api_prefix + "api/students/" + user.id,
+          {},
+          "render_user",
+          user
+        );
+        hide_loading1();
+        localStorage.setItem("cookie", JSON.stringify(user));
+        /*localStorage.setItem("password", $(".login-form-item  #password").val()); */
+      } else {
+        smallBottomFade("invalid login details!", "white", "red");
+        hide_loading1();
+      }
+    };
+  </script>
+  <script>
+    window.render_user = function (user_data) {
+      console.log(user_data);
+      if (!JSON.parse(user_data[0]).id) {
+        smallBottomFade(JSON.parse(user_data[0]).error, "white", "red");
+        document.getElementsByClassName("show-login")[0].click();
+        return false;
+      } else {
+        localStorage.setItem("user_data", user_data[0]);
+        user_info = JSON.parse(user_data[0]);
+        /*
+                        $('.logged-user-email').html(user_info.email);
+                        $('.address-fullName').val(user_info.signup_phone);
+                        $('#address-email').val(user_info.signup_country);
+                        */
+        var x;
+        var userInfo = JSON.parse(user_data[0]);
+        for (x in userInfo) {
+          var className = "update_" + x;
+          $("." + className).val(userInfo[x]);
+          $("#" + className).val(userInfo[x]);
+          if (
+            $("#" + className).prop("tagName") != "SELECT" ||
+            $("#" + className).prop("tagName") != "SELECT"
+          ) {
+            $("." + className).html(userInfo[x]);
+            $("#" + className).html(userInfo[x]);
+          }
+        }
+        $("#__next").hide(); /*Hides the home page*/
+        $(".show-home").click();
+        loadEligibleExams();
+        window.getExams = setTimeout(loadEligibleExams, 5000);
+        /*loadEligibleExams();*/
+        /*    hideSplash(); */
+        setTimeout(function () {
+          $("#screen-1").hide();
+        }, 2500);
+        setTimeout(function () {
+          $("#swiper_container").hide();
+        }, 3000);
+        $("#page-login").hide();
+        $("#page-home").show();
+      }
+      /*show_login();*/
+      /*                     
+                    if(user_data[1] != "Auto Login"){
+                        document.querySelector(".page-home").click();
+                    }
+                    */
+    };
+  </script>
+  <script>
+    window.doLogin = function () {
+      show_loading1();
+      var get_username = $(".login-form-item  #email").val();
+      var get_password = $(".login-form-item  #password").val();
+      reqAsyncJSON(
+        "POST",
+        serverHost + api_prefix + "api/students/login",
+        {
+          username: get_username,
+          password: get_password,
+        },
+        "loginResponse",
+        "Working!"
+      );
+    };
+  </script>
+  <script>
+    window.loginResponse = function (cookie) {
+      console.log(cookie);
+      let data = JSON.parse(cookie[0]);
+      console.log(data);
+      if (data.error) {
+        hide_loading1();
+        smallBottomFade(data.error, "white", "red");
+        return false;
+      }
+      hide_loading1();
+      /* prep_cookie ={"cookie": "fluttercookie" + "-" + JSON.parse(cookie[0]).token, "" : "Succesful Registration!"}; */
+      getUserInfo(data.user);
+      hide_loading1();
+      smallBottomFade("Login succesful!", "white", "green");
+    };
+  </script>
+  <script>
+    window.doPassword = function () {
+      show_loading1();
+      var get_username = $("#p-email").val();
+      reqAsyncJSON(
+        "POST",
+        serverHost + api_prefix + "api/get_password/",
+        {
+          username: get_username,
+          seconds: "4000000",
+        },
+        "passwordResponse",
+        "Working!"
+      );
+    };
+  </script>
+  <script>
+    window.passwordResponse = function (cookie) {
+      console.log(cookie);
+      if (JSON.parse(cookie[0]).success != true) {
+        hide_loading1();
+        smallBottomFade(JSON.parse(cookie[0]).message, "white", "red");
+        return false;
+      }
+      hide_loading1();
+      swal("Successful", JSON.parse(cookie[0]).message, "success");
+    };
+  </script>
+  <script>
+    /*Auto login*/
+    /*
+            setTimeout(function (){
+                    if(localStorage.getItem("cookie")){
+                        getUserInfo([localStorage.getItem("cookie"), "Auto Login"]);
+                    }else{
+                        document.getElementsByClassName("show-login")[0].click();
+                    }
+                },100);
+                */
+  </script>
+  <script>
+    window.logout = function () {
+      localStorage.removeItem("cookie");
+      localStorage.removeItem("user_data");
+      if (typeof currentExam !== "undefined") {
+        localStorage.removeItem(
+          "examState_" + user_info.id + "_" + currentExam.id
+        );
+      }
+      delete user_info;
+      $(".show-login").click();
+    };
+  </script>
+  <script>
+    window.togglePasswordVisibility = function () {
+      const passField = document.getElementById("password");
+      if (passField.type === "password") {
+        passField.type = "text";
+      } else {
+        passField.type = "password";
+      }
+    };
+  </script>
+</run>

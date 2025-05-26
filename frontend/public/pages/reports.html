@@ -1,0 +1,220 @@
+
+<div class="container mt-4">
+  <h2>Detailed Reports</h2>
+
+  <div class="mb-3">
+    <label for="examSelect" class="form-label">Exam:</label>
+    <select id="examSelect" class="form-select" style="width: 300px; display: inline-block;">
+      <!-- We'll load from /api/exams -->
+    </select>
+
+    <label for="departmentSelect" class="form-label">Department (Optional):</label>
+    <select id="departmentSelect" class="form-select" style="width: 300px; display: inline-block;">
+      <option value="">All Departments</option>
+      <!-- We'll load from /api/departments -->
+    </select>
+
+    <button id="btnLoadReport" class="btn btn-secondary">Load Report</button>
+  </div>
+
+  <!-- Exam Info Section -->
+  <div id="examInfoSection" style="display: none;" class="mb-4">
+    <h4>Exam Info:</h4>
+    <p><strong>Exam Name:</strong> <span id="reportExamName"></span></p>
+    <p><strong>Course:</strong> <span id="reportCourseName"></span></p>
+    <p><strong>Max Score:</strong> <span id="reportMaxScore"></span></p>
+    <p><strong>Exam Date:</strong> <span id="reportExamDate"></span></p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div id="summaryCards" style="display: none;">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-header">Participants</div>
+          <div class="card-body">
+            <h5 class="card-title" id="reportCountParticipants">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-header">Min Score</div>
+          <div class="card-body">
+            <h5 class="card-title" id="reportMinScore">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-header">Max Score</div>
+          <div class="card-body">
+            <h5 class="card-title" id="reportMaxScoreVal">0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+          <div class="card-header">Average Score</div>
+          <div class="card-body">
+            <h5 class="card-title" id="reportAverageScore">0</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score Distribution Table -->
+  <div id="distributionSection" style="display: none;" class="mb-4">
+    <h4>Score Distribution:</h4>
+    <table class="table">
+      <thead>
+      <tr><th>Range</th><th>Count</th></tr>
+      </thead>
+      <tbody id="distributionTbody">
+      <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Department Breakdown Table -->
+  <div id="deptBreakdownSection" style="display: none;">
+    <h4>Department Breakdown:</h4>
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Department</th>
+        <th>Participants</th>
+        <th>Average Score</th>
+      </tr>
+      </thead>
+      <tbody id="deptBreakdownTbody">
+      <!-- filled by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+  <script>
+    function loadReportPage() {
+      // 1) loadExams and loadDepartments
+      loadExamsIntoSelect();
+      loadDepartmentsIntoSelect();
+
+      // 2) On "Load Report" => call getExamReport()
+      document.getElementById("btnLoadReport").addEventListener("click", function() {
+        getExamReport();
+      });
+    }
+
+    function loadExamsIntoSelect() {
+      fetch(API_URL + "exams")
+        .then(res => res.json())
+        .then(exams => {
+          const examSel = document.getElementById("examSelect");
+          examSel.innerHTML = "";
+          exams.forEach(e => {
+            let opt = document.createElement("option");
+            opt.value = e.id;
+            opt.textContent = e.exam_name;
+            examSel.appendChild(opt);
+          });
+        })
+        .catch(() => alert("Failed to load exams."));
+    }
+
+    function loadDepartmentsIntoSelect() {
+      fetch(API_URL + "departments")
+        .then(res => res.json())
+        .then(depts => {
+          const deptSel = document.getElementById("departmentSelect");
+          deptSel.innerHTML = '<option value="">All Departments</option>';
+          depts.forEach(d => {
+            let opt = document.createElement("option");
+            opt.value = d.id;
+            opt.textContent = d.name;
+            deptSel.appendChild(opt);
+          });
+        })
+        .catch(() => alert("Failed to load departments."));
+    }
+
+    function getExamReport() {
+      const examId = document.getElementById("examSelect").value;
+      const departmentId = document.getElementById("departmentSelect").value;
+      if (!examId) {
+        alert("Please select an exam first.");
+        return;
+      }
+
+      let endpoint = API_URL + `reports/exam/${examId}`;
+      if (departmentId) {
+        endpoint += `?department_id=${departmentId}`;
+      }
+
+      fetch(endpoint)
+        .then(res => res.json())
+        .then(data => {
+          // If no participants or error
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          // Show exam info
+          document.getElementById("examInfoSection").style.display = "block";
+          document.getElementById("reportExamName").textContent = data.examInfo.exam_name;
+          document.getElementById("reportCourseName").textContent = data.examInfo.course_name;
+          document.getElementById("reportMaxScore").textContent = data.examInfo.max_score_obtainable;
+          document.getElementById("reportExamDate").textContent = data.examInfo.exam_date;
+
+          // Show summary
+          document.getElementById("summaryCards").style.display = "block";
+          document.getElementById("reportCountParticipants").textContent = data.countParticipants || 0;
+          document.getElementById("reportMinScore").textContent = data.minScore || 0;
+          document.getElementById("reportMaxScoreVal").textContent = data.maxScore || 0;
+          document.getElementById("reportAverageScore").textContent = data.averageScore ? data.averageScore.toFixed(2) : "0";
+
+          // Distribution
+          document.getElementById("distributionSection").style.display = "block";
+          const distTbody = document.getElementById("distributionTbody");
+          distTbody.innerHTML = "";
+          (data.distribution || []).forEach(d => {
+            let row = document.createElement("tr");
+            let tdRange = document.createElement("td");
+            tdRange.textContent = d.range;
+            let tdCount = document.createElement("td");
+            tdCount.textContent = d.count;
+            row.appendChild(tdRange);
+            row.appendChild(tdCount);
+            distTbody.appendChild(row);
+          });
+
+          // Department breakdown
+          document.getElementById("deptBreakdownSection").style.display = "block";
+          const deptTbody = document.getElementById("deptBreakdownTbody");
+          deptTbody.innerHTML = "";
+          (data.departmentBreakdown || []).forEach(d => {
+            let row = document.createElement("tr");
+            let tdDept = document.createElement("td");
+            tdDept.textContent = d.department_name;
+            let tdCount = document.createElement("td");
+            tdCount.textContent = d.count;
+            let tdAvg = document.createElement("td");
+            tdAvg.textContent = d.avgScore.toFixed(2);
+            row.appendChild(tdDept);
+            row.appendChild(tdCount);
+            row.appendChild(tdAvg);
+            deptTbody.appendChild(row);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          alert("Failed to load exam report.");
+        });
+    }
+  </script>
+<script>
+    /* Re-init DataTable after dynamic load if needed */
+    setTimeout(loadReportPage(), 100);
+</script>
+  

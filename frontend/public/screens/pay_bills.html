@@ -1,0 +1,625 @@
+<style>
+    #page-pay-bills{
+        width: 100vw;
+        height: 100vh;
+        background: white;  /*set from theme*/ 
+        z-index: 66666;
+        position:fixed;
+        top:0px;
+        left:0px;
+        overflow:auto;
+        text-align: center;
+    }
+    </style>
+    <!--START PAGE SETTINGS--> 
+    <div id="page-pay-bills" style="display:none;" class="app-page">
+        <div class="page-back">
+            <img src="images/icons/angle-left.svg" />
+        </div>
+        <div class="page-fluid">
+            <h1 class="padding-20 text-23">Mobile Top up</h1>
+            <div class="text-left page-fliud-menu-list">
+                <br />
+                <div class="single-transactions shadow-5 show-pay-bills-airtime-net margin-15 margin-5" style="display:flex">
+                    <div class="transaction-image  width-20p float-left text-40 text-center" style="flex-grow:3; height: 50px; color: navy;">
+                        <i class="fa fa-mobile"></i>
+                    </div>
+                    <div class="transaction-detail width-50p float-left style="flex-grow:3">
+                        <div class="transaction-description text-bold text-18">Airtime</div>
+                        <div class="transaction-date text-13">Recharge your phone</div>
+                    </div>
+                    <div class="transaction-amount width-30p float-left text-right padding-top-15 text-30" style="flex-grow:3; color:navy;">
+                        <i class="fa fa-angle-right"></i>&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="single-transactions shadow-5 show-pay-bills-data-net margin-15 width-90p margin-5" style="display:flex">
+                    <div class="transaction-image  width-20p float-left text-40 text-center" style="flex-grow:3; height: 50px; color: navy;">
+                        <i class="fa fa-check-circle"></i>
+                    </div>
+                    <div class="transaction-detail width-60p float-left style="flex-grow:3">
+                        <div class="transaction-description text-bold text-18">Data</div>
+                        <div class="transaction-date text-13">Pay for your data subscribtions</div>
+                    </div>
+                    <div class="transaction-amount width-20p float-left text-right padding-top-15 text-30" style="flex-grow:3; color:navy;">
+                        <i class="fa fa-angle-right"></i>&nbsp;&nbsp;
+                    </div>
+                </div>
+              
+
+                <div class="single-transactions shadow-5 show-pay-bills-tv-net margin-15 width-90p margin-5" style="display:flex">
+                    <div class="transaction-image  width-20p float-left text-40 text-center" style="flex-grow:3; height: 50px; color: navy;">
+                        <i class="fa fa-tv"></i>
+                    </div>
+                    <div class="transaction-detail width-60p float-left style="flex-grow:3">
+                        <div class="transaction-description text-bold text-18">TV</div>
+                        <div class="transaction-date text-13">Subscribe your television</div>
+                    </div>
+                    <div class="transaction-amount width-20p float-left text-right padding-top-15 text-30" style="flex-grow:3; color:navy;">
+                        <i class="fa fa-angle-right"></i>&nbsp;&nbsp;
+                    </div>
+                </div>
+
+            </div>
+            <br />
+            <div class="display-none">
+                <h1 class="padding-20 text-20 text-bold">Subscribe TV</h1>
+                <img src="images/networks/dstv.jpg" height="100px" class="padding-5" onclick="alert('Coming soon!')" />
+                <img src="images/networks/gotv.jpg" height="100px" class="padding-5" onclick="alert('Coming soon!')" />
+            </div>
+        
+        </div>
+    
+        <!-- START FOOT MENU-->        
+         <div w3-include-script="screens/foot-menu.html"></div>
+        <!-- START END MENU-->    
+    </div>
+    <!--END PAGE SETTINGS--> 
+
+
+    <style>
+        #page-pay-bills-data-net{
+            width: 100vw;
+            height: 100vh;
+            background: white;  /*set from theme*/ 
+            z-index: 66666;
+            position:fixed;
+            top:0px;
+            left:0px;
+            overflow:auto;
+            text-align: center;
+        }
+        </style>
+        <!--START PAGE SETTINGS--> 
+        <div id="page-pay-bills-data-net" style="display:none;" class="app-page">
+            <div class="page-back">
+                <img src="images/icons/angle-left.svg" />
+            </div>
+            <div class="page-fluid">
+                <h1 class="padding-20 text-23">Buy Data</h1>
+                <div>
+                    <h1 class="padding-20 text-20 text-bold">Choose service provide</h1>
+                    <img src="images/networks/glo_logo.jpg" height="70px" class="padding-5 show-pay-bills-data" datan="GLO" />
+                    <img src="images/networks/mtn_logo.jpg" height="70px" class="padding-5 show-pay-bills-data" datan="MTN" />
+                    <img src="images/networks/airtel_logo.jpg" height="70px" class="padding-5 show-pay-bills-data" datan="AIRTEL" />
+                    <img src="images/networks/9mobile.jpg" height="70px" class="padding-5 show-pay-bills-data" datan="9mobile" />
+                </div>
+                <br />
+                
+            
+            </div>
+        
+            <!-- START FOOT MENU-->        
+            <!-- <div w3-include-script="screens/foot-menu.html"></div> -->
+            <!-- START END MENU-->    
+        </div>
+        <!--END PAGE SETTINGS-->  
+
+
+    <style>
+        #page-pay-bills-tv-net{
+            width: 100vw;
+            height: 100vh;
+            background: white;  /*set from theme*/ 
+            z-index: 66666;
+            position:fixed;
+            top:0px;
+            left:0px;
+            overflow:auto;
+            text-align: center;
+        }
+        </style>
+        <!--START PAGE SETTINGS--> 
+        <div id="page-pay-bills-tv-net" style="display:none;" class="app-page">
+            <div class="page-back">
+                <img src="images/icons/angle-left.svg" />
+            </div>
+            <div class="page-fluid">
+                <h1 class="padding-20 text-23">Subscribe TV</h1>
+                <div>
+                    <h1 class="padding-20 text-20 text-bold">Choose service provide</h1>
+                    <img src="images/networks/dstv.jpg" height="100px" class="padding-5 show-pay-bills-tv" datan="DSTV" />
+                    <img src="images/networks/gotv.jpg" height="100px" class="padding-5 show-pay-bills-tv" datan="GOTV" />
+                </div>
+                <br />
+                <br />
+                <div class="display-none">
+                    <h1 class="padding-20 text-20 text-bold">Subscribe TV</h1>
+                    <img src="images/networks/dstv.jpg" height="100px" class="padding-5" onclick="alert('Coming soon!')" />
+                    <img src="images/networks/gotv.jpg" height="100px" class="padding-5" onclick="alert('Coming soon!')" />
+                </div>
+            
+            </div>
+        
+            <!-- START FOOT MENU-->        
+            <!-- <div w3-include-script="screens/foot-menu.html"></div> -->
+            <!-- START END MENU-->    
+        </div>
+        <!--END PAGE SETTINGS-->  
+
+
+    <style>
+        #page-pay-bills-airtime-net{
+            width: 100vw;
+            height: 100vh;
+            background: white;  /*set from theme*/ 
+            z-index: 66666;
+            position:fixed;
+            top:0px;
+            left:0px;
+            overflow:auto;
+            text-align: center;
+        }
+        </style>
+        <!--START PAGE SETTINGS--> 
+        <div id="page-pay-bills-airtime-net" style="display:none;" class="app-page">
+            <div class="page-back">
+                <img src="images/icons/angle-left.svg" />
+            </div>
+            <div class="page-fluid">
+                <h1 class="padding-20 text-23">Buy Airtime</h1>
+                <div>
+                    <h1 class="padding-20 text-20 text-bold">Choose service provide</h1>
+                    <img src="images/networks/glo_logo.jpg" height="70px" class="padding-5 show-pay-bills-airtime" datan="GLO" />
+                    <img src="images/networks/mtn_logo.jpg" height="70px" class="padding-5 show-pay-bills-airtime" datan="MTN" />
+                    <img src="images/networks/airtel_logo.jpg" height="70px" class="padding-5 show-pay-bills-airtime" datan="AIRTEL" />
+                    <img src="images/networks/9mobile.jpg" height="70px" class="padding-5 show-pay-bills-airtime" datan="9mobile" />
+                </div>
+                <br />
+            
+            </div>
+        
+            <!-- START FOOT MENU-->        
+            <!-- <div w3-include-script="screens/foot-menu.html"></div> -->
+            <!-- START END MENU-->    
+        </div>
+        <!--END PAGE SETTINGS-->  
+        
+        
+
+    <style>
+        #page-pay-bills-data{
+            width: 100vw;
+            height: 100vh;
+            background: white;  /*set from theme*/ 
+            z-index: 66666;
+            position:fixed;
+            top:0px;
+            left:0px;
+            overflow:auto;
+            text-align: center;
+        }
+        </style>
+        <!--START PAGE SETTINGS--> 
+        <div id="page-pay-bills-data" style="display:none;" class="app-page">
+            <div class="page-back2 show-pay-bills">
+                <img src="images/icons/angle-left.svg" />
+            </div>
+            <div class="page-fluid">
+                <h1 class="padding-20 text-23">Buy Data</h1>
+                <img class="network-icon" src="images/icons/globe.svg" width="40px">
+                <div class="text-left padding-20">
+                    <div class="padding-5 text-left">
+                        Network Provider
+                        <div class="login-form-item text-type">
+                            <input type="text" name="pay_bill_service_provider" id="pay_bill_data_service_provider" disabled placeholder="Network" />
+                        </div>
+                    </div>
+                    <div class="padding-5 text-left">
+                         Data Plan
+                        <div class="login-form-item text-type">
+                            <select type="number" name="pay_bill_data_service_amount" id="pay_bill_data_service_amount">
+                                <option value="">--CHOOSE PLAN--</option>
+                                <option value="50-40MB @ ₦50/1 DAY">40MB @ ₦50/1 DAY</option>
+                                <option value="60-200MB @ ₦60/1 DAY">200MB @ ₦60/1 DAY</option>
+                                <option value="100-100MB @ ₦100/1 DAY">100MB @ ₦100/1 DAY</option>
+                                <option value="300-1GB @ ₦300/1 DAY">1GB @ ₦300/1 DAY</option>
+                                <option value="500-2GB @ ₦500/2 DAYS">2GB @ ₦500/2 DAYS</option>
+                                <option value="500-2.5GB @ ₦500/2 DAYS">2.5GB @ ₦500/2 DAYS</option>
+                                <option value="120-450GB @ ₦120/7 DAYS">450GB @ ₦120/7 DAYS</option>
+                                <option value="1500-6GB @ ₦1,500/7 DAYS">6GB @ ₦1,500/7 DAYS</option>
+                                <option value="2500-10GB @ ₦2,500/30 DAYS">10GB @ ₦2,500/30 DAYS</option>
+                                <option value="3500-12GB @ ₦3500/30 DAYS">12GB @ ₦3500/30 DAYS</option>
+                                <option value="6000-25GB @ ₦6,000/3 DAYS">25GB @ ₦6,000/3 DAYS</option>
+                                <option value="10000-40GB @ ₦10,000/30 DAYS">40GB @ ₦10,000/30 DAYS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="padding-5 text-left display-none">
+                        Customer Name
+                        <div class="login-form-item text-type">
+                            <input type="text" name="car_quote_last_name" id="pay_bill_data_service_customer" placeholder="Enter Customer Name" />
+                        </div>
+                    </div>                    
+                    <div class="padding-5 text-left">
+                        Phone Number
+                        <div class="login-form-item text-type">
+                            <input type="text" name="car_quote_last_name" id="pay_bill_data_service_number" placeholder="Enter Phone Number" />
+                        </div>
+                    </div>                    
+                    <div class="padding-5 text-left display-none">
+                        Note
+                        <div class="login-form-item text-type">
+                            <input type="text" name="car_quote_last_name" id="pay_bill_data_service_note" placeholder="Enter Note" />
+                        </div>
+                    </div>  
+                    <br />                    
+                    <br />                    
+                    <div class="width-100p padding-15  bg-theme center">
+                        <div class="login-form-item">
+                            <input type="button" name="" id="" class="navy" value="Recharge Now" onclick="doData()" />
+                        </div>
+                    </div>                     
+                    
+                </div>
+            
+            </div>
+        
+            <!-- START FOOT MENU-->        
+            <!-- <div w3-include-script="screens/foot-menu.html"></div> -->
+            <!-- START END MENU-->    
+        </div>
+        <!--END PAGE SETTINGS--> 
+        
+        
+
+        <style>
+            #page-pay-bills-tv{
+                width: 100vw;
+                height: 100vh;
+                background: white;  /*set from theme*/ 
+                z-index: 66666;
+                position:fixed;
+                top:0px;
+                left:0px;
+                overflow:auto;
+                text-align: center;
+            }
+            </style>
+            <!--START PAGE SETTINGS--> 
+            <div id="page-pay-bills-tv" style="display:none;" class="app-page">
+                <div class="page-back2 show-pay-bills">
+                    <img src="images/icons/angle-left.svg" />
+                </div>
+                <div class="page-fluid">
+                    <h1 class="padding-20 text-23">Buy tv</h1>
+                    <img class="network-icon" src="images/icons/tv.svg" width="40px">
+                    <div class="text-left padding-20">
+                        <div class="padding-5 text-left">
+                            TV Provider
+                            <div class="login-form-item text-type">
+                                <input type="text" name="pay_bill_service_provider" id="pay_bill_tv_service_provider" disabled placeholder="Network" />
+                            </div>
+                        </div>
+                        <div class="padding-5 text-left">
+                             TV Plan
+                            <div class="login-form-item text-type">
+                                <select type="number" name="pay_bill_tv_service_amount" id="pay_bill_tv_service_amount">
+                                    <option value="">--CHOOSE PLAN--</option>
+                                    <option value="8500-80+ Channels @ ₦8,500/1 MONTH">80+ Channels @ ₦8,500/1 MONTH</option>
+                                    <option value="4150-75+ Channels @ ₦4,150/1 MONTH">75+ Channels @ ₦4,150/1 MONTH</option>
+                                    <option value="2800-65+ Channels @ ₦2,800/1 MONTH">65+ Channels @ ₦2,800/1 MONTH</option>
+                                    <option value="1900-45+ Channels @ ₦1,900/1 MONTH">45+ Channels @ ₦1,900/1 MONTH</option>
+                                    <option value="900-35+ Channels @ ₦900/1 MONTH">35+ Channels @ ₦900/1 MONTH</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="padding-5 text-left display-none">
+                            Customer Name
+                            <div class="login-form-item text-type">
+                                <input type="text" name="car_quote_last_name" id="pay_bill_tv_service_customer" placeholder="Enter Customer Name" />
+                            </div>
+                        </div>                    
+                        <div class="padding-5 text-left">
+                            Card Number
+                            <div class="login-form-item text-type">
+                                <input type="text" name="car_quote_last_name" id="pay_bill_tv_service_number" placeholder="Enter Phone Number" />
+                            </div>
+                        </div>                    
+                        <div class="padding-5 text-left display-none">
+                            Note
+                            <div class="login-form-item text-type">
+                                <input type="text" name="car_quote_last_name" id="pay_bill_tv_service_note" placeholder="Enter Note" />
+                            </div>
+                        </div>  
+                        <br />                    
+                        <br />                    
+                        <div class="width-100p padding-15  bg-theme center">
+                            <div class="login-form-item">
+                                <input type="button" name="" id="" class="navy" value="Subscribe Now" onclick="doTV()" />
+                            </div>
+                        </div>                     
+                        
+                    </div>
+                
+                </div>
+            
+                <!-- START FOOT MENU-->        
+                <!-- <div w3-include-script="screens/foot-menu.html"></div> -->
+                <!-- START END MENU-->    
+            </div>
+            <!--END PAGE SETTINGS--> 
+
+    <style>
+        #page-pay-bills-airtime{
+            width: 100vw;
+            height: 100vh;
+            background: white;  /*set from theme*/ 
+            z-index: 66666;
+            position:fixed;
+            top:0px;
+            left:0px;
+            overflow:auto;
+            text-align: center;
+        }
+        </style>
+        <!--START PAGE SETTINGS--> 
+        <div id="page-pay-bills-airtime" style="display:none;" class="app-page">
+            <div class="page-back2 show-pay-bills">
+                <img src="images/icons/angle-left.svg" />
+            </div>
+            <div class="page-fluid">
+                <h1 class="padding-20 text-23">Buy Airtime</h1>
+                <img class="network-icon" src="images/icons/globe.svg" width="40px">
+                <div class="text-left padding-20">
+                    <div class="padding-5 text-left">
+                        Network Provider
+                        <div class="login-form-item text-type">
+                            <input type="text" name="pay_bill_service_provider" id="pay_bill_airtime_service_provider" disabled placeholder="Network" />
+                        </div>
+                    </div>
+                    <div class="padding-5 text-left">
+                        Recharge Amount
+                        <div class="login-form-item text-type">
+                            <input type="number" name="car_quote_last_name" id="pay_bill_airtime_service_amount" placeholder="Enter Amount" />
+                        </div>
+                    </div>
+                    <div class="padding-5 text-left display-none">
+                        Customer Name
+                        <div class="login-form-item text-type">
+                            <input type="text" name="car_quote_last_name" id="pay_bill_airtime_service_name" placeholder="Enter Amount" />
+                        </div>
+                    </div>
+                    <div class="padding-5 text-left">
+                        Phone Number
+                        <div class="login-form-item text-type">
+                            <input type="text" name="car_quote_last_name" id="pay_bill_airtime_service_number" placeholder="Enter Phone Number" />
+                        </div>
+                    </div>                    
+                    <div class="padding-5 text-left display-none">
+                        Note
+                        <div class="login-form-item text-type">
+                            <input type="text" name="car_quote_last_name" id="pay_bill_airtime_service_note" placeholder="Enter Note" />
+                        </div>
+                    </div>  
+                    <br />                    
+                    <br />                    
+                    <div class="width-100p padding-15  bg-theme center">
+                        <div class="login-form-item">
+                            <input type="button" name="" id="" class="navy" value="Recharge Now" onclick="doRecharge()" />
+                        </div>
+                    </div>                     
+                    
+                </div>
+            
+            </div>   
+        </div>
+        <!--END PAGE SETTINGS--> 
+        <run>
+            <script>
+                window.network_logo = { "GLO":"images/networks/glo_logo.jpg",
+                                        "MTN":"images/networks/mtn_logo.jpg",
+                                        "AIRTEL":"images/networks/airtel_logo.jpg",
+                                        "9mobile":"images/networks/9mobile.jpg"
+                                        };
+            </script>
+            <script>
+                window.tv_logo = { "DSTV":"images/networks/dstv.jpg",
+                                        "GOTV":"images/networks/gotv.jpg"
+                                        };
+            </script>
+            <script>
+                window.dataPlans = { "GLO":["50MB @ ₦50/1 DAY","150MB @ ₦100/1 DAY","350MB @ ₦200/2 DAYS","1.8GB @ ₦500/14 DAYS","3.9GB @ ₦1000/30 DAYS","7.5GB @ ₦1,500/30 DAYS","9.2GB @ ₦2,000/30 DAYS",
+                                            "10.8GB @ ₦2,500/30 DAYS","14GB @ ₦3,000/30 DAYS","14GB @ ₦3,000/30 DAYS","18GB @ ₦4,000/30 DAYS","24GB @ ₦5,000/30 DAYS","29.5GB @ ₦8,000/30 DAYS","50GB @ ₦10,000/30 DAYS"],
+                                        "MTN":["40MB @ ₦50/1 DAY","200MB @ ₦60/1 DAY","100MB @ ₦100/1 DAY","1GB @ ₦300/1 DAY","2GB @ ₦500/2 DAYS","2.5GB @ ₦500/2 DAYS","450GB @ ₦120/7 DAYS","6GB @ ₦1,500/7 DAYS","10GB @ ₦2,500/30 DAYS",
+                                        "12GB @ ₦3500/30 DAYS","25GB @ ₦6,000/3 DAYS","40GB @ ₦10,000/30 DAYS"],
+                                        "AIRTEL":["50MB @ ₦40/1 DAY","200MB @ ₦100/1 DAY","350MB @ ₦200/2 DAYS","1.8GB @ ₦500/14 DAYS","3.9GB @ ₦1000/30 DAYS","7.5GB @ ₦1,500/30 DAYS","9.2GB @ ₦2,000/30 DAYS",
+                                            "10.8GB @ ₦2,500/30 DAYS","14GB @ ₦3,000/30 DAYS","14GB @ ₦3,000/30 DAYS","18GB @ ₦4,000/30 DAYS","24GB @ ₦5,000/30 DAYS","29.5GB @ ₦8,000/30 DAYS","50GB @ ₦10,000/30 DAYS"],
+                                        "9mobile":["100MB @ ₦50/1 DAY","250MB @ ₦100/1 DAY","450MB @ ₦200/2 DAYS","1.8GB @ ₦500/14 DAYS","3.9GB @ ₦1000/30 DAYS","7.5GB @ ₦1,500/30 DAYS","9.2GB @ ₦2,000/30 DAYS",
+                                            "10.8GB @ ₦2,500/30 DAYS","14GB @ ₦3,000/30 DAYS","14GB @ ₦3,000/30 DAYS","18GB @ ₦4,000/30 DAYS","24GB @ ₦5,000/30 DAYS","29.5GB @ ₦8,000/30 DAYS","50GB @ ₦10,000/30 DAYS"],
+                                        };
+            </script>
+            <script>
+                window.tvPlans = { "DSTV":["160+ Channels @ ₦21,000/1 MONTH","145+ Channels @ ₦14,250/1 MONTH","140+ Channels @ ₦12,000/1 MONTH","130+ Channels @ ₦9,000/1 MONTH","105+ Channels @ ₦5,300/1 MONTH","85+ Channels @ ₦2,950/1 MONTH","45+ Channels @ ₦2,150/1 MONTH"],
+                                    "GOTV":["80+ Channels @ ₦8,500/1 MONTH","75+ Channels @ ₦4,150/1 MONTH","65+ Channels @ ₦2,800/1 MONTH","45+ Channels @ ₦1,900/1 MONTH","35+ Channels @ ₦900/1 MONTH"],
+                                };
+            </script>
+            <script>
+                window.initArtime = function (network){
+                    $(".network-icon").attr("src", network_logo[network]);
+                    $("#pay_bill_airtime_service_provider").val(network);                    
+                   /* alert(network);*/
+                };
+                window.doRecharge =  function(){             
+                    var member_id = user_info.member_id;
+                    var service_type = "Airtime";
+                    var service_provider = $("#pay_bill_airtime_service_provider").val();
+                    var service_number = $("#pay_bill_airtime_service_number").val();
+                    var service_amount = $("#pay_bill_airtime_service_amount").val();
+                    var service_customer = $("#pay_bill_data_service_customer").val();
+                    var service_note = $("#pay_bill_airtime_service_note").val();
+
+                    if(service_amount.trim() == ""){
+                        smallBottomFade("Please enter recharge amount","white","red");
+                        return false;
+                    }
+
+                    if(service_number.trim() == ""){
+                        smallBottomFade("Please enter phone number","white","red");
+                        return false;
+                    }                    
+
+                    if(service_number.trim().length < 11){
+                        smallBottomFade("Please enter a valid phone number","white","red");
+                        return false;
+                    }   
+
+                    var payload =   {
+                        member_id: member_id, 
+                        service_type: service_type, 
+                        service_provider: service_provider,
+                        service_number: service_number,
+                        service_amount: service_amount,
+                        service_customer: service_customer,
+                        service_note: service_note,
+                    };
+
+                    addService(payload);
+                };
+            </script>
+            <script>
+                window.initData = function (network){
+                    $(".network-icon").attr("src", network_logo[network]);
+                    $("#pay_bill_data_service_provider").val(network);                    
+                    var plans = dataPlans[network];
+                    var options = "";
+                        options += "<option value=''>--CHOOSE PLAN--</option>";
+                        for(var x =0; x<plans.length; x++){
+                            /*50MB @ ₦50/1 DAY*/
+                            var amount = plans[x].split("₦")[1].split("/")[0].split(",").join("");
+                            options += "<option value='" + amount + "-" + plans[x] + "'>" + plans[x]  + "</option>";
+                        }
+                    $("#pay_bill_data_service_amount").html(options);
+                   
+                };
+                window.doData =  function(){             
+                    var member_id =  user_info.member_id;
+                    var service_type = "Data";
+                    var service_provider = $("#pay_bill_data_service_provider").val();
+                    var service_number = $("#pay_bill_data_service_number").val();
+                    var service_amount = $("#pay_bill_data_service_amount").val();
+                    var service_customer = $("#pay_bill_airtime_service_name").val();
+                    var service_note = $("#pay_bill_data_service_note").val();
+
+                    if(service_amount.trim() == ""){
+                        smallBottomFade("Please select a data package","white","red");
+                        return false;
+                    }
+
+                    if(service_number.trim() == ""){
+                        smallBottomFade("Please enter phone number","white","red");
+                        return false;
+                    } 
+                    
+                    if(service_number.trim().length < 11){
+                        smallBottomFade("Please enter a valid phone number","white","red");
+                        return false;
+                    }                     
+
+                    var payload =   {
+                        member_id: member_id, 
+                        service_type: service_type, 
+                        service_provider: service_provider,
+                        service_number: service_number,
+                        service_amount: service_amount,
+                        service_customer: service_customer,
+                        service_note: service_note,
+                    };
+
+                    addService(payload);
+                };
+            </script>
+            <script>
+                window.initTV = function (network){
+                    $(".network-icon").attr("src", tv_logo[network]);
+                    $("#pay_bill_tv_service_provider").val(network);                    
+                    var plans = tvPlans[network];
+                    var options = "";
+                        options += "<option value=''>--CHOOSE PLAN--</option>";
+                        for(var x =0; x<plans.length; x++){
+                            /*50MB @ ₦50/1 DAY*/
+                            var amount = plans[x].split("₦")[1].split("/")[0].split(",").join("");
+                            options += "<option value='" + amount + "-" + plans[x] + "'>" + plans[x]  + "</option>";
+                        }
+                    $("#pay_bill_tv_service_amount").html(options);
+                
+                };
+                window.doTV =  function(){             
+                    var member_id =  user_info.member_id;
+                    var service_type = "TV";
+                    var service_provider = $("#pay_bill_tv_service_provider").val();
+                    var service_number = $("#pay_bill_tv_service_number").val();
+                    var service_amount = $("#pay_bill_tv_service_amount").val();
+                    var service_customer = $("#pay_bill_airtime_service_name").val();
+                    var service_note = $("#pay_bill_tv_service_note").val();
+
+                    if(service_amount.trim() == ""){
+                        smallBottomFade("Please select a tv package","white","red");
+                        return false;
+                    }
+
+                    if(service_number.trim() == ""){
+                        smallBottomFade("Please enter card number","white","red");
+                        return false;
+                    } 
+                    
+                    if(service_number.trim().length < 4){
+                        smallBottomFade("Please enter a valid smart card number","white","red");
+                        return false;
+                    }                     
+
+                    var payload =   {
+                        member_id: member_id, 
+                        service_type: service_type, 
+                        service_provider: service_provider,
+                        service_number: service_number,
+                        service_amount: service_amount,
+                        service_customer: service_customer,
+                        service_note: service_note,
+                    };
+
+                    addService(payload);
+                };
+            </script>
+            <script>
+                window.addService = function(payload){
+                    show_loading1();
+                    reqAsyncJSON("POST", serverHost + api_prefix + "api/add_service/" + payload.member_id, payload, 
+                    "addServiceResponse",payload.service_type);
+                }
+            </script>
+            <script>
+                window.addServiceResponse = function (res){
+                    console.log(res);
+                    if(JSON.parse(res[0]).success != true){
+                        hide_loading1();
+                        smallBottomFade(JSON.parse(res[0]).message,"white","red");
+                        return false;
+                    }
+                    hide_loading1();
+                    swal("Successful",JSON.parse(res[0]).message,"success");
+                    balancePage();
+                    getTransactions();
+                }
+            </script>            
+        </run>

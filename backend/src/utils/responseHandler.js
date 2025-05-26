@@ -1,0 +1,1 @@
+module.exports = (res, data, message = 'Success') => res.json({ message, data });

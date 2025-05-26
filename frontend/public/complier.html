@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+<script>
+var car = `window.testCar = function (){alert('` + 'trying \n hfgfg \n'.replaceAll("\n","\\n") + `connoted 22');}`;
+
+setTimeout(car, 1);
+</script>
+<button onclick="testCar()">test</button>
+</body>
+</html>

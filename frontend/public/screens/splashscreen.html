@@ -1,0 +1,46 @@
+<style>
+    .internal_splash {
+        position: fixed; 
+        top:0px; 
+        background:#ffffff;
+        width: 100vw;
+        height: 100vh;
+        background-size: 100% auto;
+        z-index: 888888;
+    }
+</style>    
+<div class="splash-screen internal_splash" onclick="hideSplash()"  id="screen-1" style="">
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <center>
+        <div style="width:75%;">
+             <img src="assets/logo.svg" width="20%">
+        </div>
+        <br />
+        <br />
+        <br />
+        Maduka University
+        <br />
+        <!--
+        <img src="images/loading1.gif" width="50px">
+        <div style="position:fixed;bottom:100px; width:100%;"><strong><em>Insurance is now esay...</em></strong></div>
+         -->
+    </center>
+</div>
+<run>
+    <script>
+        window.splashFn = function (){
+                               /* swal("This is the splash screen!"); */
+                            };
+        splashFn();
+    </script>
+</run>

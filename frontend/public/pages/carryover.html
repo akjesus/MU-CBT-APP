@@ -1,0 +1,337 @@
+<div class="container mt-4">
+  <h2>Carryover Courses</h2>
+  <ul class="nav nav-tabs" id="carryoverTab" role="tablist">
+    <!-- Tab 1: Students -->
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active"
+        id="students-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#students"
+        type="button"
+        role="tab"
+        aria-controls="students"
+        aria-selected="true"
+      >
+        Students
+      </button>
+    </li>
+    <!-- Tab 2: Carryovers for Selected Student -->
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="carryover-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#carryover"
+        type="button"
+        role="tab"
+        aria-controls="carryover"
+        aria-selected="false"
+      >
+        Carryover for Student
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content mt-3" id="carryoverTabContent">
+    <!-- TAB 1: Students -->
+    <div
+      class="tab-pane fade show active"
+      id="students"
+      role="tabpanel"
+      aria-labelledby="students-tab"
+    >
+      <p>Select a student in the table below, then click "Manage Carryover".</p>
+      <table id="studentsTable" class="display nowrap table table-striped" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Reg. Number</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Level</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- DataTables loads here --></tbody>
+      </table>
+    </div>
+
+    <!-- TAB 2: Carryover for Selected Student -->
+    <div
+      class="tab-pane fade"
+      id="carryover"
+      role="tabpanel"
+      aria-labelledby="carryover-tab"
+    >
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5>Carryover for Student: <span id="carryoverStudentName">N/A</span></h5>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="btnAddCarryover">+ Add Carryover</button>
+          <button class="btn btn-danger" id="btnRemoveAllCarryovers">Remove All</button>
+        </div>
+      </div>
+      <!-- DataTable for carryover courses for the selected student -->
+      <table id="carryoverTable" class="display nowrap table table-striped" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Course ID</th>
+            <th>Course Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody><!-- DataTables loads here --></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Assign Carryover Course -->
+<div
+  class="modal fade"
+  id="assignCarryoverModal"
+  tabindex="-1"
+  aria-labelledby="assignCarryoverModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="assignCarryoverForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="assignCarryoverModalLabel">Add Carryover Course</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <!-- We'll store the selected student ID in a hidden input -->
+          <input type="hidden" id="assignStudentId" />
+
+          <div class="mb-3">
+            <label for="assignCourseSelect" class="form-label">Select Course</label>
+            <select id="assignCourseSelect" class="form-select" required>
+              <!-- We’ll load from /api/courses -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >Cancel</button>
+          <button type="submit" class="btn btn-success">Assign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  studentsTable, carryoverTable;
+  selectedStudentId = null;
+  selectedStudentName = "";
+
+   function loadCarryoverPage() {
+    initStudentsTable();
+    initCarryoverTable();
+
+    document.getElementById("btnAddCarryover").addEventListener("click", function() {
+      if (!selectedStudentId) {
+        alert("No student selected yet.");
+        return;
+      }
+      loadCoursesIntoAssignSelect();
+      document.getElementById("assignStudentId").value = selectedStudentId;
+      new bootstrap.Modal(document.getElementById("assignCarryoverModal")).show();
+    });
+
+    document.getElementById("btnRemoveAllCarryovers").addEventListener("click", function() {
+      if (!selectedStudentId) {
+        alert("No student selected yet.");
+        return;
+      }
+      if (!confirm("Remove all carryover courses for this student?")) return;
+      removeAllCarryoversByStudent(selectedStudentId);
+    });
+
+    // Assign form submission
+    document.getElementById("assignCarryoverForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      assignCarryoverCourse();
+    });
+  }
+
+  // 1) Students Table => load /api/students
+  function initStudentsTable() {
+    studentsTable = $("#studentsTable").DataTable({
+      processing: true,
+      ajax: {
+        url: API_URL + "students", // e.g. GET /api/students
+        dataSrc: ""
+      },
+      columns: [
+        { data: "id" },
+        { data: "registration_number" },
+        {
+          data: null,
+          render: function(row) {
+            return row.first_name + " " + row.last_name;
+          }
+        },
+        { data: "department_name" },
+        { data: "level_name" },
+        {
+          data: null,
+          render: function(row) {
+            // 'Manage Carryover' button
+            return `<button class="btn btn-sm btn-primary" onclick="manageCarryoverForStudent(${row.id}, '${row.first_name} ${row.last_name}')">
+                      Manage Carryover
+                    </button>`;
+          }
+        }
+      ],
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "Students_Export" },
+        { extend: "excelHtml5", title: "Students_Export" },
+        { extend: "print", title: "Students List" }
+      ],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [
+        [10,25,50,-1],
+        [10,25,50,"All"]
+      ]
+    });
+  }
+
+  // 2) Carryover Table => list carryover courses for selected student
+  function initCarryoverTable() {
+    carryoverTable = $("#carryoverTable").DataTable({
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "StudentCarryovers_Export" },
+        { extend: "excelHtml5", title: "StudentCarryovers_Export" },
+        { extend: "print", title: "Student Carryovers" }
+      ],
+      responsive: true,
+      columns: [
+        { data: "course_id" },
+        { data: "course_name" },
+        {
+          data: null,
+          render: function(row) {
+            return `
+              <button class="btn btn-sm btn-danger" onclick="removeCarryoverCourse(${row.student_id}, ${row.course_id})">
+                Remove
+              </button>
+            `;
+          }
+        }
+      ]
+    });
+  }
+
+  // Called when user clicks "Manage Carryover" in the Students table
+  function manageCarryoverForStudent(studId, studName) {
+    selectedStudentId = studId;
+    selectedStudentName = studName;
+    document.getElementById("carryoverStudentName").textContent = studName;
+    // Switch to the "Carryover" tab
+    let carryoverTab = new bootstrap.Tab(document.getElementById("carryover-tab"));
+    carryoverTab.show();
+    // Load that student's carryovers
+    loadCarryoversForStudent(studId);
+  }
+
+  // 3) Load carryovers => GET /carryover/student/:student_id
+  function loadCarryoversForStudent(studId) {
+    fetch(API_URL + `carryover-courses/student/${studId}`)
+      .then(res => res.json())
+      .then(data => {
+        carryoverTable.clear();
+        carryoverTable.rows.add(data).draw();
+      })
+      .catch(() => alert("Failed to load carryovers for this student."));
+  }
+
+  // 4) "Add Carryover" => fill courses in the dropdown
+  function loadCoursesIntoAssignSelect() {
+    // e.g. GET /api/courses
+    fetch(API_URL + "courses")
+      .then(res => res.json())
+      .then(courses => {
+        const sel = document.getElementById("assignCourseSelect");
+        sel.innerHTML = "";
+        courses.forEach(c => {
+          let opt = document.createElement("option");
+          opt.value = c.id;
+          opt.textContent = c.name + " (" + c.code + ")";
+          sel.appendChild(opt);
+        });
+      })
+      .catch(() => alert("Failed to load courses for assign."));
+  }
+
+  // 5) assignCarryover => POST /carryover/assign { student_id, course_id }
+  function assignCarryoverCourse() {
+    const studId = document.getElementById("assignStudentId").value;
+    const courseId = document.getElementById("assignCourseSelect").value;
+    if (!studId || !courseId) {
+      alert("Missing student or course.");
+      return;
+    }
+    const payload = { student_id: +studId, course_id: +courseId };
+    fetch(API_URL + "carryover-courses/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(data => {
+        bootstrap.Modal.getInstance(document.getElementById("assignCarryoverModal")).hide();
+        alert(data.message || "Carryover assigned.");
+        // reload carryover table
+        loadCarryoversForStudent(studId);
+      })
+      .catch(() => alert("Failed to assign carryover course."));
+  }
+
+  // 6) remove single => DELETE /carryover/remove { student_id, course_id }
+  function removeCarryoverCourse(studId, courseId) {
+    if (!confirm("Remove this carryover course?")) return;
+    const payload = { student_id: studId, course_id: courseId };
+    fetch(API_URL + "carryover-courses/remove", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || "Carryover removed.");
+        loadCarryoversForStudent(studId);
+      })
+      .catch(() => alert("Failed to remove carryover."));
+  }
+
+  // 7) remove all => DELETE /carryover/remove-all/:student_id
+  function removeAllCarryoversByStudent(studId) {
+    fetch(API_URL + `carryover-courses/remove-all/${studId}`, {
+      method: "DELETE"
+    })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || "All carryovers removed.");
+        loadCarryoversForStudent(studId);
+      })
+      .catch(() => alert("Failed to remove all carryovers."));
+  }
+</script>
+<script>
+    /* Re-init DataTable after dynamic load if needed */
+    setTimeout(loadCarryoverPage(), 100);
+</script>

@@ -1,0 +1,65 @@
+<style>
+    .skip-btn{
+        position: absolute; 
+        background: rgba(255,255,255,0.1); 
+        color: white; 
+        font-weight: bold; 
+        padding:10px; 
+        border-radius: 15px; 
+        top: 10px;
+        right: 10px;
+        z-index: 100000000000000;
+    }
+</style>
+<!----SWIPER --->
+<div  id="swiper_container" style="opacity:0;" class="app-page swiper-container swiper-container-fullscreen">
+    <div  class="swiper-wrapper">
+        <!-- Add slide 1 -->
+        <div class="swiper-slide vertical-align-center blue-900">
+            <div class="skip-btn show-login">Skip&gt;&gt;</div>
+            <i class="icon ion-briefcase"></i>
+            <h1>Quick Loans</h1>
+            <p><big>Get a loan of up to 12 million</big></p>
+        </div>
+        <!-- Add slide 2 -->
+         <div class="swiper-slide vertical-align-center blue-900">
+            <div class="skip-btn show-login">Skip&gt;&gt;</div>
+            <i class="icon ion-card"></i>
+            <h1>Cheaper and easier</h1>
+            <p><big>Transfer and withdraw with zero transaction fee</big></p>
+        </div> 
+        <!-- Add slide 3 -->
+        <div class="swiper-slide vertical-align-center blue-900">
+            <i class="icon ion-pricetag"></i>
+            <h1>Smarter Living</h1>
+            <p><big>Paybill, experience a whole new world</big></p>
+            <button id='close_swipe' class="show-login border-white text-white radius margin-top">
+                Continue
+            </button>
+        </div>
+        
+    </div>
+    <!-- Add Pagination -->
+    <div class="swiper-pagination swiper-pagination-white"></div>
+</div>
+ <!----END SWIPER --->
+<div w3-include-script="screens/scripts.html"></div>
+<run>
+    <script>
+        window.initSwiper = function (){  
+            new Swiper('.swiper-container', {
+                pagination: '.swiper-pagination',
+                paginationClickable: true
+            });      
+            $('#swiper_container').css('position','fixed');
+            $('#menuDiscover').css('position','fixed');
+            $('#swiper_container').css('top','0px');
+            $('#swiper_container').css('width','100%');
+            $('#swiper_container').css('z-index','100000000000');
+            $('#close_swipe').click(function(){
+                $('#swiper_container').fadeOut();
+            });
+        };
+        initSwiper();
+    </script>        
+</run>

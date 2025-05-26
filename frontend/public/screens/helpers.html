@@ -1,0 +1,36 @@
+    <!--START MODALS-->        
+        <!-- LOADING1 START--> 
+        <div id="loading1" style="display:none; width: 40px !important; height: 40px !important;">
+            <img src="images/loading1.gif" width="150px">
+        </div>
+        <div id="small-bottom-fade"  style="display:none;">
+            <center>
+                <div class="content-text">
+                ....
+                </div>
+            </center>    
+        </div>
+        <div id="big-top-slide"  style="display:none;">
+            <center>
+                <div class="content-text">
+                ....
+                </div>
+            </center>    
+        </div>
+        <run>
+        <script>
+            window.show_loading1 = function (){
+                $(document).ready(function(){    
+                        $("#loading1").css("display", "");
+                });
+            }
+            </script>
+            <script>           
+            window.hide_loading1 = function (){
+                $(document).ready(function(){    
+                        $("#loading1").css("display", "none");
+                });
+            }
+        </script>
+        </run>
+    <!-- LOADING1 END-->  

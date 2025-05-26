@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+        <meta charset="UTF-8">
+        <title>Home</title>
+        <meta name="viewport" content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width">
+        <!-- <meta http-equiv="Content-Security-Policy" content="connect-src *;default-src 'self' data: gap: https://ssl.gstatic.com http://127.0.0.0:9900/ 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;"> -->
+        <meta name="color-scheme" content="light">
+        <link rel="stylesheet" href="style.css" media="screen">
+        <link rel="stylesheet" href="style.responsive.css" media="all">
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/w3.css">
+        <link rel="stylesheet" href="css/font-awesome.css">
+        <!-- Waves Effect Css -->
+        <link href="plugins/node-waves/waves.css" rel="stylesheet" />
+        <!-- Animation Css -->
+        <link href="plugins/animate-css/animate.css" rel="stylesheet" />
+        <!-- Sweetalert Css -->
+        <link href="plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+        <link rel="stylesheet" href="mobileui/imports.css">
+        <script src="js/lib/jquery.js"></script>
+        <script src="script.js"></script>
+        <script src="script.responsive.js"></script>
+        <script src="js/lib/w3.js"></script>
+        <script src="js/lib/requester.js"></script>
+        <script src="js/helpers.js"></script>
+        <style>
+            .app{} 
+            .art-content .art-postcontent-0 .layout-item-0 { padding-right: 10px;padding-left: 10px;  }
+            .ie7 .art-post .art-layout-cell {border:none !important; padding:0 !important; }
+            .ie6 .art-post .art-layout-cell {border:none !important; padding:0 !important; }
+        </style>
+        <script type="text/javascript" src="mobileui/swiper.min.js"></script>
+        <script type="text/javascript" src="mobileui/alertX.min.js"></script>
+    </head>
+    <body onload="hideSplash()">  
+      <script> 
+        //END POINTS
+        //var serverHost = "http://192.168.43.182:8000/";          
+     var serverHost = "https://itopmoney.com/";       
+        var api_prefix = "";
+        var current_lang  = "en";
+        function isNotEmpty(arr){
+            if(arr.isArray()){
+                if(arr.length > 0){
+                    return false;
+                }else{
+                    return true;
+                }
+            }else{
+                if(arr == "undefined" || arr == "" || arr == null){
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+        }
+        </script>
+    <script>
+    let appData = {
+                root_url: serverHost,
+            }
+    </script>                       
+        <div id="art-main" style="margin:0px !important;">
+            <div class="art-sheet clearfix" style="margin:0px !important;" >
+                <div id="main_app" class="">
+                    <div w3-include-script="screens/splashscreen.html"></div>
+                    <div w3-include-script="screens/welcome.html"></div>
+                    <div w3-include-script="screens/home.html"></div>
+                    <div w3-include-script="screens/setting.html"></div>
+                    <div w3-include-script="screens/fund_wallet.html"></div>
+                    <div w3-include-script="screens/withdraw.html"></div>
+                    <div w3-include-script="screens/eNaira.html"></div>
+                    <div w3-include-script="screens/lite_loan.html"></div>
+                    <div w3-include-script="screens/mortgage_loan.html"></div>
+                    <div w3-include-script="screens/invest.html"></div>
+                    <div w3-include-script="screens/pay_bills.html"></div>
+                    <div w3-include-script="screens/save_money.html"></div>
+                    <div w3-include-script="screens/profile.html"></div>
+                    <div w3-include-script="screens/login.html"></div>
+                    <div w3-include-script="screens/register.html"></div>
+                    <div w3-include-script="screens/transactions.html"></div>
+                    <div w3-include-script="screens/banks.html"></div>
+                    <div w3-include-script="screens/terms.html"></div>
+
+                    <div w3-include-script="screens/helpers.html"></div>
+                   
+                </div>
+            </div>
+        </div> 
+        <script src="cordova.js"></script>
+        <script src="plugins/sweetalert/sweetalert.min.js"></script>        
+        <script src="js/routes.js"></script>
+        <script src="https://js.paystack.co/v1/inline.js"></script>
+            <script>
+            window.balancePage = function (){
+                    w3.getHttpObject(appData.root_url + "api/wallet/balance_page/" + user_info.member_id, balancePageRender);
+                }
+            </script>	
+            <script>            
+            window.balancePageRender = function (dataObject) {
+                    appData.balance_page=dataObject;
+                    $(".total_balance").html(dataObject.total_balance.toLocaleString('en-US', 'numeric'));
+                    $(".total_deposit").html(dataObject.total_deposit.toLocaleString('en-US', 'numeric'));
+                    $(".total_withdraw").html(dataObject.total_withdraw.toLocaleString('en-US', 'numeric'));
+                    $(".total_charges").html(dataObject.total_charges.toLocaleString('en-US', 'numeric'));
+                }       
+            </script>           
+        <script>
+            w3.includeHTML();
+            w3.includeScript();               
+            function initScripts(){
+              //  document.getElementById("runScripts").click(); 
+                w3.scripts = []; 
+            }    
+            setTimeout(initScripts, 3000);
+            setTimeout(initRoutes, 4000);    
+        </script>
+        <script>
+            window.hideSplash = function (){
+                //hide_loading1();
+                setTimeout(function (){$("#screen-1").fadeOut(2000);},2900);
+                if(localStorage.getItem("slide_seen") == null){
+                     setTimeout(function (){$("#swiper_container").animate({opacity:1});},3000);
+                }/*else if(localStorage.getItem("cookie") == null){
+                   setTimeout(function (){$(".show-login").click()},4300);
+                }      
+                */
+                else{
+                    setTimeout(function (){$(".show-login").click()},4300);
+                }          
+            }
+            /*setTimeout(function (){$(".show-login").click()},4300);*/
+        </script>
+        <script>
+
+        </script>
+    <script type="text/javascript" charset="utf-8">
+        // Wait for device API libraries to load
+        document.addEventListener('deviceready', onDeviceReady, false);
+    
+        // device APIs are available
+        function onDeviceReady() {      
+          document.addEventListener("backbutton", onBackKeyDown, false);
+          navigator.splashscreen.hide();
+          console.log(navigator.camera);
+          /*alert("devices is ready");*/
+        }
+        // Handle the back button
+        function onBackKeyDown() {
+          var cf = confirm("Are your sure you want to exit?");
+          if(cf==true){
+            if(navigator.app){
+              navigator.app.exitApp();
+            }else if (navigator.device) {
+              navigator.device.exitApp();
+            }
+          }else{
+          }
+        }
+      </script>
+    <script>
+    /*getSettings*/
+        function getSettings(){
+            w3.getHttpObject(appData.root_url + "api/get_settings", getSettingsRender);
+        }
+		function getSettingsRender(dataObject) {
+            appData.settings=dataObject;
+            $(".new_update").html(appData.settings.new_update);
+            $(".loan_min_limit").html(Number(appData.settings.loan_min_limit).toLocaleString('en-US', 'numeric'));
+            $(".loan_max_limit").html(Number(appData.settings.loan_max_limit).toLocaleString('en-US', 'numeric'));
+            $("#input-loan-amount").attr("min",appData.settings.loan_min_limit);
+            $("#input-loan-amount").attr("max",appData.settings.loan_max_limit);
+            $(".usd_rate").html(appData.settings.usd_rate);
+            $(".usd_limit").html(appData.settings.usd_limit);
+		}       
+	</script>        
+      <script>
+        $(document).ready(function(){
+            hideSplash();
+            getSettings();
+        });        
+      </script>   
+      <script src="screens/app.js"></script>
+      <script>
+        setTimeout(appScript, 6000);
+      </script>  
+
+
+
+
+<!--PAYSTAK FUNDING-->
+
+    </body>
+</html>

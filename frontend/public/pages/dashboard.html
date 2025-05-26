@@ -1,0 +1,91 @@
+<div class="container mt-4">
+  <h2>Dashboard Overview</h2>
+  <div class="stat-grid mt-4">
+    <a
+      href="#students"
+      data-page="students"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Students</h4>
+        <p>
+          <i class="fas fa-user-graduate"></i>
+          <span id="student-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#exams"
+      data-page="exams"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Exams Created</h4>
+        <p>
+          <i class="fas fa-file-alt"></i>
+          <span id="exam-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#exams"
+      data-page="exams"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Ongoing Exams</h4>
+        <p>
+          <i class="fas fa-clock"></i>
+          <span id="active-exam-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#staff"
+      data-page="staff"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Staff</h4>
+
+        <p>
+          <i class="fas fa-users"></i> <span id="staff-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a
+      href="#question-bank"
+      data-page="questionBank"
+      onclick="loadPage(this.getAttribute('data-page'))"
+    >
+      <div class="stat-box">
+        <h4>Question Bank</h4>
+        <p>
+          <i class="fas fa-book"></i>
+          <span id="question-count">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a href="#">
+      <div class="stat-box">
+        <h4>Pass Rate</h4>
+        <p>
+          <i class="fas fa-chart-line"></i>
+          <span id="pass-rate">Loading...</span>
+        </p>
+      </div>
+    </a>
+    <a href="#">
+      <div class="stat-box">
+        <h4>School</h4>
+        <p>
+          <i class="fas fa-school"></i> <span id="school-name">Loading...</span>
+        </p>
+      </div>
+    </a>
+  </div>
+</div>
+<script>
+  delete showingAll;
+  fetchAdminDashboard();
+</script>
