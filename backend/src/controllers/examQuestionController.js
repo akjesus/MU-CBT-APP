@@ -1,7 +1,7 @@
 const db = require("../config/database");
 const csvParser = require("csv-parser");
 const stream = require("stream");
-
+const fs = require("fs");
 
 /**
  * 1. GET all questions linked to a specific exam
@@ -92,7 +92,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       level,
       file,
       answers,
-      user_id
+      user_id,
     } = req.body;
 
     // Insert into `questions` table
@@ -115,7 +115,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         level,
         file,
         answers,
-        user_id
+        user_id,
       ]
     );
 
@@ -129,7 +129,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
 
     res.status(201).json({
       message: "New question created and linked to exam",
-      question_id: newQuestionId
+      question_id: newQuestionId,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -139,13 +139,14 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
 /**
  * 4. Bulk CSV upload: each row has question fields (except created_at, updated_at).
  *    We create a new question for each row, then link it to exam_id.
- * 
+ *
  *    Format example CSV:
  *      exam_id, course_id, text, option_a, option_b, option_c, option_d, correct_option, difficulty_level, question_type, score_obtainable, level, file, answers, user_id
  *    We skip created_at, updated_at
- * 
+ *
  */
-exports.bulkUploadNewQuestions = async (req, res) => {
+
+exports.bulkUploadNewQuestions2 = async (req, res) => {
   try {
     const { exam_id } = req.params;
     if (!exam_id) {
@@ -183,7 +184,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           level,
           file,
           answers,
-          user_id
+          user_id,
         } = row;
 
         // We'll store this row data
@@ -201,7 +202,159 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           level,
           file,
           answers,
-          user_id
+          user_id,
+        });
+      })
+      .on("end", async () => {
+        if (!questionsToInsert.length) {
+          return res
+            .status(400)
+            .json({ error: "No valid question rows found in CSV" });
+        }
+
+        let insertedCount = 0;
+
+        // We'll process each question row individually
+        for (const qRow of questionsToInsert) {
+          // Insert new question
+          console.log(qRow);
+          const [insertRes] = await db.query(
+            `INSERT INTO questions 
+               (course_id, text, option_a, option_b, option_c, option_d, correct_option,
+                difficulty_level, question_type, score_obtainable, level, file, answers, user_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              qRow.course_id,
+              qRow.text,
+              qRow.option_a,
+              qRow.option_b,
+              qRow.option_c,
+              qRow.option_d,
+              qRow.correct_option,
+              qRow.difficulty_level,
+              qRow.question_type,
+              qRow.score_obtainable,
+              qRow.level,
+              qRow.file,
+              qRow.answers,
+              qRow.user_id,
+            ]
+          );
+
+          const newQId = insertRes.insertId;
+
+          // Link to exam_questions
+          await db.query(
+            `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
+            [exam_id, newQId]
+          );
+
+          insertedCount++;
+        }
+
+        res.status(201).json({
+          message: `${insertedCount} new questions created & linked to exam`,
+        });
+      });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.bulkUploadNewQuestions = async (req, res) => {
+  const replaceQuestionMarkWithArrow = (str) => {
+    return str
+      .replace(/\?(\d+)/g, "->$1")
+      .replace(/\?/g, " ")
+      .replace(/\^2/g, "²");
+
+  };
+
+  function replaceSuperscript(str) {
+    return str.replace(/\^(\d+)/g, (match, exponent) =>
+      getSuperscript(exponent)
+    );
+  }
+
+  function getSuperscript(n) {
+    const superscriptMap = {
+      0: "⁰",
+      1: "¹",
+      2: "²",
+      3: "³",
+      4: "⁴",
+      5: "⁵",
+      6: "⁶",
+      7: "⁷",
+      8: "⁸",
+      9: "⁹",
+    };
+    return n
+      .toString()
+      .split("")
+      .map((digit) => superscriptMap[digit])
+      .join("");
+  }
+  
+  try {
+    const { exam_id } = req.params;
+    if (!exam_id) {
+      return res.status(400).json({ error: "No exam_id in URL" });
+    }
+
+    // Check if file is present
+    if (!req.files || !req.files.file) {
+      return res.status(400).json({ error: "CSV file is required" });
+    }
+
+    const csvFile = req.files.file;
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(csvFile.data);
+
+    const questionsToInsert = []; // for question fields
+    // We'll store them as arrays of [course_id, text, ... user_id], then link after
+
+    bufferStream
+      .pipe(csvParser())
+      .on("data", (row) => {
+        // Extract the fields from CSV row
+        // We'll parse them carefully, assuming columns are consistent
+
+        const {
+          course_id,
+          option_a,
+          option_b,
+          option_c,
+          option_d,
+          correct_option,
+          difficulty_level,
+          question_type,
+          score_obtainable,
+          level,
+          file,
+          answers,
+          user_id,
+        } = row;
+        
+        const firstText = replaceQuestionMarkWithArrow(row.text);
+        const text = replaceSuperscript(firstText);
+
+        // We'll store this row data
+        questionsToInsert.push({
+          course_id,
+          text,
+          option_a,
+          option_b,
+          option_c,
+          option_d,
+          correct_option,
+          difficulty_level,
+          question_type,
+          score_obtainable,
+          level,
+          file,
+          answers,
+          user_id,
         });
       })
       .on("end", async () => {
@@ -235,7 +388,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
               qRow.level,
               qRow.file,
               qRow.answers,
-              qRow.user_id
+              qRow.user_id,
             ]
           );
 
@@ -251,13 +404,14 @@ exports.bulkUploadNewQuestions = async (req, res) => {
         }
 
         res.status(201).json({
-          message: `${insertedCount} new questions created & linked to exam`
+          message: `${insertedCount} new questions created & linked to exam`,
         });
       });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 /**
  * 5. Remove a single question from exam
