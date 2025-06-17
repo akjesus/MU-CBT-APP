@@ -47,3 +47,12 @@ exports.deleteSession = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+exports.activateSession = async (req, res) => {
+  try {
+    await Session.activate(req.params.id);
+    res.json({ message: "Session Activated" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

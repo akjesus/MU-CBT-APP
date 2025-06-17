@@ -7,5 +7,6 @@ router.get("/:id", sessionController.getSessionById);
 router.post("/", sessionController.createSession);
 router.put("/:id", sessionController.updateSession);
 router.delete("/:id", sessionController.deleteSession);
+router.patch("/:id/activate", sessionController.activateSession);
 
 module.exports = router;

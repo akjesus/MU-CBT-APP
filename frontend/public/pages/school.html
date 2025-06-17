@@ -229,11 +229,18 @@
             <input type="number" class="form-control" id="creditLoad" />
           </div>
           <div class="mb-3">
+            <label for="semester" class="form-label">Semester</label>
+            <select id="semester" class="form-select" name = semester_id required>
+              <option value="1"> First Semester </option>
+              <option value="2"> Second Semester </option>
+            </select>
+          </div>   
+          <div class="mb-3">
             <label for="courseLevel" class="form-label">Course Level</label>
             <select id="courseLevel" class="form-select" required>
               <!-- load from /api/departments -->
             </select>
-          </div>          
+          </div>        
           <div class="mb-3">
             <label for="courseDepartment" class="form-label">Department</label>
             <select id="courseDepartment" class="form-select" required>
@@ -284,6 +291,7 @@
 
     document.getElementById("btnAddCourse").addEventListener("click", function () {
       clearCourseForm();
+      loadLevelsForCourse()// user can pick level
       loadDepartmentsForCourse(); // user can pick department
       document.getElementById("courseModalLabel").textContent = "Add Course";
       new bootstrap.Modal(document.getElementById("courseModal")).show();
@@ -660,15 +668,34 @@
           levelSel.appendChild(opt);
         });
       })
-      .catch(() => alert("Failed to load levels for course."));
+      .catch((err) => alert(err.message));
 }
 
+function loadLevelsForCourse (selectedLevelId = null){
+  fetch(API_URL + "levels")
+      .then(res => res.json())
+      .then(levels => {
+        const levelSel = document.getElementById("courseLevel");
+        levelSel.innerHTML = "";
+        levels.forEach(l => {
+          let opt = document.createElement("option");
+          opt.value = l.id;
+          opt.textContent = l.name;
+          if (selectedLevelId && l.id == selectedLevelId) {
+            opt.selected = true;
+          }
+          levelSel.appendChild(opt);
+        });
+      })
+      .catch((err) => alert(err.message));
+}
 function clearCourseForm() {
     document.getElementById("courseId").value = "";
     document.getElementById("courseName").value = "";
     document.getElementById("courseCode").value = "";
     document.getElementById("creditLoad").value = "";
     document.getElementById("courseLevel").value = "";
+    document.getElementById("semester").value = "";
     document.getElementById("courseDepartment").innerHTML = "";
   }
 
@@ -685,6 +712,7 @@ function clearCourseForm() {
         document.getElementById("courseCode").value = c.code || "";
         document.getElementById("creditLoad").value = c.credit_load || "";
         document.getElementById("courseLevel").value = c.level_id || "";
+        document.getElementById("semester").value = c.semester_id || "";
         document.getElementById("courseModalLabel").textContent = "Edit Course";
         new bootstrap.Modal(document.getElementById("courseModal")).show();
       })
@@ -697,6 +725,8 @@ function clearCourseForm() {
       name: document.getElementById("courseName").value.trim(),
       code: document.getElementById("courseCode").value.trim(),
       credit_load: document.getElementById("creditLoad").value.trim(),
+      level_id: +document.getElementById("courseLevel").value,
+      semester_id: +document.getElementById("semester").value,
       department_id: +document.getElementById("courseDepartment").value
     };
 

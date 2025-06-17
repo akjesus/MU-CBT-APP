@@ -79,15 +79,16 @@ exports.studentLogin = async (req, res) => {
         const { username, password } = req.body;
         // const student = await Student.getByUsername(username);
         const student = await Student.getByRegNumberOrEmail(username);
-        if (!student) return res.status(401).json({ error: "Invalid credentials" });
+        if (!student)
+          return res.status(401).json({ error: "Invalid Email/Matric Number" });
 
         /*
         const isValidPassword = await Student.verifyPassword(password, student.password);
         if (!isValidPassword) return res.status(401).json({ error: "Invalid credentials" });
         */
         if (password !== student.password) {
-            return res.status(401).json({ error: "Invalid credentials" });
-          }
+          return res.status(401).json({ error: "Invalid Password" });
+        }
 
         const token = jwt.sign({ id: student.id, username: student.username }, process.env.JWT_SECRET, { expiresIn: "1d" });
         res.json({ message: "Login successful", token, user: student });

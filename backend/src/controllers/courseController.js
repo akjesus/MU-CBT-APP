@@ -25,6 +25,7 @@ exports.createCourse = async (req, res) => {
         const id = await Course.create(department_id, level_id, semester_id, name, code, credit_load, level);
         res.status(201).json({ message: "Course created", id });
     } catch (err) {
+        console.log(err)
         res.status(500).json({ error: err.message });
     }
 };
