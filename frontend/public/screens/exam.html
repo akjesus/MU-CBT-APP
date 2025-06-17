@@ -175,7 +175,8 @@ window.loadExam = examId;
     // If there's a start_time + exam_date, compute examEndTime
     if (data.start_time && data.exam_date) {
       let start_datetime = data.exam_date + " " + data.start_time;
-      let start = (data.server_time == "true") ? new Date(start_datetime.replace(" ", "T")) : new Date();
+      // let start = (data.server_time == "true") ? new Date(start_datetime.replace(" ", "T")) : new Date();
+      let start =  new Date();
       let dur = parseInt(data.duration || 0);
       let isHours = (data.unit_of_time === "hours");
       let msToAdd = isHours ? dur * 3600000 : dur * 60000;

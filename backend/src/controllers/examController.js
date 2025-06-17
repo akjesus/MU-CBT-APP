@@ -74,17 +74,39 @@ exports.createExam = async (req, res) => {
         const id = await Exam.create(req.body);
         res.status(201).json({ message: "Exam created", id });
     } catch (err) {
+        console.log(err)
         res.status(500).json({ error: err.message });
     }
 };
 
 exports.updateExam = async (req, res) => {
-    try {
-        await Exam.update(req.params.id, req.body);
-        res.json({ message: "Exam updated" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+const payload = req.body;
+delete payload.department_ids;
+delete payload.examiners_ids;
+
+const id = req.params.id;
+const updateColumns = [];
+const updateValues = [];
+
+Object.keys(payload).forEach((key) => {
+  if (
+    payload[key] !== undefined &&
+    payload[key] !== null &&
+    payload[key] !== 0 &&
+    payload[key] !==''
+  ) {
+    updateColumns.push(`${key}`);
+    updateValues.push(payload[key]);
+  }
+});
+
+try {
+  await Exam.updateNewExam(id, updateColumns, updateValues);
+  res.json({ message: "Exam updated" });
+} catch (err) {
+    console.log(err.message)
+  res.status(500).json({ error: err.message });
+}
 };
 
 exports.deleteExam = async (req, res) => {

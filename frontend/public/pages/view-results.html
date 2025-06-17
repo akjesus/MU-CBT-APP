@@ -1,38 +1,33 @@
 <div class="container mt-4"  style="overflow: scroll;">
     <h2>View Results</h2>
-
     <!-- Filter Controls -->
     <div>
-        <label for="sessionSelect">Session:</label>
-        <br>
-        <select id="sessionSelect">
+        <label for="sessionSelect" class="form-label">Session:</label>
+        <select id="sessionSelect" class="form-select" style="width: 300px; display: inline-block;">
         <option value="">-- All Sessions --</option>
         </select>
-        <br>
-        <br>
+       <br>
+       <br>
         <label for="courseSelect">Select Course:</label>
-        <br>
-        <select id="courseSelect" onchange="courseId = this.value;
+        <select id="courseSelect" class="form-select" style="width: 300px; display: inline-block;" onchange="courseId = this.value;
          /*loadExamsByCourse(courseId);*/ loadExamsBySessionAndCourse()">
           <br>
         <option value="">-- Choose a Course --</option>
         </select>
-    <br />
+    <br>
     <br>
         <label for="examSelect">Select Exam:</label>
-        <br>
-        <select id="examSelect" onchange="examSel()">
+        <select id="examSelect" class="form-select" style="width: 300px; display: inline-block;" onchange="examSel()">
         <!-- We'll load this with a fetch from /api/exams or something similar -->
         </select>
         <br> 
         <br>
         <label for="departmentSelect">Filter Department:</label>
-        <select id="departmentSelect" onchange="deptSel()">
+        <select id="departmentSelect" class="form-select" style="width: 300px; display: inline-block;" onchange="deptSel()">
         <option value="">All Departments</option>
         <!-- We'll append more from /api/departments -->
         </select>
-
-        <button id="btnLoadResults">Load Results</button>
+        <button class="btn btn-primary" id="btnLoadResults">Load Results</button>
     </div>
     <br>
     <br>
