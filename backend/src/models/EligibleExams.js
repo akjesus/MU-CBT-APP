@@ -20,7 +20,7 @@ class EligibleExams {
             LEFT JOIN exams e ON ed.exam_id = e.id
             LEFT JOIN students s2 ON RIGHT(ed.department_id, 1) = s2.level_id
             LEFT JOIN courses c ON e.course_id = c.id
-            WHERE s2.id = ?  AND (ed.department_id >= '31' AND ed.department_id <= '36') AND NOW() >= TIMESTAMP(e.exam_date, e.start_time)
+            WHERE s2.id = ?  AND (ed.department_id >= '31' AND ed.department_id <= '36') AND NOW() >= TIMESTAMP(e.exam_date, e.start_time) AND e.active = 1
 
             UNION 
 

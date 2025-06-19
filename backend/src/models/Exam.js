@@ -6,8 +6,8 @@ class Exam {
       `SELECT exams.id, exams.course_id, courses.name AS course_name,courses.code AS course_code, 
                     exams.session_id, sessions.name AS session_name, levels.name AS course_level,
                     exams.semester, exams.level, exams.exam_name, 
-                    exams.max_score_obtainable, exams.exam_mode, 
-                    exams.start_time, exams.duration, exams.unit_of_time, 
+                    exams.max_score_obtainable, exams.exam_mode, exams.server_time,
+                    exams.start_time, exams.duration, exams.unit_of_time, exams.active,
                     exams.exam_date, exams.instruction, exams.venue, exams.show_max_scores, exams.display_question_randomly, 
                     exams.allow_multiple_attempts, exams.is_public_access, exams.browser_warn_level, 
                     exams.farewell_message, exams.unordered_answering, exams.set_pass_mark, 
@@ -70,16 +70,20 @@ class Exam {
     );
     return questions;
   }
+  static async activateExam(id) {
+    await db.query(`UPDATE exams SET active = 1 - active WHERE id = ?`, [id]);
+    return;
+  }
 
   static async create(data) {
     const [result] = await db.query(
       `INSERT INTO exams (course_id, session_id, semester, level, exam_name, max_score_obtainable, 
-                               exam_mode, start_time, duration, unit_of_time, exam_date, instruction, venue, 
-                                show_max_scores, display_question_randomly, allow_multiple_attempts, 
-                               is_public_access, browser_warn_level, farewell_message, unordered_answering, 
-                               set_pass_mark, pass_mark_value, pass_mark_unit, grade_with_points, send_result_mail, 
-                               send_congratulatory_mail, created_at, updated_at) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  NOW(), NOW())`,
+                           exam_mode, start_time, duration, unit_of_time, exam_date, instruction, venue, 
+                           server_time, show_max_scores, display_question_randomly, allow_multiple_attempts, 
+                           is_public_access, browser_warn_level, farewell_message, unordered_answering, 
+                           set_pass_mark, pass_mark_value, pass_mark_unit, grade_with_points, send_result_mail, 
+                           send_congratulatory_mail, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         data.course_id,
         data.session_id,
@@ -94,6 +98,7 @@ class Exam {
         data.exam_date,
         data.instruction,
         data.venue,
+        data.server_time,
         data.show_max_scores,
         data.display_question_randomly,
         data.allow_multiple_attempts,
@@ -111,7 +116,6 @@ class Exam {
     );
     return result.insertId;
   }
-
   static async update(id, data) {
     await db.query(
       `UPDATE exams SET course_id = ?, session_id = ?, semester = ?, level = ?, exam_name = ?, 
@@ -159,18 +163,17 @@ class Exam {
       return { message: "No data to update" };
     }
 
-      const query = columns.map((columns) => `${columns} = ?`).join(", ");
-      const newValues = values.map((values) => values);
-      newValues.push(parseInt(id));
+    const query = columns.map((columns) => `${columns} = ?`).join(", ");
+    const newValues = values.map((values) => values);
+    newValues.push(parseInt(id));
 
-      const sql = `UPDATE exams SET ${query} WHERE id = ?`;
-      try {
-        const [results] = await db.query(sql, newValues);
-        console.log(`Updated row with id ${id}`);
-      } catch (err) {
-        console.error(err);
-      }
-
+    const sql = `UPDATE exams SET ${query} WHERE id = ?`;
+    try {
+      const [results] = await db.query(sql, newValues);
+      console.log(`Updated row with id ${id}`);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   static async delete(id) {

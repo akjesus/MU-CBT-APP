@@ -47,7 +47,14 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="semester" class="form-label">Semester</label>
-              <input type="text" class="form-control" id="semester" placeholder="e.g. First Semester" required />
+              <select  id="semester" name="semester" class="form-control" required>
+                <option value="First Semester"selected>First Semester</option>
+                <option value="Second Semester">Second Semester</option>
+                <option value="Mid Semester" >Mid Semester </option>
+                <option value="Mock Test" >Mock Test</option>
+              </select>
+              
+              <!-- <input type="text" class="form-control" id="semester" placeholder="e.g. First Semester" required /> -->
             </div>
           </div>
 
@@ -61,7 +68,8 @@
               <select id="sessionSelect" class="form-select" required><!-- from /api/sessions --></select>
             </div>
           </div>
-
+          
+          
           <div class="row">
             <div class="col-md-6 mb-3" style="display: none;">
               <label for="examLevel" class="form-label">Exam Level</label>
@@ -134,11 +142,11 @@
 
           <!-- Additional Toggles -->
           <div class="row">
-            <!-- <div class="col-md-4 mb-2">
+            <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="server_time" /> Server Time?
               </label>
-            </div> -->
+            </div>
             <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="show_max_scores" /> Show Max Scores?
@@ -256,7 +264,9 @@
         <button class="btn btn-success mb-3" onclick="showQuestionBankModal()">
           From Question Bank
         </button>
-        
+        <button class="btn btn-danger mb-3" onclick="deleteQuestions(currentExamId)">
+          Delete All Questions
+        </button>
         <!-- DataTable for exam questions -->
         <table id="examQuestionsTable" class="display table table-striped w-100">
           <thead>
@@ -556,7 +566,9 @@
       .then(res => res.json())
       .then(data => {
         bootstrap.Modal.getInstance(document.getElementById("questionUploadModal")).hide();
-        alert(data.message || "Bulk exam questions upload completed.");
+        if(data.error)
+       {alert(data.error)} 
+       else alert(data.message || "Bulk exam questions upload completed.");
         examQuestionsTable.ajax.reload(null, false);
       })
       .catch(() => alert("Failed to import exam questions."));
@@ -711,9 +723,11 @@ function showAllExams(){
         {
           data: null,
           render: function (row) {
+
             return `
               <button class="btn btn-sm btn-primary me-1" onclick="editExam(${row.id})">Edit</button>
               <button class="btn btn-sm btn-danger me-1" onclick="deleteExam(${row.id})">Delete</button>
+              <button class="btn btn-sm ${row.active ?`btn-warning`: `btn-success`} me-1" onclick="activateExam(${row.id}, ${row.active})">${row.active ?`Deactivate`: `Activate`}</button>
               <button class="btn btn-sm btn-info" onclick="manageExamQuestions(${row.id},'${row.exam_name}',${row.course_id})">Manage Questions</button>
             `;
           },
@@ -837,7 +851,7 @@ function showAllExams(){
     document.getElementById("instruction").value = "";
     document.getElementById("venue").value = "";
 
-    // document.getElementById("server_time").checked = false;
+    document.getElementById("server_time").checked = false;
     document.getElementById("show_max_scores").checked = false;
     document.getElementById("display_question_randomly").checked = false;
     document.getElementById("allow_multiple_attempts").checked = false;
@@ -859,6 +873,8 @@ function showAllExams(){
   }
 
   function loadDropdowns(selectedCourseId=null, selectedSessionId=null, selectedDepts=[]) {
+    const select = document.getElementById('semester');
+    select.selectedIndex = 0;
     // Course
     fetch(API_URL + "courses")
       .then(res => res.json())
@@ -920,7 +936,7 @@ function showAllExams(){
 
     const payload = {
       exam_name: document.getElementById("examName").value.trim(),
-      semester: document.getElementById("semester").value.trim(),
+      semester: document.getElementById("semester").value,
       course_id: +document.getElementById("courseSelect").value,
       session_id: +document.getElementById("sessionSelect").value,
       level: document.getElementById("examLevel").value.trim(),
@@ -933,7 +949,7 @@ function showAllExams(){
       instruction: document.getElementById("instruction").value.trim(),
       venue: document.getElementById("venue").value.trim(),
       
-      // server_time: boolTo01("server_time"),
+      server_time: boolTo01("server_time"),
       show_max_scores: boolTo01("show_max_scores"),
       display_question_randomly: boolTo01("display_question_randomly"),
       allow_multiple_attempts: boolTo01("allow_multiple_attempts"),
@@ -990,8 +1006,31 @@ function showAllExams(){
       })
       .catch(() => alert("Failed to delete exam."));
   }
+  function activateExam(examId, active) {
+    if (!confirm(` ${active == 1 ?`Deactivate`: `Activate`} this exam?`)) return;
+    fetch(`${API_URL}exams/${examId}`, { method: "PATCH" })
+      .then(res => res.json())
+      .then(() => {
+        alert(`Exam ${active == 1 ?`Deactivated`: `Activated`}!`);
+        examsTable.ajax.reload(null, false);
+      })
+      .catch(() => alert("Failed to activate exam."));
+  }
 
-
+  
+  function deleteQuestions(exam_id) {
+    const url = `${API_URL}exams/${exam_id}/remove-questions`;
+    if (!confirm(` Delete questions for this exam?`)) return;
+    fetch(url, { method: "DElETE" })
+      .then(res => res.json())
+      .then((data) => {
+        console.log(data)
+        if(data.error) alert(`Error: ${data.error}`);
+        else alert(`${data.message}`);
+        examQuestionsTable.ajax.reload(null, false);
+      })
+      .catch(() => alert("Failed to delete exam questions."));
+  }
   function assignDepartmentsToExam(examId) {
     const deptSel = document.getElementById("examDepartments");
     const selectedDeptIds = Array.from(deptSel.selectedOptions).map(opt => +opt.value);

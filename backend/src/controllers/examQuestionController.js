@@ -267,7 +267,6 @@ exports.bulkUploadNewQuestions = async (req, res) => {
       .replace(/\?(\d+)/g, "->$1")
       .replace(/\?/g, " ")
       .replace(/\^2/g, "²");
-
   };
 
   function replaceSuperscript(str) {
@@ -295,7 +294,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
       .map((digit) => superscriptMap[digit])
       .join("");
   }
-  
+
   try {
     const { exam_id } = req.params;
     if (!exam_id) {
@@ -335,7 +334,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           answers,
           user_id,
         } = row;
-        
+
         const firstText = replaceQuestionMarkWithArrow(row.text);
         const text = replaceSuperscript(firstText);
 
@@ -369,36 +368,40 @@ exports.bulkUploadNewQuestions = async (req, res) => {
         // We'll process each question row individually
         for (const qRow of questionsToInsert) {
           // Insert new question
-          const [insertRes] = await db.query(
-            `INSERT INTO questions 
+          try {
+            const [insertRes] = await db.query(
+              `INSERT INTO questions 
                (course_id, text, option_a, option_b, option_c, option_d, correct_option,
                 difficulty_level, question_type, score_obtainable, level, file, answers, user_id)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              qRow.course_id,
-              qRow.text,
-              qRow.option_a,
-              qRow.option_b,
-              qRow.option_c,
-              qRow.option_d,
-              qRow.correct_option,
-              qRow.difficulty_level,
-              qRow.question_type,
-              qRow.score_obtainable,
-              qRow.level,
-              qRow.file,
-              qRow.answers,
-              qRow.user_id,
-            ]
-          );
+              [
+                qRow.course_id,
+                qRow.text,
+                qRow.option_a,
+                qRow.option_b,
+                qRow.option_c,
+                qRow.option_d,
+                qRow.correct_option,
+                qRow.difficulty_level,
+                qRow.question_type,
+                qRow.score_obtainable,
+                qRow.level,
+                qRow.file,
+                qRow.answers,
+                qRow.user_id,
+              ]
+            );
 
-          const newQId = insertRes.insertId;
+            const newQId = insertRes.insertId;
 
+            await db.query(
+              `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
+              [exam_id, newQId]
+            );
+          } catch (err) {
+            return res.status(500).json({ error: err.message });
+          }
           // Link to exam_questions
-          await db.query(
-            `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
-            [exam_id, newQId]
-          );
 
           insertedCount++;
         }
@@ -408,10 +411,10 @@ exports.bulkUploadNewQuestions = async (req, res) => {
         });
       });
   } catch (err) {
+    console.log(err.message);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 /**
  * 5. Remove a single question from exam
@@ -419,7 +422,6 @@ exports.bulkUploadNewQuestions = async (req, res) => {
 exports.removeQuestionFromExam = async (req, res) => {
   try {
     const { exam_id, question_id } = req.params;
-
     const [result] = await db.query(
       `DELETE FROM exam_questions WHERE exam_id = ? AND question_id = ?`,
       [exam_id, question_id]
@@ -442,13 +444,11 @@ exports.removeQuestionFromExam = async (req, res) => {
  */
 exports.removeAllQuestionsFromExam = async (req, res) => {
   try {
-    const { exam_id } = req.params;
-    await db.query(
-      `DELETE FROM exam_questions WHERE exam_id = ?`,
-      [exam_id]
-    );
+    const { id } = req.params;
+    await db.query(`DELETE FROM exam_questions WHERE exam_id = ?`, [id]);
     res.json({ message: "All questions removed from exam successfully" });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };

@@ -79,6 +79,29 @@ exports.createExam = async (req, res) => {
     }
 };
 
+exports.activateExam = async (req, res) => {
+  try {
+    const id = await Exam.activateExam(req.params.id);
+    res.status(201).json({ message: "Exam activated", id });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.removeAllQuestionsFromExam = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [row] = await db.query(`DELETE FROM exam_questions WHERE exam_id = ?`, [id]);
+    if (row?.affectedRows == 0)
+      return res.json({ message: "Alert! No question for this exam" });
+    res.json({ message: `All questions removed from exam successfully` });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 exports.updateExam = async (req, res) => {
 const payload = req.body;
 delete payload.department_ids;
