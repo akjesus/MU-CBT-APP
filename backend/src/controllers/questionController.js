@@ -50,21 +50,56 @@ exports.createQuestion = async (req, res) => {
 exports.updateQuestion = async (req, res) => {
     try {
         const questionId = req.params.id;
-        const { course_id, text, option_a, option_b, option_c, option_d, correct_option, difficulty_level, question_type, score_obtainable, level, file, answers, user_id } = req.body;
-
+        const {
+          course_id,
+          text,
+          option_a,
+          option_b,
+          option_c,
+          option_d,
+          correct_option,
+          instructions,
+          difficulty_level,
+          question_type,
+          score_obtainable,
+          level,
+          file,
+          answers,
+          user_id,
+        } = req.body;
         // Check if question exists
-        const [existingQuestion] = await db.query("SELECT * FROM questions WHERE id = ?", [questionId]);
+        const [existingQuestion] = await db.query(
+          "SELECT * FROM questions WHERE id = ?",
+          [questionId]
+        );
         if (!existingQuestion.length) {
-            return res.status(404).json({ error: "Question not found" });
+          return res.status(404).json({ error: "Question not found" });
         }
 
         await db.query(
-            `UPDATE questions 
+          `UPDATE questions 
              SET course_id = ?, text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, 
-                 correct_option = ?, difficulty_level = ?, question_type = ?, score_obtainable = ?, 
+                 correct_option = ?, instructions = ?, difficulty_level = ?, question_type = ?, score_obtainable = ?, 
                  level = ?, file = ?, answers = ?, user_id = ?, updated_at = NOW() 
              WHERE id = ?`,
-            [course_id, text, option_a, option_b, option_c, option_d, correct_option, difficulty_level, question_type, score_obtainable, level, file, answers, user_id, questionId]
+          [
+            course_id,
+            text,
+            option_a,
+            option_b,
+            option_c,
+            option_d,
+            correct_option,
+            instructions,
+            difficulty_level,
+            question_type,
+            score_obtainable,
+            level,
+            file,
+            answers,
+            user_id,
+            questionId,
+          ]
         );
 
         res.json({ message: "Question updated successfully" });
@@ -116,6 +151,7 @@ exports.bulkUploadQuestions = async (req, res) => {
         fs.createReadStream(req.file.path)
             .pipe(csv())
             .on("data", (row) => {
+                console.log(row[0]); // Debugging line to check the first column of each row
                 questions.push([
                     row.course_id,
                     row.text,
@@ -124,18 +160,14 @@ exports.bulkUploadQuestions = async (req, res) => {
                     row.option_c,
                     row.option_d,
                     row.correct_option,
-                    row.difficulty_level,
-                    row.question_type,
+                    row.instructions,
                     row.score_obtainable,
                     row.level,
-                    row.file,
-                    row.answers,
-                    row.user_id
                 ]);
             })
             .on("end", async () => {
                 await db.query(
-                    "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, difficulty_level, question_type, score_obtainable, level, file, answers, user_id, created_at, updated_at) VALUES ?",
+                    "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions, score_obtainable, level, created_at, updated_at) VALUES ?",
                     [questions.map(q => [...q, new Date(), new Date()])]
                 );
                 res.json({ message: "Bulk Questions uploaded successfully" });
@@ -165,6 +197,7 @@ exports.bulkUploadExamQuestions = async (req, res) => {
                     row.option_c,
                     row.option_d,
                     row.correct_option,
+                    row.instructions,
                     row.difficulty_level,
                     row.question_type,
                     row.score_obtainable,
@@ -176,7 +209,7 @@ exports.bulkUploadExamQuestions = async (req, res) => {
             })
             .on("end", async () => {
                 const [result] = await db.query(
-                    "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, difficulty_level, question_type, score_obtainable, level, file, answers, user_id, created_at, updated_at) VALUES ?",
+                    "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions, difficulty_level, question_type, score_obtainable, level, file, answers, user_id, created_at, updated_at) VALUES ?",
                     [questions.map(q => [...q, new Date(), new Date()])]
                 );
 

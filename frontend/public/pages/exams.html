@@ -274,6 +274,7 @@
               <th>ID</th>
               <th>Question Text</th>
               <th>Correct Opt</th>
+              <th>Instructions</th>
               <th>Score</th>
               <th>Actions</th>
             </tr>
@@ -361,7 +362,7 @@
           <input type="hidden" id="questionExamId" />
           <input type="hidden" id="questionCourseId" />
           <div class="mb-3">
-            <label class="form-label">Correct Option</label>
+            <label class="form-label">Difficulty</label>
             <select class="form-select" id="difficulty_level">
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
@@ -406,6 +407,10 @@
               <option value="D">D</option>
             </select>
           </div>
+          <div class="mb-3">
+            <label class="form-label">Question Instructions</label>
+            <textarea type="number" class="form-control" id="instructions" placeholder="Insert instructions here"></textarea>  
+          </div> 
           <div class="mb-3">
             <label class="form-label">Score Obtainable</label>
             <input type="number" class="form-control" id="scoreObtainable" step="0.1" min="0" />
@@ -513,6 +518,7 @@
         { data: "question_id" },
         { data: "text" },
         { data: "correct_option" },
+        { data: "instructions" },
         { data: "score_obtainable" },
         {
           data: null,
@@ -587,6 +593,7 @@
     document.getElementById("option_c").value = "";
     document.getElementById("option_d").value = "";    
     document.getElementById("correctOption").value = "A";
+    document.getElementById("instructions").value = "";
     document.getElementById("scoreObtainable").value = "0";   
     new bootstrap.Modal(document.getElementById("examQuestionModal")).show();
   }
@@ -606,6 +613,7 @@
         document.getElementById("option_c").value = q.option_c || "";
         document.getElementById("option_d").value = q.option_d || "";
         document.getElementById("correctOption").value = q.correct_option || "A";
+        document.getElementById("instructions").value = q.instructions || "";
         document.getElementById("scoreObtainable").value = q.score_obtainable || 0;
         document.getElementById("examQuestionModalLabel").textContent = "Edit Question";
         new bootstrap.Modal(document.getElementById("examQuestionModal")).show();
@@ -619,14 +627,15 @@
 
     const payload = {
       course_id: document.getElementById("questionCourseId").value.trim(),
-      difficulty_level: document.getElementById("difficulty_level").value.trim(),
-      question_type: document.getElementById("question_type").value.trim(),
+      difficulty_level: "easy",
+      question_type: "objective",
       text: document.getElementById("questionText").value.trim(),
       option_a: document.getElementById("option_a").value.trim(),
       option_b: document.getElementById("option_b").value.trim(),
       option_c: document.getElementById("option_c").value.trim(),
       option_d: document.getElementById("option_d").value.trim(),
       correct_option: document.getElementById("correctOption").value,
+      instructions: document.getElementById("instructions").value,
       score_obtainable: document.getElementById("scoreObtainable").value
     };
 
