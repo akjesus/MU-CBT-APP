@@ -274,6 +274,7 @@
               <th>ID</th>
               <th>Question Text</th>
               <th>Correct Opt</th>
+              <th>Instructions</th>
               <th>Score</th>
               <th>Actions</th>
             </tr>
@@ -517,6 +518,7 @@
         { data: "question_id" },
         { data: "text" },
         { data: "correct_option" },
+        { data: "instructions" },
         { data: "score_obtainable" },
         {
           data: null,
@@ -611,7 +613,7 @@
         document.getElementById("option_c").value = q.option_c || "";
         document.getElementById("option_d").value = q.option_d || "";
         document.getElementById("correctOption").value = q.correct_option || "A";
-        document.getElementById("instructions").value = q.instructions || "A";
+        document.getElementById("instructions").value = q.instructions || "";
         document.getElementById("scoreObtainable").value = q.score_obtainable || 0;
         document.getElementById("examQuestionModalLabel").textContent = "Edit Question";
         new bootstrap.Modal(document.getElementById("examQuestionModal")).show();

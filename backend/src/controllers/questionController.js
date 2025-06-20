@@ -67,7 +67,6 @@ exports.updateQuestion = async (req, res) => {
           answers,
           user_id,
         } = req.body;
-        console.log(instructions);
         // Check if question exists
         const [existingQuestion] = await db.query(
           "SELECT * FROM questions WHERE id = ?",

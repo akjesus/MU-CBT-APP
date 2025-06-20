@@ -15,6 +15,11 @@
     overflow: auto;
     text-align: center;
   }
+  .input {
+  font-size: 24px; /* Adjust the font size to your liking */
+  padding: 10px; /* Add some padding to make the input field more comfortable to use */
+}
+
 
   /* Style the radio labels with a black border */
   .option-label {
@@ -25,24 +30,14 @@
     margin-bottom: 6px;
     cursor: pointer;
     text-align: left;
+    font-size: 19px;
   }
   .option-label input[type="radio"] {
-    accent-color: green; /* The circle fill will be black when checked */
+    accent-color: green; 
     margin-right: 8px;
-    background: green;
+    background: rgb(1, 14, 1);
+    transform: scale(1.7);
   }
-  .button {
-  background-color: #04AA6D;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
   .btn {
     padding: 10px 20px;
     border-radius: 5px;
@@ -94,19 +89,18 @@
     Duration: <span id="exam-duration"></span> <span id="exam-unit"></span><br />
     Time Left: <span id="exam-countdown" style="font-weight: bold; color: rgb(8, 85, 59);">--:--</span>
   </p>
-  <br>
-<h2>Question Instructions:</h2>
-<span id="question-instructions">Loading instructions...</span>
+<h3 style = "color: green">Question Instructions:</h3>
+<h4 id="question-instructions" style = "color: green">Loading instructions...</h4>
   <!-- SINGLE QUESTION VIEW -->
   <div
     id="single-question-container"
     class="p-3 rounded shadow-sm"
-    style="background-color: #fff; min-height: 300px;"
+    style="background-color: #ffffff; min-height: 300px; border-radius: 5px;"
   >
     <div class="mb-2 text-left text-18">
       <fieldset>
-        <legend><span id="current-question-number" class="text-bold">Q1.</span></legend>
-        <span id="current-question-text">Loading question...</span>
+        <legend><h3 id="current-question-number" class="text-bold">Q1.</h3></legend>
+        <h3 id="current-question-text">Loading question...</h3>
       </fieldset>
     </div>
     <br />
@@ -120,7 +114,7 @@
     <button class=" btn " onclick="prevQuestion()">&lt; Previous</button>
     <button class=" btn2 " onclick="nextQuestion()">Next &gt;</button>
   </div>
-  <br /><br />
+  <br />
   <!-- QUESTION INDICATORS -->
   <div
     id="question-indicators"
@@ -132,7 +126,7 @@
   
   <!-- SUBMIT BUTTON -->
   <div class="text-center mt-3">
-    <br /><br />
+    <br />
     <button class="btn1 " onclick="submitExamAnswers(true)">Submit Exam</button>
 
   </div>
@@ -305,7 +299,7 @@ window.loadExam = examId;
   window.renderCurrentQuestion = function() {
     let q = window.currentExamQuestions[window.currentQuestionIndex];
     if (!q) return;
-    document.getElementById("current-question-number").innerText = "Q" + (window.currentQuestionIndex + 1) + ".";
+    document.getElementById("current-question-number").innerText = "Question " + (window.currentQuestionIndex + 1) + ".";
     document.getElementById("current-question-text").innerText = q.text || "Untitled Question";
     document.getElementById("question-instructions").innerText = q.instructions || "No instructions provided for this question.";
     let savedAnswer = window.userAnswers[q.question_id] || "";
@@ -326,7 +320,7 @@ window.loadExam = examId;
     let checkedAttr = (savedAnswer === optionVal) ? "checked" : "";
     return `
       <label class="option-label">
-        <input type="radio"
+        <input class = "input" type="radio"
                name="q_${qid}"
                value="${optionVal}"
                onclick="selectRadioOption('${qid}', '${optionVal}')"
@@ -340,7 +334,7 @@ window.loadExam = examId;
     selectRadioOption: toggling logic
   */
   window.selectRadioOption = function(qid, val) {
-    let oldValue = window.userAnswers[qid] || "";
+    let oldValue = window.userAnswers[qid] || ""; //makes sure checked answers remain 
     let newValue = (oldValue === val) ? "" : val; // uncheck if re-click
     window.userAnswers[qid] = newValue;
     let radios = document.getElementsByName("q_" + qid);
