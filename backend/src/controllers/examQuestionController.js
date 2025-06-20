@@ -11,7 +11,7 @@ exports.getQuestionsByExam = async (req, res) => {
     const { exam_id } = req.params;
     const [rows] = await db.query(
       `SELECT q.id AS question_id, q.course_id, q.text, q.option_a, q.option_b, q.option_c,
-              q.option_d, q.correct_option, q.difficulty_level, q.question_type, q.score_obtainable,
+              q.option_d, q.correct_option, q.instructions, q.difficulty_level, q.question_type, q.score_obtainable,
               q.level, q.file, q.answers, q.user_id
        FROM exam_questions eq
        JOIN questions q ON eq.question_id = q.id
@@ -86,6 +86,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       option_c,
       option_d,
       correct_option,
+      instructions,
       difficulty_level,
       question_type,
       score_obtainable,
@@ -98,9 +99,9 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
     // Insert into `questions` table
     const [result] = await db.query(
       `INSERT INTO questions 
-          (course_id, text, option_a, option_b, option_c, option_d, correct_option,
+          (course_id, text, option_a, option_b, option_c, option_d, instructions, correct_option,
            difficulty_level, question_type, score_obtainable, level, file, answers, user_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         course_id,
         text,
@@ -109,6 +110,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         option_c,
         option_d,
         correct_option,
+        instructions,
         difficulty_level,
         question_type,
         score_obtainable,
@@ -217,7 +219,6 @@ exports.bulkUploadNewQuestions2 = async (req, res) => {
         // We'll process each question row individually
         for (const qRow of questionsToInsert) {
           // Insert new question
-          console.log(qRow);
           const [insertRes] = await db.query(
             `INSERT INTO questions 
                (course_id, text, option_a, option_b, option_c, option_d, correct_option,
@@ -326,6 +327,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           option_c,
           option_d,
           correct_option,
+          instructions,
           difficulty_level,
           question_type,
           score_obtainable,
@@ -347,6 +349,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           option_c,
           option_d,
           correct_option,
+          instructions,
           difficulty_level,
           question_type,
           score_obtainable,
@@ -371,9 +374,9 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           try {
             const [insertRes] = await db.query(
               `INSERT INTO questions 
-               (course_id, text, option_a, option_b, option_c, option_d, correct_option,
+               (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions,
                 difficulty_level, question_type, score_obtainable, level, file, answers, user_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 qRow.course_id,
                 qRow.text,
@@ -382,6 +385,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
                 qRow.option_c,
                 qRow.option_d,
                 qRow.correct_option,
+                qRow.instructions,
                 qRow.difficulty_level,
                 qRow.question_type,
                 qRow.score_obtainable,

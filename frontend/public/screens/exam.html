@@ -27,9 +27,57 @@
     text-align: left;
   }
   .option-label input[type="radio"] {
-    accent-color: black; /* The circle fill will be black when checked */
+    accent-color: green; /* The circle fill will be black when checked */
     margin-right: 8px;
-    background: black;
+    background: green;
+  }
+  .button {
+  background-color: #04AA6D;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+  .btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    background-color: orange; 
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .btn1 {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    background-color: #f44336;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .btn2 {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    background-color: green; 
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .btn:hover {
+    background-color: orangered; /* Darker shade on hover */
+  }
+  .btn1:hover {
+    background-color: #970707; /* Darker shade on hover */
+  }
+  .btn2:hover {
+    background-color: rgb(3, 83, 3); /* Darker shade on hover */
   }
 </style>
 
@@ -46,7 +94,9 @@
     Duration: <span id="exam-duration"></span> <span id="exam-unit"></span><br />
     Time Left: <span id="exam-countdown" style="font-weight: bold; color: rgb(8, 85, 59);">--:--</span>
   </p>
-
+  <br>
+<h2>Question Instructions:</h2>
+<span id="question-instructions">Loading instructions...</span>
   <!-- SINGLE QUESTION VIEW -->
   <div
     id="single-question-container"
@@ -67,15 +117,15 @@
 
   <!-- NAVIGATION BUTTONS -->
   <div class="text-center mt-3">
-    <button class="btn btn-secondary" onclick="prevQuestion()">&lt; Previous</button>
-    <button class="btn btn-secondary" onclick="nextQuestion()">Next &gt;</button>
+    <button class=" btn " onclick="prevQuestion()">&lt; Previous</button>
+    <button class=" btn2 " onclick="nextQuestion()">Next &gt;</button>
   </div>
-  
+  <br /><br />
   <!-- QUESTION INDICATORS -->
   <div
     id="question-indicators"
     class="flex flex-wrap justify-content-center mb-3 text-center"
-    style="gap: 5px; flex-wrap: wrap !important;"
+    style="gap: 10px; flex-wrap: wrap !important;"
   >
     <!-- We'll dynamically create small boxes for each question index -->
   </div>
@@ -83,7 +133,8 @@
   <!-- SUBMIT BUTTON -->
   <div class="text-center mt-3">
     <br /><br />
-    <button class="btn btn-primary plain-button" onclick="submitExamAnswers(true)">Submit Exam</button>
+    <button class="btn1 " onclick="submitExamAnswers(true)">Submit Exam</button>
+
   </div>
 </div>
 <!-- END PAGE EXAM -->
@@ -256,6 +307,7 @@ window.loadExam = examId;
     if (!q) return;
     document.getElementById("current-question-number").innerText = "Q" + (window.currentQuestionIndex + 1) + ".";
     document.getElementById("current-question-text").innerText = q.text || "Untitled Question";
+    document.getElementById("question-instructions").innerText = q.instructions || "No instructions provided for this question.";
     let savedAnswer = window.userAnswers[q.question_id] || "";
     let optionsHTML = `
       ${buildRadioOptionHTML(q.question_id, "A", q.option_a, savedAnswer)}
