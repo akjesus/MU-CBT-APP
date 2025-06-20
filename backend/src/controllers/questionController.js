@@ -151,6 +151,7 @@ exports.bulkUploadQuestions = async (req, res) => {
         fs.createReadStream(req.file.path)
             .pipe(csv())
             .on("data", (row) => {
+                console.log(row[0]); // Debugging line to check the first column of each row
                 questions.push([
                     row.course_id,
                     row.text,
@@ -160,18 +161,13 @@ exports.bulkUploadQuestions = async (req, res) => {
                     row.option_d,
                     row.correct_option,
                     row.instructions,
-                    row.difficulty_level,
-                    row.question_type,
                     row.score_obtainable,
                     row.level,
-                    row.file,
-                    row.answers,
-                    row.user_id
                 ]);
             })
             .on("end", async () => {
                 await db.query(
-                    "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions, difficulty_level, question_type, score_obtainable, level, file, answers, user_id, created_at, updated_at) VALUES ?",
+                    "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions, score_obtainable, level, created_at, updated_at) VALUES ?",
                     [questions.map(q => [...q, new Date(), new Date()])]
                 );
                 res.json({ message: "Bulk Questions uploaded successfully" });

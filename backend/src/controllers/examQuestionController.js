@@ -87,21 +87,16 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       option_d,
       correct_option,
       instructions,
-      difficulty_level,
-      question_type,
       score_obtainable,
       level,
-      file,
-      answers,
-      user_id,
     } = req.body;
 
     // Insert into `questions` table
     const [result] = await db.query(
       `INSERT INTO questions 
           (course_id, text, option_a, option_b, option_c, option_d, instructions, correct_option,
-           difficulty_level, question_type, score_obtainable, level, file, answers, user_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             score_obtainable, level) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         course_id,
         text,
@@ -111,13 +106,8 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         option_d,
         correct_option,
         instructions,
-        difficulty_level,
-        question_type,
         score_obtainable,
-        level,
-        file,
-        answers,
-        user_id,
+        level
       ]
     );
 
@@ -180,13 +170,10 @@ exports.bulkUploadNewQuestions2 = async (req, res) => {
           option_c,
           option_d,
           correct_option,
-          difficulty_level,
-          question_type,
           score_obtainable,
           level,
           file,
           answers,
-          user_id,
         } = row;
 
         // We'll store this row data
@@ -198,13 +185,10 @@ exports.bulkUploadNewQuestions2 = async (req, res) => {
           option_c,
           option_d,
           correct_option,
-          difficulty_level,
-          question_type,
           score_obtainable,
           level,
           file,
           answers,
-          user_id,
         });
       })
       .on("end", async () => {
@@ -222,8 +206,8 @@ exports.bulkUploadNewQuestions2 = async (req, res) => {
           const [insertRes] = await db.query(
             `INSERT INTO questions 
                (course_id, text, option_a, option_b, option_c, option_d, correct_option,
-                difficulty_level, question_type, score_obtainable, level, file, answers, user_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                score_obtainable, level, file, answers)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               qRow.course_id,
               qRow.text,
@@ -232,13 +216,10 @@ exports.bulkUploadNewQuestions2 = async (req, res) => {
               qRow.option_c,
               qRow.option_d,
               qRow.correct_option,
-              qRow.difficulty_level,
-              qRow.question_type,
               qRow.score_obtainable,
               qRow.level,
               qRow.file,
               qRow.answers,
-              qRow.user_id,
             ]
           );
 
@@ -319,7 +300,6 @@ exports.bulkUploadNewQuestions = async (req, res) => {
       .on("data", (row) => {
         // Extract the fields from CSV row
         // We'll parse them carefully, assuming columns are consistent
-
         const {
           course_id,
           option_a,
@@ -328,13 +308,10 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           option_d,
           correct_option,
           instructions,
-          difficulty_level,
-          question_type,
           score_obtainable,
           level,
           file,
           answers,
-          user_id,
         } = row;
 
         const firstText = replaceQuestionMarkWithArrow(row.text);
@@ -350,13 +327,10 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           option_d,
           correct_option,
           instructions,
-          difficulty_level,
-          question_type,
           score_obtainable,
           level,
           file,
           answers,
-          user_id,
         });
       })
       .on("end", async () => {
@@ -374,9 +348,8 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           try {
             const [insertRes] = await db.query(
               `INSERT INTO questions 
-               (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions,
-                difficulty_level, question_type, score_obtainable, level, file, answers, user_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+               (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions, score_obtainable, level, file, answers)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 qRow.course_id,
                 qRow.text,
@@ -386,13 +359,10 @@ exports.bulkUploadNewQuestions = async (req, res) => {
                 qRow.option_d,
                 qRow.correct_option,
                 qRow.instructions,
-                qRow.difficulty_level,
-                qRow.question_type,
                 qRow.score_obtainable,
                 qRow.level,
                 qRow.file,
                 qRow.answers,
-                qRow.user_id,
               ]
             );
 
