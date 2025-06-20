@@ -23,20 +23,23 @@ exports.assignDepartment = async (req, res) => {
 
 exports.assignMultipleDepartments = async (req, res) => {
     try {
-        const { department_ids } = req.body; // Expecting an array of department IDs
-        const examId = req.params.exam_id;
+      const { department_ids } = req.body; // Expecting an array of department IDs
+      const examId = req.params.exam_id;
+      console.log("Assigning departments to exam:", examId, department_ids);
+      await ExamDepartment.removeAllByExam(examId); // Clear existing assignments
+      if (!Array.isArray(department_ids) || department_ids.length === 0) {
+        return res.status(400).json({ error: "Invalid department_ids format" });
+      }
 
-        if (!Array.isArray(department_ids) || department_ids.length === 0) {
-            return res.status(400).json({ error: "Invalid department_ids format" });
-        }
+      const insertPromises = department_ids.map((departmentId) =>
+        ExamDepartment.assignDepartment(examId, departmentId)
+      );
 
-        const insertPromises = department_ids.map(departmentId =>
-            ExamDepartment.assignDepartment(examId, departmentId)
-        );
+      await Promise.all(insertPromises);
 
-        await Promise.all(insertPromises);
-
-        res.status(201).json({ message: "Departments assigned to exam successfully" });
+      res
+        .status(201)
+        .json({ message: "Departments assigned to exam successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
