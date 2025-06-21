@@ -18,8 +18,8 @@
         <th>Session</th>
         <th>Level</th>
         <th>Departments</th>
-        <th>Server Time</th>
         <th>Start Time</th>
+        <th>Server Time</th>
         <th>Duration</th>
         <th>Actions</th>
       </tr>
@@ -93,7 +93,7 @@
               <label for="examMode" class="form-label">Exam Mode</label>
               <select id="examMode" class="form-select">
                 <option value="mock">Mock</option>
-                <option value="graded" selected>Graded</option>
+                <option value="graded">Graded</option>
               </select>
             </div>
           </div>
@@ -130,103 +130,55 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="venue" class="form-label">Venue</label>
-              <select type="text" class="form-select" id="venue">
+              <select type="text" class="form-select" id="venue"> 
                 <option value="CBT Hall 1">CBT Hall 1</option>
                 <option value="CBT Hall 2">CBT Hall 2</option>
                 <option value="CBT Hall 3">CBT Hall 3</option>
                 <option value="CBT Hall 4">CBT Hall 4</option>
-              <select>
-                
+              </select>
             </div>
           </div>
 
           <div class="row">
-            <div class="col-md-8 mb-3">
+            <div class="col-md-6 mb-3">
               <label for="examExaminers" class="form-label">Examiner</label>
               <select id="examExaminers" class="form-select" multiple><!-- from /api/exam-examiners --></select>
             </div>
-            <div class="col-md-4 mb-3">
-              <label for="server_time" class="form-label">Server Time ?</label>
-              <select id="server_time" class="form-select">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
-              </select>
+            <div class="col-md-6 mb-2">
+              <label for = "server_time"class="form-label" >Server Time</label>
+                <select class="form-select" type="checkbox" id="server_time" > 
+                  <option value="0">No</option>
+                  <option value="1" selected>Yes</option>
+                </select> 
+              </label>
             </div>
           </div>
+
           <!-- Additional Toggles -->
           <div class="row">
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="show_max_scores" /> Show Max Scores?
-              </label>
-            </div> -->
+            
             <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="display_question_randomly" /> Display Random?
+              <label class="form-check-label" > Display Random? </label>
+                <select class="form-select"  id="display_question_randomly" >
+                  <option value="0"> No </option>
+                  <option value="1"> Yes</option>
+
+                </select>
               </label>
             </div>
-            <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="allow_multiple_attempts" /> Allow Multiple Attempts?
-              </label>
-            </div>
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="is_public_access" /> Public Access?
-              </label>
-            </div> -->
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="browser_warn_level" /> Browser Warn?
-              </label>
-            </div> -->
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="farewell_message" /> Farewell Message?
-              </label>
-            </div> -->
             <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="unordered_answering" /> Unordered Answering?
               </label>
             </div>
-            <!-- <div class="col-md-4 mb-2">
+            <div class="col-md-4 mb-2">
               <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="set_pass_mark" /> Set Pass Mark?
+                <input class="form-check-input" type="checkbox" id="multiple_attempts" /> Multiple Attempts?
               </label>
-            </div> -->
+            </div>
           </div>
 
           <div class="row">
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-label">Pass Mark Value</label>
-              <input type="number" step="0.01" class="form-control" id="pass_mark_value" />
-            </div> -->
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-label">Pass Mark Unit</label>
-              <select id="pass_mark_unit" class="form-select">
-                <option value="points">Points</option>
-                <option value="percentage">Percentage</option>
-              </select>
-            </div> -->
-            <!-- <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="grade_with_points" /> Grade with Points?
-              </label>
-            </div>
-          </div> -->
-
-          <div class="row">
-            <!-- <div class="col-md-6 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="send_result_mail" /> Send Result Mail?
-              </label>
-            </div> -->
-            <!-- <div class="col-md-6 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="send_congratulatory_mail" /> Send Congrat Mail?
-              </label>
-            </div> -->
           </div>
 
         </div><!-- /modal-body -->
@@ -281,7 +233,7 @@
             <tr>
               <th>ID</th>
               <th>Question Text</th>
-              <th>Correct Opt</th>
+              <th>Correct Option</th>
               <th>Instructions</th>
               <th>Score</th>
               <th>Actions</th>
@@ -718,7 +670,15 @@ function showAllExams(){
       examsTable.page.len(showingAll ? -1 : 10).draw(false);
 }
 
+function formatTime(data) {
+  const timeParts = data.split(':');
+  const hours = parseInt(timeParts[0]);
+  const minutes = timeParts[1];
+  const ampm = hours < 12 ? 'AM' : 'PM';
+  const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
 
+  return `${formattedHours}:${minutes} ${ampm}`;
+}
   function initExamsDataTable() {
     examsTable = $("#examsTable").DataTable({
       processing: true,
@@ -735,13 +695,15 @@ function showAllExams(){
         { data: "session_name" },
         { data: "course_level" },
         {data: "departments",},
-        {data: "server_time",
-        render: function(data, type, row) {
+        {data: "start_time",
+          render : function(data) {
+            return formatTime(data)
+          } 
+        },
+        { data: "server_time", render: function(data, type, row) {
         return data == 1 ? 'Yes' : 'No';
       }
-
-        },
-        { data: "start_time" },
+},
         { data: "duration" },
         {
           data: null,
@@ -787,24 +749,13 @@ function showAllExams(){
         document.getElementById("unitOfTime").value = exam.unit_of_time || "minutes";
         document.getElementById("examDate").value = exam.exam_date || `${new Date().toISOString().split("T")[0]}`;
         document.getElementById("instruction").value = exam.instruction || "";
-        document.getElementById("venue").value = exam.venue || "";
-
-        // Checkboxes'''''
-
+        document.getElementById("venue").value = exam.venue || "CBT Hall 1";
         document.getElementById("server_time").value = exam.server_time || "0";
-        // document.getElementById("show_max_scores").checked = !!exam.show_max_scores;
-        document.getElementById("display_question_randomly").checked = !!exam.display_question_randomly;
-        document.getElementById("allow_multiple_attempts").checked = !!exam.allow_multiple_attempts;
-        // document.getElementById("is_public_access").checked = !!exam.is_public_access;
-        // document.getElementById("browser_warn_level").checked = !!exam.browser_warn_level;
-        // document.getElementById("farewell_message").checked = !!exam.farewell_message;
+        document.getElementById("display_question_randomly").value = exam.display_question_randomly || "0";
+
+        // Checkboxes
         document.getElementById("unordered_answering").checked = !!exam.unordered_answering;
-        // document.getElementById("set_pass_mark").checked = !!exam.set_pass_mark;
-        // document.getElementById("pass_mark_value").value = exam.pass_mark_value || "";
-        // document.getElementById("pass_mark_unit").value = exam.pass_mark_unit || "points";
-        // document.getElementById("grade_with_points").checked = !!exam.grade_with_points;
-        // document.getElementById("send_result_mail").checked = !!exam.send_result_mail;
-        // document.getElementById("send_congratulatory_mail").checked = !!exam.send_congratulatory_mail;
+        document.getElementById("multiple_attempts").checked = !!exam.multiple_attempts;
 
         loadDropdowns(exam.course_id, exam.session_id, exam.departments);
 
@@ -875,20 +826,11 @@ function showAllExams(){
     document.getElementById("instruction").value = "";
     document.getElementById("venue").value = "CBT Hall 1";
     document.getElementById("server_time").value = "0";
+    document.getElementById("display_question_randomly").value = "0";
 
-    // document.getElementById("show_max_scores").checked = false;
-    document.getElementById("display_question_randomly").checked = false;
-    document.getElementById("allow_multiple_attempts").checked = false;
-    // document.getElementById("is_public_access").checked = false;
-    // document.getElementById("browser_warn_level").checked = false;
-    // document.getElementById("farewell_message").checked = false;
+
     document.getElementById("unordered_answering").checked = false;
-    // document.getElementById("set_pass_mark").checked = false;
-    // document.getElementById("pass_mark_value").value = "";
-    // document.getElementById("pass_mark_unit").value = "points";
-    // document.getElementById("grade_with_points").checked = false;
-    // document.getElementById("send_result_mail").checked = false;
-    // document.getElementById("send_congratulatory_mail").checked = false;
+    document.getElementById("multiple_attempts").checked = false;
     
     // Clears the select boxes
     document.getElementById("courseSelect").innerHTML = "";
@@ -971,23 +913,13 @@ function showAllExams(){
       unit_of_time: document.getElementById("unitOfTime").value, // "minutes" or "hours"
       exam_date: document.getElementById("examDate").value, // e.g. "2025-03-10"
       instruction: document.getElementById("instruction").value.trim(),
-      venue: document.getElementById("venue").value.trim(),
+      venue: document.getElementById("venue").value,
       server_time: document.getElementById("server_time").value,
-      
+      display_question_randomly: document.getElementById("display_question_randomly").value,
 
-      // show_max_scores: boolTo01("show_max_scores"),
-      display_question_randomly: boolTo01("display_question_randomly"),
-      allow_multiple_attempts: boolTo01("allow_multiple_attempts"),
-      // is_public_access: boolTo01("is_public_access"),
-      // browser_warn_level: boolTo01("browser_warn_level"),
-      // farewell_message: boolTo01("farewell_message"),
-      // unordered_answering: boolTo01("unordered_answering"),
-      // set_pass_mark: boolTo01("set_pass_mark"),
-      // pass_mark_value: document.getElementById("pass_mark_value").value.trim(),
-      // pass_mark_unit: document.getElementById("pass_mark_unit").value, // "points" or "percentage"
-      // grade_with_points: boolTo01("grade_with_points"),
-      // send_result_mail: boolTo01("send_result_mail"),
-      // send_congratulatory_mail: boolTo01("send_congratulatory_mail")
+      
+      unordered_answering: boolTo01("unordered_answering"),
+      multiple_attempts: boolTo01("multiple_attempts"),
     };
 
    
