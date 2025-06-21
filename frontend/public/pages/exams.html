@@ -18,6 +18,7 @@
         <th>Session</th>
         <th>Level</th>
         <th>Departments</th>
+        <th>Server Time</th>
         <th>Start Time</th>
         <th>Duration</th>
         <th>Actions</th>
@@ -134,19 +135,20 @@
           </div>
 
           <div class="row">
-            <div class="col-md-12 mb-3">
+            <div class="col-md-8 mb-3">
               <label for="examExaminers" class="form-label">Examiner</label>
               <select id="examExaminers" class="form-select" multiple><!-- from /api/exam-examiners --></select>
             </div>
+            <div class="col-md-4 mb-3">
+              <label for="server_time" class="form-label">Server Time ?</label>
+              <select id="server_time" class="form-select">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
           </div>
-
           <!-- Additional Toggles -->
           <div class="row">
-            <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="server_time" /> Server Time?
-              </label>
-            </div>
             <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="show_max_scores" /> Show Max Scores?
@@ -727,6 +729,12 @@ function showAllExams(){
         { data: "session_name" },
         { data: "course_level" },
         {data: "departments",},
+        {data: "server_time",
+        render: function(data, type, row) {
+        return data == 1 ? 'Yes' : 'No';
+      }
+
+        },
         { data: "start_time" },
         { data: "duration" },
         {
@@ -775,8 +783,9 @@ function showAllExams(){
         document.getElementById("instruction").value = exam.instruction || "";
         document.getElementById("venue").value = exam.venue || "";
 
-        // Checkboxes
-        // document.getElementById("server_time").checked = !!exam.server_time;
+        // Checkboxes'''''
+
+        document.getElementById("server_time").value = exam.server_time || "0";
         document.getElementById("show_max_scores").checked = !!exam.show_max_scores;
         document.getElementById("display_question_randomly").checked = !!exam.display_question_randomly;
         document.getElementById("allow_multiple_attempts").checked = !!exam.allow_multiple_attempts;
@@ -859,8 +868,8 @@ function showAllExams(){
     document.getElementById("examDate").value = `${new Date().toISOString().split("T")[0]}`; // e.g. "2025-03-10"
     document.getElementById("instruction").value = "";
     document.getElementById("venue").value = "";
+    document.getElementById("server_time").value = "0";
 
-    document.getElementById("server_time").checked = false;
     document.getElementById("show_max_scores").checked = false;
     document.getElementById("display_question_randomly").checked = false;
     document.getElementById("allow_multiple_attempts").checked = false;
@@ -957,8 +966,9 @@ function showAllExams(){
       exam_date: document.getElementById("examDate").value, // e.g. "2025-03-10"
       instruction: document.getElementById("instruction").value.trim(),
       venue: document.getElementById("venue").value.trim(),
+      server_time: document.getElementById("server_time").value,
       
-      server_time: boolTo01("server_time"),
+
       show_max_scores: boolTo01("show_max_scores"),
       display_question_randomly: boolTo01("display_question_randomly"),
       allow_multiple_attempts: boolTo01("allow_multiple_attempts"),
