@@ -39,7 +39,7 @@
     font-size: 16px;
   }
   .option-label input[type="radio"] {
-    accent-color: green; 
+    accent-color:rgb(3, 143, 89); 
     margin-right: 8px;
     background: rgb(1, 14, 1);
     transform: scale(1.3);
@@ -67,7 +67,7 @@
     border-radius: 5px;
     border: none;
     color: white;
-    background-color: green; 
+    background-color: rgb(3, 143, 89); 
     cursor: pointer;
     font-size: 12px;
   }
@@ -95,7 +95,7 @@
     Duration: <span id="exam-duration"></span> <span id="exam-unit"></span>
     Time Left: <span id="exam-countdown" style="font-weight: bold; color: rgb(8, 85, 59);">--:--</span>
   </p>
-<h4 style = "color: green"><span>Question Instructions: </span><span id="question-instructions" style = "color: green">Loading instructions... </span> </h4>
+<h4 style = "color: rgb(3, 143, 89)"><span>Question Instructions: </span><span id="question-instructions" style = "color: rgb(3, 143, 89)">Loading instructions... </span> </h4>
 
   <!-- SINGLE QUESTION VIEW -->
   <div
@@ -269,15 +269,15 @@ window.loadExam = examId;
     container.innerHTML = "";
     window.currentExamQuestions.forEach(function(q, index) {
       let indicator = document.createElement("div");
-      indicator.style.width = "30px";
-      indicator.style.height = "30px";
-      indicator.style.borderRadius = "5px";
+      indicator.style.width = "35px";
+      indicator.style.height = "35px";
+      indicator.style.borderRadius = "15px";
       indicator.style.display = "flex";
       indicator.style.alignItems = "center";
       indicator.style.justifyContent = "center";
       indicator.style.cursor = "pointer";
-      indicator.style.backgroundColor = "#ccc";
-      indicator.style.color = "#000";
+      indicator.style.backgroundColor = "red";
+      indicator.style.color = "#999";
       indicator.innerText = (index + 1);
       indicator.onclick = function() {
         saveCurrentAnswer();
