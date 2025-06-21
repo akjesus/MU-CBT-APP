@@ -162,19 +162,21 @@
                 <select class="form-select"  id="display_question_randomly" >
                   <option value="0"> No </option>
                   <option value="1"> Yes</option>
-
                 </select>
-              </label>
             </div>
             <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="unordered_answering" /> Unordered Answering?
-              </label>
-            </div>
+              <label class="form-check-label"> Unordered Answering?</label>
+                <select class="form-select"  id="unordered_answering" >
+                  <option value="0"> No </option>
+                  <option value="1"> Yes</option>
+                </select>
+              </div>
             <div class="col-md-4 mb-2">
-              <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" id="multiple_attempts" /> Multiple Attempts?
-              </label>
+              <label class="form-check-label">Multiple Attempts?</label>
+                <select class="form-select"  id="allow_multiple_attempts" >
+                  <option value="0"> No </option>
+                  <option value="1"> Yes</option>
+                </select>
             </div>
           </div>
 
@@ -752,10 +754,8 @@ function formatTime(data) {
         document.getElementById("venue").value = exam.venue || "CBT Hall 1";
         document.getElementById("server_time").value = exam.server_time || "0";
         document.getElementById("display_question_randomly").value = exam.display_question_randomly || "0";
-
-        // Checkboxes
-        document.getElementById("unordered_answering").checked = !!exam.unordered_answering;
-        document.getElementById("multiple_attempts").checked = !!exam.multiple_attempts;
+        document.getElementById("unordered_answering").value = exam.display_question_randomly || "0";
+        document.getElementById("allow_multiple_attempts").value = exam.allow_multiple_attempts || "0";
 
         loadDropdowns(exam.course_id, exam.session_id, exam.departments);
 
@@ -826,11 +826,9 @@ function formatTime(data) {
     document.getElementById("instruction").value = "";
     document.getElementById("venue").value = "CBT Hall 1";
     document.getElementById("server_time").value = "0";
-    document.getElementById("display_question_randomly").value = "0";
-
-
-    document.getElementById("unordered_answering").checked = false;
-    document.getElementById("multiple_attempts").checked = false;
+    document.getElementById("display_question_randomly").value = "0",
+    document.getElementById("unordered_answering").value = "0"
+    document.getElementById("allow_multiple_attempts").value = "0";
     
     // Clears the select boxes
     document.getElementById("courseSelect").innerHTML = "";
@@ -916,10 +914,8 @@ function formatTime(data) {
       venue: document.getElementById("venue").value,
       server_time: document.getElementById("server_time").value,
       display_question_randomly: document.getElementById("display_question_randomly").value,
-
-      
-      unordered_answering: boolTo01("unordered_answering"),
-      multiple_attempts: boolTo01("multiple_attempts"),
+      unordered_answering: document.getElementById("unordered_answering").value,
+      allow_multiple_attempts: document.getElementById("allow_multiple_attempts").value,
     };
 
    
