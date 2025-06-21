@@ -8,11 +8,8 @@ class Exam {
                     exams.semester, exams.level, exams.exam_name, 
                     exams.max_score_obtainable, exams.exam_mode, exams.server_time,
                     exams.start_time, exams.duration, exams.unit_of_time, exams.active,
-                    exams.exam_date, exams.instruction, exams.venue, exams.show_max_scores, exams.display_question_randomly, 
-                    exams.allow_multiple_attempts, exams.is_public_access, exams.browser_warn_level, 
-                    exams.farewell_message, exams.unordered_answering, exams.set_pass_mark, 
-                    exams.pass_mark_value, exams.pass_mark_unit, exams.grade_with_points, 
-                    exams.send_result_mail, exams.send_congratulatory_mail, 
+                    exams.exam_date, exams.instruction, exams.venue, exams.display_question_randomly, 
+                    exams.allow_multiple_attempts, exams.unordered_answering, 
                     exams.created_at, exams.updated_at, 
                     GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
              FROM exams
@@ -79,11 +76,9 @@ class Exam {
     const [result] = await db.query(
       `INSERT INTO exams (course_id, session_id, semester, level, exam_name, max_score_obtainable, 
                            exam_mode, start_time, duration, unit_of_time, exam_date, instruction, venue, 
-                           server_time, show_max_scores, display_question_randomly, allow_multiple_attempts, 
-                           is_public_access, browser_warn_level, farewell_message, unordered_answering, 
-                           set_pass_mark, pass_mark_value, pass_mark_unit, grade_with_points, send_result_mail, 
-                           send_congratulatory_mail, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+                           server_time, display_question_randomly, allow_multiple_attempts, unordered_answering, 
+                          created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         data.course_id,
         data.session_id,
@@ -99,19 +94,9 @@ class Exam {
         data.instruction,
         data.venue,
         data.server_time,
-        data.show_max_scores,
         data.display_question_randomly,
         data.allow_multiple_attempts,
-        data.is_public_access,
-        data.browser_warn_level,
-        data.farewell_message,
         data.unordered_answering,
-        data.set_pass_mark,
-        data.pass_mark_value,
-        data.pass_mark_unit,
-        data.grade_with_points,
-        data.send_result_mail,
-        data.send_congratulatory_mail,
       ]
     );
     return result.insertId;
@@ -121,11 +106,8 @@ class Exam {
       `UPDATE exams SET course_id = ?, session_id = ?, semester = ?, level = ?, exam_name = ?, 
                              max_score_obtainable = ?, exam_mode = ?, start_time = ?, duration = ?, 
                              unit_of_time = ?, exam_date = ?, instruction = ?, venue = ?,
-                             show_max_scores = ?, display_question_randomly = ?, allow_multiple_attempts = ?, 
-                             is_public_access = ?, browser_warn_level = ?, farewell_message = ?, 
-                             unordered_answering = ?, set_pass_mark = ?, pass_mark_value = ?, 
-                             pass_mark_unit = ?, grade_with_points = ?, send_result_mail = ?, 
-                             send_congratulatory_mail = ?, updated_at = NOW() 
+                             show_max_scores = ?, display_question_randomly = ?, allow_multiple_attempts = ?,              
+                             unordered_answering = ?, updated_at = NOW() 
              WHERE id = ?`,
       [
         data.course_id,
@@ -141,19 +123,9 @@ class Exam {
         data.exam_date,
         data.instruction,
         data.venue,
-        data.show_max_scores,
         data.display_question_randomly,
         data.allow_multiple_attempts,
-        data.is_public_access,
-        data.browser_warn_level,
-        data.farewell_message,
         data.unordered_answering,
-        data.set_pass_mark,
-        data.pass_mark_value,
-        data.pass_mark_unit,
-        data.grade_with_points,
-        data.send_result_mail,
-        data.send_congratulatory_mail,
         id,
       ]
     );

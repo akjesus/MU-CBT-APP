@@ -15,9 +15,15 @@
     overflow: auto;
     text-align: center;
   }
+  body {
+    line-height: 1.1;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
   .input {
-  font-size: 24px; /* Adjust the font size to your liking */
-  padding: 10px; /* Add some padding to make the input field more comfortable to use */
+  font-size: 16px; /* Adjust the font size to your liking */
+  padding: 6px; /* Add some padding to make the input field more comfortable to use */
 }
 
 
@@ -30,13 +36,13 @@
     margin-bottom: 6px;
     cursor: pointer;
     text-align: left;
-    font-size: 19px;
+    font-size: 16px;
   }
   .option-label input[type="radio"] {
     accent-color: green; 
     margin-right: 8px;
     background: rgb(1, 14, 1);
-    transform: scale(1.7);
+    transform: scale(1.3);
   }
   .btn {
     padding: 10px 20px;
@@ -45,7 +51,7 @@
     color: white;
     background-color: orange; 
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
   }
   .btn1 {
     padding: 10px 20px;
@@ -54,7 +60,7 @@
     color: white;
     background-color: #f44336;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
   }
   .btn2 {
     padding: 10px 20px;
@@ -63,7 +69,7 @@
     color: white;
     background-color: green; 
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
   }
   .btn:hover {
     background-color: orangered; /* Darker shade on hover */
@@ -81,26 +87,26 @@
   <div class="page-back2" onclick="showHome()">
     <img src="images/icons/angle-left.svg" />
   </div>
-  <h2 class="text-center text-25 text-bold">
+  <h3 class="text-center text-25 text-bold">
     Exam Title: <span id="exam-title">Loading...</span>
-  </h2>
+  </h3>
   <p class="text-center text-18" id="exam-info">
     Start Time: <span id="exam-start"></span> |
-    Duration: <span id="exam-duration"></span> <span id="exam-unit"></span><br />
+    Duration: <span id="exam-duration"></span> <span id="exam-unit"></span>
     Time Left: <span id="exam-countdown" style="font-weight: bold; color: rgb(8, 85, 59);">--:--</span>
   </p>
-<h3 style = "color: green">Question Instructions:</h3>
-<h4 id="question-instructions" style = "color: green">Loading instructions...</h4>
+<h4 style = "color: green"><span>Question Instructions: </span><span id="question-instructions" style = "color: green">Loading instructions... </span> </h4>
+
   <!-- SINGLE QUESTION VIEW -->
   <div
     id="single-question-container"
     class="p-3 rounded shadow-sm"
     style="background-color: #ffffff; min-height: 300px; border-radius: 5px;"
   >
-    <div class="mb-2 text-left text-18">
+    <div class="mb-2 text-18">
       <fieldset>
-        <legend><h3 id="current-question-number" class="text-bold">Q1.</h3></legend>
-        <h3 id="current-question-text">Loading question...</h3>
+        <legend><h4 id="current-question-number" class="text-bold">Q1.</h4></legend>
+        <h4 id="current-question-text">Loading question...</h4>
       </fieldset>
     </div>
     <br />
@@ -128,7 +134,6 @@
   <div class="text-center mt-3">
     <br />
     <button class="btn1 " onclick="submitExamAnswers(true)">Submit Exam</button>
-
   </div>
 </div>
 <!-- END PAGE EXAM -->
@@ -220,8 +225,7 @@ window.loadExam = examId;
     // If there's a start_time + exam_date, compute examEndTime
     if (data.start_time && data.exam_date) {
       let start_datetime = data.exam_date + " " + data.start_time;
-      // let start = (data.server_time == "true") ? new Date(start_datetime.replace(" ", "T")) : new Date();
-      let start =  new Date();
+      let start = (data.server_time == 1) ? new Date(start_datetime.replace(" ", "T")) : new Date();
       let dur = parseInt(data.duration || 0);
       let isHours = (data.unit_of_time === "hours");
       let msToAdd = isHours ? dur * 3600000 : dur * 60000;
