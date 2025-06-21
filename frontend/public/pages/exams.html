@@ -93,7 +93,7 @@
               <label for="examMode" class="form-label">Exam Mode</label>
               <select id="examMode" class="form-select">
                 <option value="mock">Mock</option>
-                <option value="graded">Graded</option>
+                <option value="graded" selected>Graded</option>
               </select>
             </div>
           </div>
@@ -130,7 +130,13 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="venue" class="form-label">Venue</label>
-              <input type="text" class="form-control" id="venue" />
+              <select type="text" class="form-select" id="venue">
+                <option value="CBT Hall 1">CBT Hall 1</option>
+                <option value="CBT Hall 2">CBT Hall 2</option>
+                <option value="CBT Hall 3">CBT Hall 3</option>
+                <option value="CBT Hall 4">CBT Hall 4</option>
+              <select>
+                
             </div>
           </div>
 
@@ -149,11 +155,11 @@
           </div>
           <!-- Additional Toggles -->
           <div class="row">
-            <div class="col-md-4 mb-2">
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="show_max_scores" /> Show Max Scores?
               </label>
-            </div>
+            </div> -->
             <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="display_question_randomly" /> Display Random?
@@ -164,63 +170,63 @@
                 <input class="form-check-input" type="checkbox" id="allow_multiple_attempts" /> Allow Multiple Attempts?
               </label>
             </div>
-            <div class="col-md-4 mb-2">
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="is_public_access" /> Public Access?
               </label>
-            </div>
-            <div class="col-md-4 mb-2">
+            </div> -->
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="browser_warn_level" /> Browser Warn?
               </label>
-            </div>
-            <div class="col-md-4 mb-2">
+            </div> -->
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="farewell_message" /> Farewell Message?
               </label>
-            </div>
+            </div> -->
             <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="unordered_answering" /> Unordered Answering?
               </label>
             </div>
-            <div class="col-md-4 mb-2">
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="set_pass_mark" /> Set Pass Mark?
               </label>
-            </div>
+            </div> -->
           </div>
 
           <div class="row">
-            <div class="col-md-4 mb-2">
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-label">Pass Mark Value</label>
               <input type="number" step="0.01" class="form-control" id="pass_mark_value" />
-            </div>
-            <div class="col-md-4 mb-2">
+            </div> -->
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-label">Pass Mark Unit</label>
               <select id="pass_mark_unit" class="form-select">
                 <option value="points">Points</option>
                 <option value="percentage">Percentage</option>
               </select>
-            </div>
-            <div class="col-md-4 mb-2">
+            </div> -->
+            <!-- <div class="col-md-4 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="grade_with_points" /> Grade with Points?
               </label>
             </div>
-          </div>
+          </div> -->
 
           <div class="row">
-            <div class="col-md-6 mb-2">
+            <!-- <div class="col-md-6 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="send_result_mail" /> Send Result Mail?
               </label>
-            </div>
-            <div class="col-md-6 mb-2">
+            </div> -->
+            <!-- <div class="col-md-6 mb-2">
               <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" id="send_congratulatory_mail" /> Send Congrat Mail?
               </label>
-            </div>
+            </div> -->
           </div>
 
         </div><!-- /modal-body -->
@@ -775,7 +781,7 @@ function showAllExams(){
         document.getElementById("semester").value = exam.semester || "";
         document.getElementById("examLevel").value = exam.level || "";
         document.getElementById("max_score_obtainable").value = exam.max_score_obtainable || "15";
-        document.getElementById("examMode").value = exam.exam_mode || "mock";
+        document.getElementById("examMode").value = exam.exam_mode || "graded";
         $("#startTime").val(exam.exam_date + "T" + exam.start_time);
         document.getElementById("duration").value = exam.duration || "20";
         document.getElementById("unitOfTime").value = exam.unit_of_time || "minutes";
@@ -786,19 +792,19 @@ function showAllExams(){
         // Checkboxes'''''
 
         document.getElementById("server_time").value = exam.server_time || "0";
-        document.getElementById("show_max_scores").checked = !!exam.show_max_scores;
+        // document.getElementById("show_max_scores").checked = !!exam.show_max_scores;
         document.getElementById("display_question_randomly").checked = !!exam.display_question_randomly;
         document.getElementById("allow_multiple_attempts").checked = !!exam.allow_multiple_attempts;
-        document.getElementById("is_public_access").checked = !!exam.is_public_access;
-        document.getElementById("browser_warn_level").checked = !!exam.browser_warn_level;
-        document.getElementById("farewell_message").checked = !!exam.farewell_message;
+        // document.getElementById("is_public_access").checked = !!exam.is_public_access;
+        // document.getElementById("browser_warn_level").checked = !!exam.browser_warn_level;
+        // document.getElementById("farewell_message").checked = !!exam.farewell_message;
         document.getElementById("unordered_answering").checked = !!exam.unordered_answering;
-        document.getElementById("set_pass_mark").checked = !!exam.set_pass_mark;
-        document.getElementById("pass_mark_value").value = exam.pass_mark_value || "";
-        document.getElementById("pass_mark_unit").value = exam.pass_mark_unit || "points";
-        document.getElementById("grade_with_points").checked = !!exam.grade_with_points;
-        document.getElementById("send_result_mail").checked = !!exam.send_result_mail;
-        document.getElementById("send_congratulatory_mail").checked = !!exam.send_congratulatory_mail;
+        // document.getElementById("set_pass_mark").checked = !!exam.set_pass_mark;
+        // document.getElementById("pass_mark_value").value = exam.pass_mark_value || "";
+        // document.getElementById("pass_mark_unit").value = exam.pass_mark_unit || "points";
+        // document.getElementById("grade_with_points").checked = !!exam.grade_with_points;
+        // document.getElementById("send_result_mail").checked = !!exam.send_result_mail;
+        // document.getElementById("send_congratulatory_mail").checked = !!exam.send_congratulatory_mail;
 
         loadDropdowns(exam.course_id, exam.session_id, exam.departments);
 
@@ -861,28 +867,28 @@ function showAllExams(){
     document.getElementById("semester").value = "";
     document.getElementById("examLevel").value = "";
     document.getElementById("max_score_obtainable").value = "20";
-    document.getElementById("examMode").value = "mock";
+    document.getElementById("examMode").value = "graded";
     document.getElementById("startTime").value = ``; // e.g. "2025-03-10T12:00:00"
     document.getElementById("duration").value = "20";
     document.getElementById("unitOfTime").value = "minutes";
     document.getElementById("examDate").value = `${new Date().toISOString().split("T")[0]}`; // e.g. "2025-03-10"
     document.getElementById("instruction").value = "";
-    document.getElementById("venue").value = "";
+    document.getElementById("venue").value = "CBT Hall 1";
     document.getElementById("server_time").value = "0";
 
-    document.getElementById("show_max_scores").checked = false;
+    // document.getElementById("show_max_scores").checked = false;
     document.getElementById("display_question_randomly").checked = false;
     document.getElementById("allow_multiple_attempts").checked = false;
-    document.getElementById("is_public_access").checked = false;
-    document.getElementById("browser_warn_level").checked = false;
-    document.getElementById("farewell_message").checked = false;
+    // document.getElementById("is_public_access").checked = false;
+    // document.getElementById("browser_warn_level").checked = false;
+    // document.getElementById("farewell_message").checked = false;
     document.getElementById("unordered_answering").checked = false;
-    document.getElementById("set_pass_mark").checked = false;
-    document.getElementById("pass_mark_value").value = "";
-    document.getElementById("pass_mark_unit").value = "points";
-    document.getElementById("grade_with_points").checked = false;
-    document.getElementById("send_result_mail").checked = false;
-    document.getElementById("send_congratulatory_mail").checked = false;
+    // document.getElementById("set_pass_mark").checked = false;
+    // document.getElementById("pass_mark_value").value = "";
+    // document.getElementById("pass_mark_unit").value = "points";
+    // document.getElementById("grade_with_points").checked = false;
+    // document.getElementById("send_result_mail").checked = false;
+    // document.getElementById("send_congratulatory_mail").checked = false;
     
     // Clears the select boxes
     document.getElementById("courseSelect").innerHTML = "";
@@ -969,19 +975,19 @@ function showAllExams(){
       server_time: document.getElementById("server_time").value,
       
 
-      show_max_scores: boolTo01("show_max_scores"),
+      // show_max_scores: boolTo01("show_max_scores"),
       display_question_randomly: boolTo01("display_question_randomly"),
       allow_multiple_attempts: boolTo01("allow_multiple_attempts"),
-      is_public_access: boolTo01("is_public_access"),
-      browser_warn_level: boolTo01("browser_warn_level"),
-      farewell_message: boolTo01("farewell_message"),
-      unordered_answering: boolTo01("unordered_answering"),
-      set_pass_mark: boolTo01("set_pass_mark"),
-      pass_mark_value: document.getElementById("pass_mark_value").value.trim(),
-      pass_mark_unit: document.getElementById("pass_mark_unit").value, // "points" or "percentage"
-      grade_with_points: boolTo01("grade_with_points"),
-      send_result_mail: boolTo01("send_result_mail"),
-      send_congratulatory_mail: boolTo01("send_congratulatory_mail")
+      // is_public_access: boolTo01("is_public_access"),
+      // browser_warn_level: boolTo01("browser_warn_level"),
+      // farewell_message: boolTo01("farewell_message"),
+      // unordered_answering: boolTo01("unordered_answering"),
+      // set_pass_mark: boolTo01("set_pass_mark"),
+      // pass_mark_value: document.getElementById("pass_mark_value").value.trim(),
+      // pass_mark_unit: document.getElementById("pass_mark_unit").value, // "points" or "percentage"
+      // grade_with_points: boolTo01("grade_with_points"),
+      // send_result_mail: boolTo01("send_result_mail"),
+      // send_congratulatory_mail: boolTo01("send_congratulatory_mail")
     };
 
    
