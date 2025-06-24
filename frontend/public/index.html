@@ -132,19 +132,19 @@
         //  document.getElementById("runScripts").click();
         w3.scripts = [];
       }
-      setTimeout(initScripts, 1000);
-      setTimeout(initRoutes, 2000);
+      setTimeout(initScripts, 500);
+      setTimeout(initRoutes, 500);
     </script>
     <script>
       window.hideSplash = function () {
         //hide_loading1();
         setTimeout(function () {
-          $("#screen-1").fadeOut(2000);
-        }, 2900);
+          $("#screen-1").fadeOut(500);
+        }, 500);
         if (localStorage.getItem("login") == null) {
           setTimeout(function () {
             $("#swiper_container").animate({ opacity: 1 });
-          }, 3000);
+          }, 500);
         } else {
           //setTimeout(function (){$(".show-login").click()},4300);
         }
@@ -164,7 +164,7 @@
             doLogin();
           }
         }
-      }, 5500);
+      }, 500);
     </script>
     <script></script>
     <script>
@@ -207,7 +207,7 @@
       //   setTimeout(appScript, 6000);
       setTimeout(function () {
         eval(w3.scripts2);
-      }, 4000);
+      }, 1000);
     </script>
     <script>
       window.showHome = function (examId) {
