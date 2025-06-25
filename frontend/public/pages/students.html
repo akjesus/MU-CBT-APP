@@ -483,6 +483,8 @@
         bootstrap.Modal.getInstance(
           document.getElementById("importCSVModal")
         ).hide();
+        if(data.error)
+       {alert(data.error)} 
         alert(data.message || "CSV Import completed.");
         studentsTable.ajax.reload(null, false);
       })
