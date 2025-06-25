@@ -95,7 +95,6 @@ exports.bulkUploadStudents = async (req, res) => {
             );
             insertedCount++;
 
-
         }
         res.status(201).json({
           message: `${insertedCount} students successfully uploaded`,
