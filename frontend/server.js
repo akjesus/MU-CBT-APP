@@ -3,6 +3,8 @@ const path = require("path");
 const app = express();
 const dotenv = require("dotenv");
 dotenv.config({ path: "../.env" });
+
+// const webSocket = require('./webSocket')
 // Use PORT 3003 for the frontend
 const PORT = process.env.FRONTEND_PORT;
 

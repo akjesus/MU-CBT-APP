@@ -526,7 +526,6 @@
     formData.append("exam_id", currentExamId);
     formData.append("course_id", currentExamCourseId);
     
-
     fetch(API_URL + `exam-questions/${examId}/bulk-upload`, {
       method: "POST",
       body: formData
