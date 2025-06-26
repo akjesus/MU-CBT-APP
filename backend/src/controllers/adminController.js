@@ -6,7 +6,7 @@ exports.getDashboardStats = async (req, res) => {
     const [[students]] = await db.query("SELECT COUNT(*) as total FROM students");
 
     // Fetch active exam count
-    const [[activeExams]] = await db.query("SELECT COUNT(*) as total FROM exams WHERE NOW() BETWEEN start_time AND DATE_ADD(start_time, INTERVAL duration MINUTE)");
+    const [[activeExams]] = await db.query("SELECT COUNT(*) as total FROM exams WHERE active = 1");
 
     // Fetch total exams created
     const [[totalExams]] = await db.query("SELECT COUNT(*) as total FROM exams");

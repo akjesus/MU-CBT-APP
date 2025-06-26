@@ -34,15 +34,15 @@ function fetchAdminDashboard() {
       document.getElementById("student-count").innerText =
         data.students ? data.students + " Enrolled" : "No Students Enrolled";
       document.getElementById("exam-count").innerText =
-        data.total_exams + " Exams Created";
+        data.total_exams ? data.total_exams + " Exams Created" : "No Exams Created";
       document.getElementById("active-exam-count").innerText =
-        data.active_exams + " Ongoing";
+        data.active_exams ? data.active_exams + " Ongoing" : "No Ongoing Exams";
       document.getElementById("pass-rate").innerText =
-        data.pass_rate + "% Pass Rate";
+        data.pass_rate ? data.pass_rate + "% Pass Rate" : "No Pass Rate Data";
       document.getElementById("staff-count").innerText =
-        data.staff + " Active Staff";
+        data.staff ? data.staff + " Active Staff" : "No Active Staff";
       document.getElementById("question-count").innerText =
-        data.questions + " Questions Available";
+        data.questions ? data.questions + " Questions Available" : "No Questions Available";
       document.getElementById("school-name").innerText = data.school_name;
     })
     .catch((error) => console.error("Error loading dashboard:", error));
