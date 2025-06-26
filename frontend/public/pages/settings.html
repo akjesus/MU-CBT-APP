@@ -108,7 +108,11 @@
       saveSession();
     });
   }
-
+function formatDate(dateStr) {
+    // Format date to YYYY-MM-DD
+    const date = new Date(dateStr);
+    return  date.toLocaleDateString('en-US');
+  }
   // 1) DataTable
   function initSessionsDataTable() {
     sessionsTable = $("#sessionsTable").DataTable({
@@ -120,8 +124,16 @@
       columns: [
         { data: "id" },
         { data: "name" },
-        { data: "start_date" },
-        { data: "end_date" },
+        { data: "start_date",
+          render: function (data){
+            return  formatDate(data)
+          }
+         },
+        { data: "end_date",
+          render: function (data){
+            return  formatDate(data)
+          }
+         },
         {
           // is_active => Yes/No
           data: "is_active",
@@ -137,7 +149,7 @@
               <button class="btn btn-sm btn-danger me-1" onclick="deleteSession(${row.id})">Delete</button>
               ${
                 row.is_active
-                ? ''
+                ? `<button class="btn btn-sm btn-success" > Active</button>`
                 : `<button class="btn btn-sm btn-warning" onclick="setSessionActive(${row.id})">Set Active</button>`
               }
             `;
