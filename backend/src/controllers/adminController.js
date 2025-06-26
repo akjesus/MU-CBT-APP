@@ -30,7 +30,7 @@ exports.getDashboardStats = async (req, res) => {
       pass_rate: passRate.avg_pass_rate || 0,
       staff: staff.total || 0,
       questions: questionBank.total || 0,
-      school_name: school.name || "Unknown University"
+      school_name: school?.name || "Maduka University"
     });
   } catch (err) {
     console.error("Dashboard Stats Error:", err);

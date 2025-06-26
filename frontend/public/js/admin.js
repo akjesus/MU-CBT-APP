@@ -32,7 +32,7 @@ function fetchAdminDashboard() {
     .then((response) => response.json())
     .then((data) => {
       document.getElementById("student-count").innerText =
-        data.students + " Enrolled";
+        data.students ? data.students + " Enrolled" : "No Students Enrolled";
       document.getElementById("exam-count").innerText =
         data.total_exams + " Exams Created";
       document.getElementById("active-exam-count").innerText =
