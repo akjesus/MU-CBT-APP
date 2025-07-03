@@ -76,6 +76,7 @@
             </select>
           </div>
 
+        
           <!-- Score Obtainable -->
           <div class="mb-3">
             <label for="scoreObtainable" class="form-label">Score Obtainable</label>
@@ -273,7 +274,7 @@
       return;
     }
     // e.g. GET /api/questions?course_id=xx
-    fetch(API_URL + `questions?course_id=${courseId}`)
+    fetch(API_URL + `questions/course/${courseId}`)
       .then(res => res.json())
       .then(data => {
         questionBankTable.clear();

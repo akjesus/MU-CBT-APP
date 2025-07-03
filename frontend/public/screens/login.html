@@ -47,6 +47,7 @@
       <!-- Email input -->
       <div class="login-form-item text-type">
         <input
+        class="form-control" 
           type="text"
           name="email"
           id="email"
@@ -58,6 +59,7 @@
       <!-- Password input + show password checkbox -->
       <div class="login-form-item text-type">
         <input
+        class="form-control" 
           type="password"
           name="password"
           id="password"
@@ -74,14 +76,15 @@
           <label for="showPassCheckbox"><em>Show Password</em></label>
         </div>
       </div>
-
-      <div class="login-form-item">
-        <input
+      <br /><br />
+      <div class ="login-form-item">
+        <input class = "form-control"
           type="button"
           onclick="doLogin()"
           name="signin"
           id="signin"
-          value="Sign in"
+          value="Sign In"
+          required
         />
       </div>
       <br /><br />
