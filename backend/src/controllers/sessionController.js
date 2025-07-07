@@ -56,3 +56,13 @@ exports.activateSession = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getActiveSession = async (req, res) => {
+  try {
+    const session = await Session.getActiveSession();
+    res.json([session]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+  

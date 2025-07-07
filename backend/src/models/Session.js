@@ -35,6 +35,10 @@ class Session {
   static async delete(id) {
     await db.query("DELETE FROM sessions WHERE id = ?", [id]);
   }
+  static async getActiveSession() {
+    const [rows] = await db.query("SELECT * FROM sessions WHERE is_active = 1");
+    return rows[0]; // Return the first active session
+  }
 }
 
 module.exports = Session;

@@ -855,7 +855,7 @@ function formatTime(data) {
       .catch(() => alert("Failed to load courses."));
 
     // Session
-    fetch(API_URL + "sessions")
+    fetch(API_URL + "sessions/active") // Assuming this endpoint returns active sessions
       .then(res => res.json())
       .then(sessions => {
         const sessionSel = document.getElementById("sessionSelect");
