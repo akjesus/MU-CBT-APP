@@ -57,10 +57,6 @@ input:hover{
    padding:5px;
 }
 
-.splash-screen {
-    
-}
-
 
 .hidden {
     display: hidden;
@@ -668,7 +664,7 @@ input[type=range] {
     width: 100%;
     height: 2px;
     cursor: pointer;
-    animate: 0.2s;
+    animation: 0.2s;
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
     background: grey;
     border-radius: 25px;
@@ -689,7 +685,7 @@ input[type=range] {
     width: 100%;
     height: 2px;
     cursor: pointer;
-    animate: 0.2s;
+    animation: 0.2s;
     background: transparent;
     border-color: transparent;
     border-width: 39px 0;
@@ -1058,9 +1054,6 @@ input[type=range] {
     overscroll-behavior: contain;
 }
 
-.checkout-list{
-    
-}
 
 .favorite-each{
     border-bottom: 1px solid grey;
@@ -1431,9 +1424,6 @@ input[type=range] {
     font-size: 20px;
 }
 
-.items-related{
-    
-}
 
 .items-related h2 {
     text-align: left;
@@ -2234,9 +2224,7 @@ outline: none;
     overflow-y: scroll;
 }
 
-.search-filter-content-each{
-    
-}
+
 
 .search-filter-content > div {
     padding: 10px;
@@ -2332,9 +2320,6 @@ outline: none;
     background-position: right;
 }
 
-.categories-each{
-    
-}
 
 .search-items {
  padding-left: 15px;
@@ -2433,10 +2418,6 @@ outline: none;
    background-clip: content-box;
    background-position: 50% 10%;
     background-repeat: no-repeat;
-}
-
-.grid-products{
-    
 }
 
 .grid-product-header{
@@ -2706,8 +2687,6 @@ input:checked + .slider:before {
   background-color: #777;
 }
 
-.tab-body{
-}
 
 /* Style the tab content (and add height:100% for full page content) */
 .tabcontent {
@@ -2728,7 +2707,6 @@ input:checked + .slider:before {
 
 /* Style tab links */
 .tablink4 {
-  background-color: ; /*set from theme*/
   color: ;  /*set from theme*/
   float: left;
   border: none;
@@ -2749,7 +2727,6 @@ input:checked + .slider:before {
 
 /* Style the tab content (and add height:100% for full page content) */
 .tabcontent4 {
-  color: ;  /*set from theme*/
   display: none;
   padding: 15px;
   height: 100%;
