@@ -6,11 +6,15 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
+const notifier = require("node-notifier");
 const dotenv = require("dotenv");
 dotenv.config({ path: "../../.env" });
+const path = require("path");
 
 
 const app = express();
+
+
 
 // Middleware
 app.use(cors());
@@ -90,6 +94,18 @@ app.use("/api/exam-examiners", examExaminerRoutes);
 app.use("/api/exam-questions", examQuestionRoutes);
 app.use("/api/result", resultRoutes);
 app.use("/api/reports", reportRoutes);
+
+
+app.use("/api/notification", (req, res) => {
+  notifier.notify({
+    title: "Possible Malpractice Alert!!",
+    icon: path.join(__dirname, "logo.png"),
+    message: `${req.body.first_name} ${req.body.last_name}: ${req.body.registration_number} switched tabs more than 5 times`,
+    sound: true, // Play a sound
+    wait: false, // Do not wait for user interaction
+  });
+  return;
+});
 
 app.all("*", (req, res, next) => {
   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;

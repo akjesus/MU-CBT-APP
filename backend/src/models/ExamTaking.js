@@ -17,25 +17,33 @@ class ExamTaking {
     }
 
     static async getExamQuestions(examId) {
-        // First, check if display_question_randomly is enabled for the given exam
-        const [[exam]] = await db.query(
-            `SELECT display_question_randomly FROM exams WHERE id = ?`,
-            [examId]
-        );
-    
-        // Determine sorting order
-        const orderClause = exam && exam.display_question_randomly ? "ORDER BY RAND()" : "ORDER BY q.id";
-    
-        // Fetch questions with the determined order
-        const [questions] = await db.query(
-            `SELECT q.id AS question_id, q.text, q.option_a, q.option_b, q.option_c, q.option_d, q.instructions, q.score_obtainable, q.question_type
+      // First, check if display_question_randomly is enabled for the given exam
+      const [[exam]] = await db.query(
+        `SELECT display_question_randomly FROM exams WHERE id = ?`,
+        [examId]
+      );
+
+      //to be implemented in the future 
+      //random questions from question bank with limits
+      // const [[exam]] = await db.query(
+      //`SELECT random_question_bank  FROM exams WHERE id = ?`, [examId];
+
+      // Determine sorting order
+      const orderClause =
+        exam && exam.display_question_randomly
+          ? "ORDER BY RAND()"
+          : "ORDER BY q.id";
+
+      // Fetch questions with the determined order
+      const [questions] = await db.query(
+        `SELECT q.id AS question_id, q.text, q.option_a, q.option_b, q.option_c, q.option_d, q.instructions, q.score_obtainable, q.question_type
              FROM exam_questions eq
              JOIN questions q ON eq.question_id = q.id
              WHERE eq.exam_id = ? ${orderClause}`,
-            [examId]
-        );
-    
-        return questions;
+        [examId]
+      );
+
+      return questions;
     }
     
 
