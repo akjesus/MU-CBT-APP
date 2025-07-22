@@ -189,7 +189,6 @@
   </script>
   <script>
     window.render_user = function (user_data) {
-      console.log(user_data);
       if (!JSON.parse(user_data[0]).id) {
         smallBottomFade(JSON.parse(user_data[0]).error, "white", "red");
         document.getElementsByClassName("show-login")[0].click();
@@ -258,9 +257,7 @@
   </script>
   <script>
     window.loginResponse = function (cookie) {
-      console.log(cookie);
       let data = JSON.parse(cookie[0]);
-      console.log(data);
       if (data.error) {
         hide_loading1();
         smallBottomFade(data.error, "white", "red");
@@ -291,7 +288,6 @@
   </script>
   <script>
     window.passwordResponse = function (cookie) {
-      console.log(cookie);
       if (JSON.parse(cookie[0]).success != true) {
         hide_loading1();
         smallBottomFade(JSON.parse(cookie[0]).message, "white", "red");
@@ -302,16 +298,7 @@
     };
   </script>
   <script>
-    /*Auto login*/
-    /*
-            setTimeout(function (){
-                    if(localStorage.getItem("cookie")){
-                        getUserInfo([localStorage.getItem("cookie"), "Auto Login"]);
-                    }else{
-                        document.getElementsByClassName("show-login")[0].click();
-                    }
-                },100);
-                */
+
   </script>
   <script>
     window.logout = function () {
