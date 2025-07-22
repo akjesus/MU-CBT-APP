@@ -301,7 +301,6 @@ window.loadExam = examId;
       }
 
       if (document.visibilityState === "visible") {
-        // Check if 10 seconds have passed since alert
         if (alertShown && alertTime && Date.now() - alertTime >= 10000) {
           tabSwitchCount = 0;
           alertShown = false;
