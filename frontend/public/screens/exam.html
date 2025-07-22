@@ -146,6 +146,12 @@
     and also now check if results exist before starting the exam.
   */
 
+// Remove this tab's ID from local storage when the tab is closed
+
+
+// Set up event listeners
+
+
   window.currentExamQuestions = [];
   window.currentQuestionIndex = 0;
   window.userAnswers = {};
@@ -155,6 +161,8 @@
   // We'll store references to the "user_data" from localStorage
   let userString = localStorage.getItem("user_data");
   let currentUser = userString ? JSON.parse(userString) : null;
+  // If user is logged in, we can track tab switches
+
   
   /*
     loadExamQuestions:
@@ -163,6 +171,9 @@
     3) Then fetch exam questions
     4) Restore local state if it exists
   */
+
+
+
   window.loadExamQuestions = function(examId) {
     // 1) fetch exam details
     let endpoint = serverHost + api_prefix + "api/exams/" + examId;
@@ -203,6 +214,7 @@ window.loadExam = examId;
     reqAsyncJSON("GET", qEndpoint, {}, "renderExamQuestionsOneByOne", "Loading exam questions...");
     }
   };
+
 
   /*
     handleExamDetails:
@@ -259,7 +271,48 @@ window.loadExam = examId;
 
     // Show exam page
     document.getElementById("page-exam").style.display = "block";
-  };
+
+    //track tab switches
+    const currentUser = getCurrentUser();
+     if (currentUser) {
+    let tabSwitchCount = 0;
+    let alertTime = null;
+    let alertShown = false;
+
+    const visibilityHandler = async () => {
+      if (document.visibilityState === "hidden") {
+        tabSwitchCount++;
+        console.log(`Tab switch count: ${tabSwitchCount}`);
+
+        if (tabSwitchCount >= 5 && !alertShown) {
+          alertShown = true;
+          alertTime = Date.now(); // Record when alert was shown
+          // Send alert to server
+          let alertEndpoint = serverHost + api_prefix + "api/notification";
+
+          await fetch(alertEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(currentUser)
+          });
+        }
+      }
+
+      if (document.visibilityState === "visible") {
+        // Check if 10 seconds have passed since alert
+        if (alertShown && alertTime && Date.now() - alertTime >= 10000) {
+          tabSwitchCount = 0;
+          alertShown = false;
+          alertTime = null;
+          console.log("Tab switch count reset after returning to tab.");
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", visibilityHandler);
+  }  };
 
   /*
     buildQuestionIndicators: build clickable question # boxes
@@ -413,7 +466,6 @@ window.loadExam = examId;
   window.submitExamAnswers = function(isUser) {
     if(isUser){
         let promptSubmit = confirm("Are you Sure you want to submit?");
-        console.log(promptSubmit);
         if(!promptSubmit){
           return promptSubmit;
         }
@@ -521,6 +573,8 @@ window.loadExam = examId;
       // parse to date
       window.examEndTime = new Date(parsed.examEndTime);
     }
+
+    
   }
 
   /**

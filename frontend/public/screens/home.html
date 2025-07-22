@@ -86,13 +86,11 @@
                */
               let userString = localStorage.getItem("user_data");
               if (!userString) {
-                console.log("No user data found in localStorage. Not logged in?");
                 return;
               }
           
               let user = JSON.parse(userString);
               if (!user.id) {
-                console.log("User data missing ID. Cannot load eligible exams.");
                 return;
               }
           
