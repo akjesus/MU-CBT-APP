@@ -101,8 +101,8 @@ app.use("/api/notification", (req, res) => {
     title: "Possible Malpractice Alert!!",
     icon: path.join(__dirname, "logo.png"),
     message: `${req.body.first_name} ${req.body.last_name}: ${req.body.registration_number} switched tabs more than 5 times`,
-    sound: true, // Play a sound
-    wait: false, // Do not wait for user interaction
+    sound: true, 
+    wait: false, 
   });
   return;
 });
