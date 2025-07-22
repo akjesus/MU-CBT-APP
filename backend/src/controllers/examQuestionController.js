@@ -282,7 +282,13 @@ exports.bulkUploadNewQuestions = async (req, res) => {
     if (!exam_id) {
       return res.status(400).json({ error: "No exam_id in URL" });
     }
-
+    const [courseId] = await db.query(
+      `SELECT course_id FROM exams WHERE id = ?`, [exam_id]
+    );
+    const course_id = courseId[0].course_id;
+    if (!courseId || courseId .length === 0) {
+      return res.status(404).json({ error: "Exam not found" });
+    }
     // Check if file is present
     if (!req.files || !req.files.file) {
       return res.status(400).json({ error: "CSV file is required" });
@@ -301,7 +307,6 @@ exports.bulkUploadNewQuestions = async (req, res) => {
         // Extract the fields from CSV row
         // We'll parse them carefully, assuming columns are consistent
         const {
-          course_id,
           option_a,
           option_b,
           option_c,
