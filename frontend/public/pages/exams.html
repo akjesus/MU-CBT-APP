@@ -48,11 +48,11 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="semester" class="form-label">Semester</label>
-              <select  id="semester" name="semester" class="form-control" required>
-                <option value="First Semester"selected>First Semester</option>
-                <option value="Second Semester">Second Semester</option>
-                <option value="Mid Semester" >Mid Semester </option>
-                <option value="Mock Test" >Mock Test</option>
+              <select type="text" class="form-select" id="semester"> 
+                <option value="First Semester"> First Semester </option>
+                <option value="Second Semester"> Second Semester </option>
+                <option value="Mid Semester"> Mid Semester </option>
+                <option value="Mock Test"> Mock Test </option>
               </select>
               
               <!-- <input type="text" class="form-control" id="semester" placeholder="e.g. First Semester" required /> -->
@@ -323,21 +323,21 @@
           <input type="hidden" id="questionId" />
           <input type="hidden" id="questionExamId" />
           <input type="hidden" id="questionCourseId" />
-          <div class="mb-3">
+          <!-- <div class="mb-3">
             <label class="form-label">Difficulty</label>
             <select class="form-select" id="difficulty_level">
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
             </select>
-          </div>  
-          <div class="mb-3">
+          </div>   -->
+          <!-- <div class="mb-3">
             <label class="form-label">Question Type</label>
             <select class="form-select" id="question_type">
               <option value="objective">Objective</option>
               <option value="subjective">Subjective</option>
             </select>
-          </div>          
+          </div>           -->
           <!-- Question Text -->
           <div class="mb-3">
             <label class="form-label">Question Text</label>
@@ -346,11 +346,11 @@
           <!-- Options (optional) or correct_option, etc. -->
           <div class="mb-3">
             <label class="form-label">Option A</label>
-            <input type="tect" class="form-control" id="option_a" />
+            <input type="text" class="form-control" id="option_a" />
           </div>
           <div class="mb-3">
             <label class="form-label">Option B</label>
-            <input type="tect" class="form-control" id="option_b" />
+            <input type="text" class="form-control" id="option_b" />
           </div>
           <div class="mb-3">
             <label class="form-label">Option C</label>
@@ -358,7 +358,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Option D</label>
-            <input type="tect" class="form-control" id="option_d" />
+            <input type="text" class="form-control" id="option_d" />
           </div>                              
           <div class="mb-3">
             <label class="form-label">Correct Option</label>
@@ -546,14 +546,14 @@
     document.getElementById("questionExamId").value = currentExamId;
     document.getElementById("questionCourseId").value = currentExamCourseId;
     document.getElementById("examQuestionModalLabel").textContent = "Add Question";
-    document.getElementById("difficulty_level").value = "easy";
-    document.getElementById("question_type").value = "objective"; 
+    // document.getElementById("difficulty_level").value = "easy";
+    // document.getElementById("question_type").value = "objective"; 
     document.getElementById("questionText").value = "";
     document.getElementById("option_a").value = "";
     document.getElementById("option_b").value = "";
     document.getElementById("option_c").value = "";
     document.getElementById("option_d").value = "";    
-    document.getElementById("correctOption").value = "A";
+    document.getElementById("correctOption").value = "";
     document.getElementById("instructions").value = "";
     document.getElementById("scoreObtainable").value = "0";   
     new bootstrap.Modal(document.getElementById("examQuestionModal")).show();
@@ -566,14 +566,14 @@
         document.getElementById("questionId").value = q.id;
         document.getElementById("questionCourseId").value = q.course_id;
         document.getElementById("questionExamId").value = examId;
-        document.getElementById("difficulty_level").value = q.difficulty_level || "easy";
-        document.getElementById("question_type").value = q.question_type || "objective";
+        // document.getElementById("difficulty_level").value = q.difficulty_level || "easy";
+        // document.getElementById("question_type").value = q.question_type || "objective";
         document.getElementById("questionText").value = q.text || "";
         document.getElementById("option_a").value = q.option_a || "";
         document.getElementById("option_b").value = q.option_b || "";
         document.getElementById("option_c").value = q.option_c || "";
         document.getElementById("option_d").value = q.option_d || "";
-        document.getElementById("correctOption").value = q.correct_option || "A";
+        document.getElementById("correctOption").value = q.correct_option || "";
         document.getElementById("instructions").value = q.instructions || "";
         document.getElementById("scoreObtainable").value = q.score_obtainable || 0;
         document.getElementById("examQuestionModalLabel").textContent = "Edit Question";
@@ -582,7 +582,7 @@
       .catch(() => alert("Failed to fetch question data."));
   }
 
-  function saveExamQuestion() {
+  async function saveExamQuestion() {
     const id = document.getElementById("questionId").value;
     const examId = document.getElementById("questionExamId").value;
 
@@ -602,34 +602,47 @@
 
     if (id) {
       // Update existing question
-      payload.id = id;
-      fetch(API_URL + `questions/${id}`, {
+      try {
+        payload.id = id;
+        const data = await fetch(API_URL + `questions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
-        .then(res => res.json())
-        .then(() => {
+      const res = await data.json();
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
           bootstrap.Modal.getInstance(document.getElementById("examQuestionModal")).hide();
           alert("Question updated.");
           examQuestionsTable.ajax.reload(null, false);
-        })
-        .catch(() => alert("Failed to update question."));
+      }
+      catch(error) {
+        alert(error)
+      }
+      
     } else {
       // Create new question
-      payload.exam_id = examId; // link to the exam
-      fetch(API_URL + "exam-questions/addNew", {
+      try {
+            payload.exam_id = examId; // link to the exam
+        const data = await  fetch(API_URL + "exam-questions/addNew", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
-        .then(res => res.json())
-        .then(() => {
-          bootstrap.Modal.getInstance(document.getElementById("examQuestionModal")).hide();
+        const res = data.json();
+        if(data.error) {
+          alert(data.error);
+          return
+        }
+        bootstrap.Modal.getInstance(document.getElementById("examQuestionModal")).hide();
           alert("Question added.");
           examQuestionsTable.ajax.reload(null, false);
-        })
-        .catch(() => alert("Failed to add question."));
+      }
+      catch (error) {
+        alert(error)
+      }
     }
   }
 
@@ -682,7 +695,7 @@ function formatTime(data) {
   return strTime;
 
 }
-  function initExamsDataTable() {
+function initExamsDataTable() {
     examsTable = $("#examsTable").DataTable({
       processing: true,
       ajax: {
@@ -737,13 +750,16 @@ function formatTime(data) {
     new bootstrap.Modal(document.getElementById("examModal")).show();
   }
   
-  function editExam(examId) {
-    fetch(API_URL + "exams/" + examId)
-      .then(res => res.json())
-      .then(exam => {
+  async function editExam(examId) {
+    try {
+      const res = await fetch(API_URL + "exams/" + examId);
+      const exam = await res.json();
+      if(exam.error) {
+        alert(exam.error);
+        return
+      }
         document.getElementById("examId").value = exam.id || "";
         document.getElementById("examName").value = exam.exam_name || "";
-        document.getElementById("semester").value = exam.semester || "";
         document.getElementById("examLevel").value = exam.level || "";
         document.getElementById("max_score_obtainable").value = exam.max_score_obtainable || "15";
         document.getElementById("examMode").value = exam.exam_mode || "graded";
@@ -752,8 +768,10 @@ function formatTime(data) {
         document.getElementById("unitOfTime").value = exam.unit_of_time || "minutes";
         document.getElementById("examDate").value = exam.exam_date || `${new Date().toISOString().split("T")[0]}`;
         document.getElementById("instruction").value = exam.instruction || "";
-        document.getElementById("venue").value = exam.venue || "CBT Hall 1";
+        document.getElementById("startTime").value = exam.start_time || "";
+        document.getElementById("venue").value = exam.venue;
         document.getElementById("server_time").value = exam.server_time || "0";
+        document.getElementById("semester").value = exam.semester || "";
         document.getElementById("display_question_randomly").value = exam.display_question_randomly || "0";
         document.getElementById("unordered_answering").value = exam.display_question_randomly || "0";
         document.getElementById("allow_multiple_attempts").value = exam.allow_multiple_attempts || "0";
@@ -762,8 +780,10 @@ function formatTime(data) {
 
         document.getElementById("examModalLabel").textContent = "Edit Exam";
         new bootstrap.Modal(document.getElementById("examModal")).show();
-      })
-      .catch(() => alert("Failed to fetch exam."));
+    }
+    catch (error) {
+      alert(error)
+    }
 
                 // Load Departments and mark those linked to this exam
     fetch(API_URL + `exam-departments/${examId}/departments`)
@@ -838,8 +858,6 @@ function formatTime(data) {
   }
 
   function loadDropdowns(selectedCourseId=null, selectedSessionId=null, selectedDepts=[]) {
-    const select = document.getElementById('semester');
-    select.selectedIndex = 0;
     // Course
     fetch(API_URL + "courses")
       .then(res => res.json())

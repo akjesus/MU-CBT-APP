@@ -60,6 +60,7 @@ const examExaminerRoutes = require("./routes/examExaminerRoutes");
 const examQuestionRoutes = require("./routes/examQuestionRoutes");
 const resultRoutes = require("./routes/resultRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const notifierRoutes =  require("./utils/notifier")
 
 
 
@@ -96,16 +97,7 @@ app.use("/api/result", resultRoutes);
 app.use("/api/reports", reportRoutes);
 
 
-app.use("/api/notification", (req, res) => {
-  notifier.notify({
-    title: "Possible Malpractice Alert!!",
-    icon: path.join(__dirname, "logo.png"),
-    message: `${req.body.first_name} ${req.body.last_name}: ${req.body.registration_number} switched tabs more than 5 times`,
-    sound: true, 
-    wait: false, 
-  });
-  return;
-});
+app.use("/api/notification", notifierRoutes);
 
 app.all("*", (req, res, next) => {
   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
@@ -114,6 +106,7 @@ app.all("*", (req, res, next) => {
     status: "Not found",
     message: `Can not find ${fullUrl} on this server`,
   });
+
 });
 
 

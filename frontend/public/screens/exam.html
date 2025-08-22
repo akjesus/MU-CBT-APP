@@ -278,6 +278,7 @@ window.loadExam = examId;
     let tabSwitchCount = 0;
     let alertTime = null;
     let alertShown = false;
+    const exam_name = document.getElementById("exam-title").innerText;
 
     const visibilityHandler = async () => {
       if (document.visibilityState === "hidden") {
@@ -289,13 +290,13 @@ window.loadExam = examId;
           alertTime = Date.now(); // Record when alert was shown
           // Send alert to server
           let alertEndpoint = serverHost + api_prefix + "api/notification";
-
+          const payload = {...currentUser, exam_name}
           await fetch(alertEndpoint, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
             },
-            body: JSON.stringify(currentUser)
+            body: JSON.stringify(payload)
           });
         }
       }
