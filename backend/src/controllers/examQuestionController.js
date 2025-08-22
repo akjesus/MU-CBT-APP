@@ -20,6 +20,7 @@ exports.getQuestionsByExam = async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -94,7 +95,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
     // Insert into `questions` table
     const [result] = await db.query(
       `INSERT INTO questions 
-          (course_id, text, option_a, option_b, option_c, option_d, instructions, correct_option,
+          (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions,
              score_obtainable, level) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -107,7 +108,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         correct_option,
         instructions,
         score_obtainable,
-        level
+        level,
       ]
     );
 
