@@ -95,3 +95,70 @@ exports.submitExam = async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   };
+
+//controller function to take in bulk student responses as array and submit
+exports.submitBulkExam = async (req, res) => {
+  try {
+    const { exam_id } = req.params;
+    const studentResponses = req.body; 
+    // e.g. [{ student_id: 1, responses: { "7": "A", "8": "C" } }, ...]
+
+    if (!Array.isArray(studentResponses) || studentResponses.length === 0) {
+      return res.status(400).json({ error: "Invalid request format." });
+    }
+
+    // Process each student's responses
+    for (const { student_id, responses } of studentResponses) {
+      // Check if student has already attempted
+      const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
+      if (hasAttempted) {
+        continue; // Skip this student if they have already taken the exam
+      }
+
+      // 1) Fetch all relevant questions for this exam from the DB,
+      //    including their correct_option and score_obtainable.
+      const [questions] = await db.query(
+        `SELECT id AS question_id, correct_option, score_obtainable
+         FROM questions
+         WHERE id IN (
+           SELECT question_id FROM exam_questions WHERE exam_id = ?
+         )`,
+        [exam_id]
+      );
+
+      if (!questions || questions.length === 0) {
+        continue; // Skip this student if no questions found
+      }
+
+      // 2) For each question, check if user response matches the correct_option.
+      let totalScore = 0;
+      questions.forEach((q) => {
+        const userAnswer = responses[q.question_id];
+        // Convert score_obtainable to a real number
+        const questionScore = parseFloat(q.score_obtainable) || 0;
+
+        if (userAnswer && userAnswer === q.correct_option) {
+          totalScore += questionScore;
+        }
+      });
+
+      // 3) Save the result in the `results` table (status=completed, etc.)
+      //    We'll assume there's only one attempt. If multiple attempts are allowed,
+      //    you'd handle that logic.
+      await db.query(
+        `INSERT INTO results (student_id, exam_id, score, responses, status, start_time, submitted_time,
+                              active_duration, created_at, updated_at)
+         VALUES (?, ?, ?, ?, 'completed', NOW(), NOW(), 0, NOW(), NOW())`,
+        [student_id, exam_id, totalScore, JSON.stringify(responses)]
+      );
+    }
+
+    // 4) Respond with a success message.
+    res.json({
+      message: "Bulk exam submissions processed successfully!"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};

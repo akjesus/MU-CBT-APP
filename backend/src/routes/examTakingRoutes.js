@@ -5,6 +5,7 @@ const examTakingController = require("../controllers/examTakingController");
 router.get("/:exam_id/student/:student_id/eligibility", examTakingController.checkEligibility);
 router.get("/:exam_id/questions", examTakingController.getExamQuestions);
 router.post("/:exam_id/student/:student_id/submit", examTakingController.submitExam);
+router.post("/:exam_id/bulk-submit", examTakingController.submitBulkExam);
 
 module.exports = router;
 
