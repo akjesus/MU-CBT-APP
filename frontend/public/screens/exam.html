@@ -140,17 +140,6 @@
 
 <run>
 <script>
-  /*
-    We store exam progress (userAnswers, currentQuestionIndex, etc.)
-    in localStorage under a key like `examState_{userId}_{examId}`,
-    and also now check if results exist before starting the exam.
-  */
-
-// Remove this tab's ID from local storage when the tab is closed
-
-
-// Set up event listeners
-
 
   window.currentExamQuestions = [];
   window.currentQuestionIndex = 0;
@@ -164,16 +153,6 @@
   // If user is logged in, we can track tab switches
 
   
-  /*
-    loadExamQuestions:
-    1) Fetch exam details from /api/exams/:exam_id
-    2) Check if user already has a result
-    3) Then fetch exam questions
-    4) Restore local state if it exists
-  */
-
-
-
   window.loadExamQuestions = function(examId) {
     // 1) fetch exam details
     let endpoint = serverHost + api_prefix + "api/exams/" + examId;
@@ -357,7 +336,14 @@ window.loadExam = examId;
     let q = window.currentExamQuestions[window.currentQuestionIndex];
     if (!q) return;
     document.getElementById("current-question-number").innerText = "Question " + (window.currentQuestionIndex + 1) + ".";
-    document.getElementById("current-question-text").innerText = q.text || "Untitled Question";
+    // Show image if present
+    let imageHTML = "";
+    if (q.file && typeof q.file === "string" && q.file.trim() !== "") {
+      // If file path does not start with /, add it
+      let imgSrc = q.file.startsWith("/") ? q.file : "/" + q.file;
+      imageHTML = `<div style='margin-bottom:10px;'><img src='${imgSrc}' alt='Question Image' style='max-width:350px;max-height:250px;display:block;margin:auto;border:1px solid #ccc;border-radius:6px;'/></div>`;
+    }
+    document.getElementById("current-question-text").innerHTML = imageHTML + (q.text || "Untitled Question");
     document.getElementById("question-instructions").innerText = q.instructions || "No instructions provided for this question.";
     let savedAnswer = window.userAnswers[q.question_id] || "";
     let optionsHTML = `

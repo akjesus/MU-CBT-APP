@@ -159,6 +159,7 @@ exports.submitBulkExam = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    console.log
     res.status(500).json({ error: err.message });
   }
 };

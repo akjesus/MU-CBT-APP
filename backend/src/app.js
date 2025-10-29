@@ -6,15 +6,10 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
-const notifier = require("node-notifier");
 const dotenv = require("dotenv");
 dotenv.config({ path: "../../.env" });
-const path = require("path");
-
 
 const app = express();
-
-
 
 // Middleware
 app.use(cors());
@@ -95,8 +90,6 @@ app.use("/api/exam-examiners", examExaminerRoutes);
 app.use("/api/exam-questions", examQuestionRoutes);
 app.use("/api/result", resultRoutes);
 app.use("/api/reports", reportRoutes);
-
-
 app.use("/api/notification", notifierRoutes);
 
 app.all("*", (req, res, next) => {
@@ -106,7 +99,7 @@ app.all("*", (req, res, next) => {
     status: "Not found",
     message: `Can not find ${fullUrl} on this server`,
   });
-
+  next();
 });
 
 

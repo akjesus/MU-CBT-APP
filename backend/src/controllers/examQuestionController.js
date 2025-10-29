@@ -59,19 +59,9 @@ exports.addQuestionToExam = async (req, res) => {
   }
 };
 
-/**
- * 3. ADD A BRAND-NEW QUESTION to `questions`, then link it to exam_questions
- *    We expect the request body to have all question fields + exam_id
- *    for the new question. E.g.:
- *    {
- *      exam_id: 123,
- *      course_id: 5,
- *      text: "...",
- *      option_a: "...",
- *      ...
- *    }
- */
 exports.addNewQuestionAndLinkToExam = async (req, res) => {
+  console.log("Request files:", req.files.file);
+  const path = require("path");
   try {
     const { exam_id } = req.body;
     if (!exam_id) {
@@ -92,12 +82,44 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       level,
     } = req.body;
 
+    // Handle file upload if present
+    let filePath = null;
+    if (req.files && req.files.file) {
+      const uploadedFile = req.files.file;
+      // Save to frontend/public/uploads so it is accessible from the browser
+      const path = require('path');
+      const uploadDir = path.resolve(__dirname, '../../../frontend/public/uploads');
+      try {
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+      } catch (dirErr) {
+        console.error('Error creating upload directory:', uploadDir, dirErr);
+        return res.status(500).json({ error: 'Failed to create upload directory', details: dirErr.message });
+      }
+      // Generate unique filename
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const fileExt = uploadedFile.name.split('.').pop();
+      const filename = `question_${uniqueSuffix}.${fileExt}`;
+      filePath = `uploads/${filename}`; // relative to public
+      const fullPath = path.join(uploadDir, filename);
+      try {
+        fs.writeFileSync(fullPath, uploadedFile.data);
+        console.log('File saved successfully:', fullPath);
+      } catch (fileErr) {
+        console.error('Error saving file:', fullPath, fileErr);
+        return res.status(500).json({ error: 'Failed to save file', details: fileErr.message });
+      }
+    } else {
+      console.warn('No file found in req.files:', req.files);
+    }
+
     // Insert into `questions` table
     const [result] = await db.query(
       `INSERT INTO questions 
           (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions,
-             score_obtainable, level) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             score_obtainable, level, file) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         course_id,
         text,
@@ -109,6 +131,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         instructions,
         score_obtainable,
         level,
+        filePath,
       ]
     );
 
@@ -123,122 +146,8 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
     res.status(201).json({
       message: "New question created and linked to exam",
       question_id: newQuestionId,
+      file: filePath,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-/**
- * 4. Bulk CSV upload: each row has question fields (except created_at, updated_at).
- *    We create a new question for each row, then link it to exam_id.
- *
- *    Format example CSV:
- *      exam_id, course_id, text, option_a, option_b, option_c, option_d, correct_option, difficulty_level, question_type, score_obtainable, level, file, answers, user_id
- *    We skip created_at, updated_at
- *
- */
-
-exports.bulkUploadNewQuestions2 = async (req, res) => {
-  try {
-    const { exam_id } = req.params;
-    if (!exam_id) {
-      return res.status(400).json({ error: "No exam_id in URL" });
-    }
-
-    // Check if file is present
-    if (!req.files || !req.files.file) {
-      return res.status(400).json({ error: "CSV file is required" });
-    }
-    
-    const csvFile = req.files.file;
-    const bufferStream = new stream.PassThrough();
-    bufferStream.end(csvFile.data);
-
-    const questionsToInsert = []; // for question fields
-    // We'll store them as arrays of [course_id, text, ... user_id], then link after
-
-    bufferStream
-      .pipe(csvParser())
-      .on("data", (row) => {
-        // Extract the fields from CSV row
-        // We'll parse them carefully, assuming columns are consistent
-        const {
-          course_id,
-          text,
-          option_a,
-          option_b,
-          option_c,
-          option_d,
-          correct_option,
-          score_obtainable,
-          level,
-          file,
-          answers,
-        } = row;
-
-        // We'll store this row data
-        questionsToInsert.push({
-          course_id,
-          text,
-          option_a,
-          option_b,
-          option_c,
-          option_d,
-          correct_option,
-          score_obtainable,
-          level,
-          file,
-          answers,
-        });
-      })
-      .on("end", async () => {
-        if (!questionsToInsert.length) {
-          return res
-            .status(400)
-            .json({ error: "No valid question rows found in CSV" });
-        }
-
-        let insertedCount = 0;
-
-        // We'll process each question row individually
-        for (const qRow of questionsToInsert) {
-          // Insert new question
-          const [insertRes] = await db.query(
-            `INSERT INTO questions 
-               (course_id, text, option_a, option_b, option_c, option_d, correct_option,
-                score_obtainable, level, file, answers)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              qRow.course_id,
-              qRow.text,
-              qRow.option_a,
-              qRow.option_b,
-              qRow.option_c,
-              qRow.option_d,
-              qRow.correct_option,
-              qRow.score_obtainable,
-              qRow.level,
-              qRow.file,
-              qRow.answers,
-            ]
-          );
-
-          const newQId = insertRes.insertId;
-
-          // Link to exam_questions
-          await db.query(
-            `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
-            [exam_id, newQId]
-          );
-
-          insertedCount++;
-        }
-
-        res.status(201).json({
-          message: `${insertedCount} new questions created & linked to exam`,
-        });
-      });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

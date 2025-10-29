@@ -88,3 +88,31 @@ exports.createAdmin = async (req, res) => {
           next();
       });
   };
+
+  exports.resetpassword = async (req, res) => {
+    try {
+      const { username, newPassword } = req.body;
+
+      if (!username || !newPassword) {
+        return res.status(400).json({ error: "Username and new password are required" });
+      }
+
+      const admin = await Admin.findByUsername(username);
+
+      if (!admin) {
+        return res.status(404).json({ error: "Admin not found" });
+      }
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      await db.query(
+        `UPDATE staff SET password = ?, updated_at = NOW() WHERE id = ?`,
+        [hashedPassword, admin.id]
+      );
+
+      res.json({ message: "Password reset successful" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };

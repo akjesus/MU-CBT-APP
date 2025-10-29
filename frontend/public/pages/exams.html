@@ -374,6 +374,10 @@
             <textarea type="number" class="form-control" id="instructions" placeholder="Insert instructions here"></textarea>  
           </div> 
           <div class="mb-3">
+            <label class="form-label">Question Image (If Any)</label>
+            <input type="file" class="form-control" id="questionFile" accept="image/*" />
+          </div> 
+          <div class="mb-3">
             <label class="form-label">Score Obtainable</label>
             <input type="number" class="form-control" id="scoreObtainable" step="0.1" min="0" />
           </div>                   
@@ -546,8 +550,6 @@
     document.getElementById("questionExamId").value = currentExamId;
     document.getElementById("questionCourseId").value = currentExamCourseId;
     document.getElementById("examQuestionModalLabel").textContent = "Add Question";
-    // document.getElementById("difficulty_level").value = "easy";
-    // document.getElementById("question_type").value = "objective"; 
     document.getElementById("questionText").value = "";
     document.getElementById("option_a").value = "";
     document.getElementById("option_b").value = "";
@@ -555,7 +557,8 @@
     document.getElementById("option_d").value = "";    
     document.getElementById("correctOption").value = "";
     document.getElementById("instructions").value = "";
-    document.getElementById("scoreObtainable").value = "0";   
+    document.getElementById("scoreObtainable").value = "0";
+    document.getElementById("questionFile").value = "";
     new bootstrap.Modal(document.getElementById("examQuestionModal")).show();
   }
 
@@ -566,8 +569,6 @@
         document.getElementById("questionId").value = q.id;
         document.getElementById("questionCourseId").value = q.course_id;
         document.getElementById("questionExamId").value = examId;
-        // document.getElementById("difficulty_level").value = q.difficulty_level || "easy";
-        // document.getElementById("question_type").value = q.question_type || "objective";
         document.getElementById("questionText").value = q.text || "";
         document.getElementById("option_a").value = q.option_a || "";
         document.getElementById("option_b").value = q.option_b || "";
@@ -576,72 +577,88 @@
         document.getElementById("correctOption").value = q.correct_option || "";
         document.getElementById("instructions").value = q.instructions || "";
         document.getElementById("scoreObtainable").value = q.score_obtainable || 0;
+        document.getElementById("questionFile").value = "";
         document.getElementById("examQuestionModalLabel").textContent = "Edit Question";
         new bootstrap.Modal(document.getElementById("examQuestionModal")).show();
       })
-      .catch(() => alert("Failed to fetch question data."));
+      .catch((error) => {
+        console.error(error);
+        alert("Failed to fetch question data.");
+      });
   }
 
   async function saveExamQuestion() {
     const id = document.getElementById("questionId").value;
     const examId = document.getElementById("questionExamId").value;
+    const formData = new FormData();
 
-    const payload = {
-      course_id: document.getElementById("questionCourseId").value.trim(),
-      difficulty_level: "easy",
-      question_type: "objective",
-      text: document.getElementById("questionText").value.trim(),
-      option_a: document.getElementById("option_a").value.trim(),
-      option_b: document.getElementById("option_b").value.trim(),
-      option_c: document.getElementById("option_c").value.trim(),
-      option_d: document.getElementById("option_d").value.trim(),
-      correct_option: document.getElementById("correctOption").value,
-      instructions: document.getElementById("instructions").value,
-      score_obtainable: document.getElementById("scoreObtainable").value
-    };
+    // Collect all form fields
+    formData.append("course_id", document.getElementById("questionCourseId").value.trim());
+    formData.append("difficulty_level", "easy");
+    formData.append("question_type", "objective");
+    formData.append("text", document.getElementById("questionText").value.trim());
+    formData.append("option_a", document.getElementById("option_a").value.trim());
+    formData.append("option_b", document.getElementById("option_b").value.trim());
+    formData.append("option_c", document.getElementById("option_c").value.trim());
+    formData.append("option_d", document.getElementById("option_d").value.trim());
+    formData.append("correct_option", document.getElementById("correctOption").value);
+    formData.append("instructions", document.getElementById("instructions").value);
+    formData.append("score_obtainable", document.getElementById("scoreObtainable").value);
+
+    // Handle file upload
+    const fileInput = document.getElementById("questionFile");
+    if (fileInput.files && fileInput.files[0]) {
+      formData.append("file", fileInput.files[0]);
+      console.log("File appended to form data.");
+    }
 
     if (id) {
       // Update existing question
       try {
-        payload.id = id;
+        formData.append("id", id);
         const data = await fetch(API_URL + `questions/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      const res = await data.json();
-      if (data.error) {
-        alert(data.error);
-        return;
+          method: "PUT",
+          body: formData
+        });
+        const res = await data.json();
+        if (res.error) {
+          alert(res.error);
+          return;
+        }
+        bootstrap.Modal.getInstance(document.getElementById("examQuestionModal")).hide();
+        let msg = "Question updated.";
+        alert(msg);
+        examQuestionsTable.ajax.reload(null, false);
+      } catch (error) {
+        alert(error);
       }
-          bootstrap.Modal.getInstance(document.getElementById("examQuestionModal")).hide();
-          alert("Question updated.");
-          examQuestionsTable.ajax.reload(null, false);
-      }
-      catch(error) {
-        alert(error)
-      }
-      
     } else {
       // Create new question
       try {
-            payload.exam_id = examId; // link to the exam
-        const data = await  fetch(API_URL + "exam-questions/addNew", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-        const res = data.json();
-        if(data.error) {
-          alert(data.error);
-          return
+        formData.append("exam_id", examId); // link to the exam
+        const data = await fetch(API_URL + "exam-questions/addNew", {
+          method: "POST",
+          body: formData
+        });
+        const res = await data.json();
+        if (res.error) {
+          alert(res.error);
+          return;
         }
         bootstrap.Modal.getInstance(document.getElementById("examQuestionModal")).hide();
-          alert("Question added.");
-          examQuestionsTable.ajax.reload(null, false);
-      }
-      catch (error) {
-        alert(error)
+        let msg = "Question added.";
+        if (res.file) {
+          msg += `\nFile: <a href='/${res.file}' target='_blank'>View Uploaded File</a>`;
+        }
+        // Show as HTML if possible, else fallback to alert
+        if (window.Swal) {
+          Swal.fire({ html: msg });
+        } else {
+          alert(msg);
+        }
+        examQuestionsTable.ajax.reload(null, false);
+      } catch (error) {
+        alert(error);
       }
     }
   }

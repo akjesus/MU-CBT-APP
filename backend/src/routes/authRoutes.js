@@ -6,5 +6,6 @@ const authController = require("../controllers/authController");
 router.post("/login", authController.adminLogin);
 router.post("/register", authController.createAdmin); // Only for initial setup
 router.post("/logout", authController.adminLogout);
+router.post("/reset-password", authController.resetpassword);
 
 module.exports = router;

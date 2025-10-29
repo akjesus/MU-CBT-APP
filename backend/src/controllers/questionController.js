@@ -101,7 +101,9 @@ exports.createQuestion = async (req, res) => {
   }
 };
 
+
 exports.updateQuestion = async (req, res) => {
+  
   try {
     const questionId = req.params.id;
     const {
@@ -130,6 +132,37 @@ exports.updateQuestion = async (req, res) => {
       return res.status(404).json({ error: "Question not found" });
     }
 
+        let fullPath
+        if (req.files && req.files.file) {
+          const uploadedFile = req.files.file;
+          // Save to frontend/public/uploads so it is accessible from the browser
+          const path = require('path');
+          const uploadDir = path.resolve(__dirname, '../../../frontend/public/uploads');
+          try {
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+          } catch (dirErr) {
+            console.error('Error creating upload directory:', uploadDir, dirErr);
+            return res.status(500).json({ error: 'Failed to create upload directory', details: dirErr.message });
+          }
+          // Generate unique filename
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const fileExt = uploadedFile.name.split('.').pop();
+          const filename = `question_${uniqueSuffix}.${fileExt}`;
+          filePath = `uploads/${filename}`; // relative to public
+          fullPath = path.join(uploadDir, filename);
+          try {
+            fs.writeFileSync(fullPath, uploadedFile.data);
+            console.log('File saved successfully:', fullPath);
+          } catch (fileErr) {
+            console.error('Error saving file:', fullPath, fileErr);
+            return res.status(500).json({ error: 'Failed to save file', details: fileErr.message });
+          }
+        } else {
+          console.warn('No file found in req.files:', req.files);
+        }
+
     await db.query(
       `UPDATE questions 
              SET course_id = ?, text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, 
@@ -149,7 +182,7 @@ exports.updateQuestion = async (req, res) => {
         question_type,
         score_obtainable,
         level,
-        file,
+        fullPath,
         answers,
         user_id,
         questionId,

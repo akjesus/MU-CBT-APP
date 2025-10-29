@@ -36,7 +36,7 @@ class ExamTaking {
 
       // Fetch questions with the determined order
       const [questions] = await db.query(
-        `SELECT q.id AS question_id, q.text, q.option_a, q.option_b, q.option_c, q.option_d, q.instructions, q.score_obtainable, q.question_type
+        `SELECT q.id AS question_id, q.text, q.option_a, q.option_b, q.option_c, q.option_d, q.instructions, q.score_obtainable, q.question_type, q.file
              FROM exam_questions eq
              JOIN questions q ON eq.question_id = q.id
              WHERE eq.exam_id = ? ${orderClause}`,
