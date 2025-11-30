@@ -1,4 +1,5 @@
 const ExamTaking = require("../models/ExamTaking");
+const Attendance = require("../models/Attendance");
 const db = require("../config/database");
 
 exports.checkEligibility = async (req, res) => {
@@ -86,6 +87,7 @@ exports.submitExam = async (req, res) => {
       );
   
       // 4) Respond with a success message and the final score if you wish.
+      await Attendance.signOutStudent(student_id, exam_id);
       res.json({
         message: "Exam submitted and auto-graded successfully!",
         finalScore: totalScore

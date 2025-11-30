@@ -82,6 +82,7 @@ exports.createExam = async (req, res) => {
 exports.activateExam = async (req, res) => {
   try {
     const id = await Exam.activateExam(req.params.id);
+    console.log("Exam Active state toggled")
     res.status(201).json({ message: "Exam activated", id });
   } catch (err) {
     console.log(err);
@@ -103,39 +104,49 @@ exports.removeAllQuestionsFromExam = async (req, res) => {
 };
 
 exports.updateExam = async (req, res) => {
-const payload = req.body;
-delete payload.department_ids;
-delete payload.examiners_ids;
+    const payload = req.body;
+    delete payload.department_ids;
+    delete payload.examiners_ids;
 
-const id = req.params.id;
-const updateColumns = [];
-const updateValues = [];
+    const id = req.params.id;
+    const updateColumns = [];
+    const updateValues = [];
 
-Object.keys(payload).forEach((key) => {
-  if (
-    payload[key] !== undefined &&
-    payload[key] !== null &&
-    payload[key] !== 0 &&
-    payload[key] !==''
-  ) {
-    updateColumns.push(`${key}`);
-    updateValues.push(payload[key]);
-  }
-});
+    Object.keys(payload).forEach((key) => {
+      if (
+        payload[key] !== undefined &&
+        payload[key] !== null &&
+        payload[key] !== 0 &&
+        payload[key] !==''
+      ) {
+        updateColumns.push(`${key}`);
+        updateValues.push(payload[key]);
+      }
+    });
 
-try {
-  await Exam.updateNewExam(id, updateColumns, updateValues);
-  res.json({ message: "Exam updated" });
-} catch (err) {
-    console.log(err.message)
-  res.status(500).json({ error: err.message });
-}
+    try {
+      await Exam.updateNewExam(id, updateColumns, updateValues);
+      res.json({ message: "Exam updated" });
+    } catch (err) {
+        console.log(err.message)
+      res.status(500).json({ error: err.message });
+    }
 };
 
 exports.deleteExam = async (req, res) => {
     try {
         await Exam.delete(req.params.id);
         res.json({ message: "Exam deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
+exports.getAllActiveExams = async (req, res) => {
+    try {
+        const exams = await Exam.getAllActive();
+        res.json(exams);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

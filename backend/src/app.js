@@ -56,6 +56,7 @@ const examQuestionRoutes = require("./routes/examQuestionRoutes");
 const resultRoutes = require("./routes/resultRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const notifierRoutes =  require("./utils/notifier")
+const attendanceRoutes = require("./routes/attendanceRoutes");
 
 
 
@@ -91,6 +92,7 @@ app.use("/api/exam-questions", examQuestionRoutes);
 app.use("/api/result", resultRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notification", notifierRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 app.all("*", (req, res, next) => {
   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;

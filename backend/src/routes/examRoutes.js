@@ -3,6 +3,7 @@ const router = express.Router();
 const examController = require("../controllers/examController");
 
 router.get("/", examController.getAllExams);
+router.get("/active", examController.getAllActiveExams);
 router.get("/coursesession", examController.getAllExamsWithCourseSession);
 router.get("/:id", examController.getExamById);
 router.patch("/:id", examController.activateExam);
