@@ -866,20 +866,21 @@ function clearCourseForm() {
     showingNotificationAll = !showingNotificationAll;
     notificationTable.page.len(showingNotificationAll ? -1 : 10).draw(false);
   }
+
 function dateTime(dateStr) {
   const date = new Date(dateStr);
-const day = date.toLocaleString('en-US', { weekday: 'long' });
-const month = date.toLocaleString('en-US', { month: 'long' });
-const dayOfMonth = date.getDate();
-const year = date.getFullYear();
-let hours = date.getHours();
-const minutes = date.getMinutes().toString().padStart(2, '0');
-const amPm = hours < 12 ? 'AM' : 'PM';
+  const day = date.toLocaleString('en-US', { weekday: 'long' });
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const dayOfMonth = date.getDate();
+  const year = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const amPm = hours < 12 ? 'AM' : 'PM';
 
-hours = hours % 12;
-hours = hours === 0 ? 12 : hours;
+  hours = hours % 12;
+  hours = hours === 0 ? 12 : hours;
 
-return`${day}, ${month} ${dayOfMonth}, ${year} at ${hours}:${minutes} ${amPm}`;
+  return`${day}, ${month} ${dayOfMonth}, ${year} at ${hours}:${minutes} ${amPm}`;
 
 }
 

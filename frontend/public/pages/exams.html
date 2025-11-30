@@ -1,31 +1,158 @@
-<div class="container mt-4" style="overflow: scroll;">
+<div class="container mt-4">
   <h2>Manage Exams</h2>
 
-  <div class="mb-3">
-    <button class="btn btn-primary" id="btnAddExam" onclick="addExam()">+ Add Exam</button>
-    <button class="btn btn-secondary" id="btnToggleLength">Toggle Paginated/All</button>
-  </div>
+  <!-- Add tabs for All Exams, Active Exams, and Attendance -->
+  <ul class="nav nav-tabs" id="examTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active"
+        id="all-exams-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#all-exams"
+        type="button"
+        role="tab"
+        aria-controls="all-exams"
+        aria-selected="true"
+      >
+        All Exams
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="active-exams-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#active-exams"
+        type="button"
+        role="tab"
+        aria-controls="active-exams"
+        aria-selected="false"
+      >
+        Active Exams
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="attendance-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#attendance"
+        type="button"
+        role="tab"
+        aria-controls="attendance"
+        aria-selected="false"
+      >
+        Attendance
+      </button>
+    </li>
+  </ul>
 
-  <!-- DataTable for Exams -->
-  <table id="examsTable" class="display nowrap table table-striped" style="width: 100%;">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Exam Name</th>
-        <th>Semester</th>
-        <th>Course Code</th>
-        <th>Course</th>
-        <th>Session</th>
-        <th>Level</th>
-        <th>Departments</th>
-        <th>Start Time</th>
-        <th>Server Time</th>
-        <th>Duration</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody><!-- Data loaded by DataTables Ajax --></tbody>
-  </table>
+  <div class="tab-content" id="examTabsContent">
+    <!-- All Exams Tab -->
+    <div
+      class="tab-pane fade show active"
+      id="all-exams"
+      role="tabpanel"
+      aria-labelledby="all-exams-tab"
+    >
+      <div class="container mt-4" style="overflow: scroll;">
+        <div class="mb-3">
+          <button class="btn btn-primary" id="btnAddExam" onclick="addExam()">
+            + Add Exam
+          </button>
+          <button class="btn btn-secondary" id="btnToggleLength">
+            Toggle Paginated/All
+          </button>
+        </div>
+        <!-- DataTable for Exams -->
+        <table
+          id="examsTable"
+          class="display nowrap table table-striped"
+          style="width: 100%;"
+        >
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Exam Name</th>
+              <th>Semester</th>
+              <th>Course Code</th>
+              <th>Course</th>
+              <th>Session</th>
+              <th>Level</th>
+              <th>Departments</th>
+              <th>Start Time</th>
+              <th>Server Time</th>
+              <th>Duration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody><!-- Data loaded by DataTables Ajax --></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Active Exams Tab -->
+    <div
+      class="tab-pane fade"
+      id="active-exams"
+      role="tabpanel"
+      aria-labelledby="active-exams-tab"
+    >
+      <div class="container mt-4" style="overflow: scroll;">
+        <h2>Active Exams</h2>
+        <table
+          id="activeExamsTable"
+          class="display nowrap table table-striped"
+          style="width: 100%;"
+        >
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Exam Name</th>
+              <th>Course</th>
+              <th>Level</th>
+              <th>Start Time</th>
+              <th>Duration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody><!-- Data loaded by DataTables Ajax --></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Attendance Tab -->
+    <div
+      class="tab-pane fade"
+      id="attendance"
+      role="tabpanel"
+      aria-labelledby="attendance-tab"
+    >
+      <div class="container mt-4" style="overflow: scroll;">
+        <h2>Attendance</h2>
+        <table
+          id="attendanceTable"
+          class="display nowrap table table-striped"
+          style="width: 100%;"
+        >
+          <thead>
+            <tr>
+              <th>Exam ID</th>
+              <th>Exam Name</th>
+              <th>Matric No</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>IP Address</th>
+              <th>Time Started</th>
+              <th>Time Submitted</th>
+            </tr>
+          </thead>
+          <tbody><!-- Data loaded by DataTables Ajax --></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 <!-- Modal: Add/Edit Exam -->
 <div class="modal fade" id="examModal" tabindex="-1" aria-labelledby="examModalLabel" aria-hidden="true">
@@ -535,14 +662,19 @@
       body: formData
     })
       .then(res => res.json())
-      .then(data => {
+      .then((data) => {
+        // Handle success
         bootstrap.Modal.getInstance(document.getElementById("questionUploadModal")).hide();
-        if(data.error)
-       {alert(data.error)} 
-       else alert(data.message || "Bulk exam questions upload completed.");
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert(data.message || "Bulk exam questions upload completed.");
+        }
         examQuestionsTable.ajax.reload(null, false);
       })
-      .catch(() => alert("Failed to import exam questions."));
+      .catch(() => {
+        alert("Failed to import exam questions.");
+      });
   }
 
   function addExamQuestion() {
@@ -609,7 +741,6 @@
     const fileInput = document.getElementById("questionFile");
     if (fileInput.files && fileInput.files[0]) {
       formData.append("file", fileInput.files[0]);
-      console.log("File appended to form data.");
     }
 
     if (id) {
@@ -679,11 +810,17 @@
 </script>
 <script>
   showingAll = false;
+  showingAllActive = false;
+  showingAllAttendance = false;
   examsTable;
+  activeExamsTable;
+  attendanceTable;
 
-  document.addEventListener("DOMContentLoaded", function () {
-    initExamsDataTable();
-
+  if (document.readyState !== 'loading') {
+    initActiveExamsDataTable();
+    initAttendanceTable();
+  } else {
+    document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("btnAddExam").addEventListener("click", addExam);
     document.getElementById("btnToggleLength").addEventListener("click", function () {
       showingAll = !showingAll;
@@ -696,9 +833,15 @@
       saveExam();
     });
   });
+}
+  //end of function DOMContentLoaded
 function showAllExams(){
   showingAll = !showingAll;
       examsTable.page.len(showingAll ? -1 : 10).draw(false);
+}
+function showAllActiveExams(){
+  showingAllActive = !showingAllActive;
+      activeExamsTable.page.len(showingAllActive ? -1 : 10).draw(false);
 }
 
 function formatTime(data) {
@@ -710,6 +853,21 @@ function formatTime(data) {
   minutes = minutes;
   let strTime = hours + ':' + minutes + ' ' + ampm;
   return strTime;
+}
+function dateTime(dateStr) {
+  const date = new Date(dateStr);
+  const day = date.toLocaleString('en-US', { weekday: 'long' });
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const dayOfMonth = date.getDate();
+  const year = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const amPm = hours < 12 ? 'AM' : 'PM';
+
+  hours = hours % 12;
+  hours = hours === 0 ? 12 : hours;
+
+  return`${day}, ${month} ${dayOfMonth}, ${year} at ${hours}:${minutes} ${amPm}`;
 
 }
 function initExamsDataTable() {
@@ -758,7 +916,97 @@ function initExamsDataTable() {
       pageLength: 10,
       lengthMenu: [[10,25,50,-1],[10,25,50,"All"]]
     });
-  }
+}
+
+function initActiveExamsDataTable() {
+    // Initialize the DataTable
+    activeExamsTable = $("#activeExamsTable").DataTable({
+        processing: true,
+        serverSide: false, // Set to true if the server handles pagination
+        ajax: {
+            url: API_URL + "exams/active", // Ensure this endpoint is correct
+            dataSrc: function (json) {
+                if (!Array.isArray(json)) {
+                    console.error("Unexpected data format. Expected an array.");
+                    return [];
+                }
+                return json;
+            },
+            error: function (xhr, error, thrown) {
+                console.error("Error fetching active exams:", error, thrown);
+                console.error("XHR Response:", xhr.responseText);
+            },
+        },
+        columns: [
+            { data: "id" },
+            { data: "exam_name" },
+            { data: "course_name" },
+            { data: "course_level" },
+            {data: "start_time",
+              render : function(data) {
+               return formatTime(data)
+          } 
+        },
+            { data: "duration" },
+            {
+          data: null,
+          render: function (row) {
+
+            return `
+              <button class="btn btn-sm btn-primary me-1" onclick="editExam(${row.id})">Edit</button>
+              <button class="btn btn-sm ${row.active ?`btn-warning`: `btn-success`} me-1" onclick="activateExam(${row.id}, ${row.active})">${row.active ?`Deactivate`: `Activate`}</button>
+              <button class="btn btn-sm btn-info" onclick="manageExamQuestions(${row.id},'${row.exam_name}',${row.course_id})">Manage Questions</button>
+            `;
+          },
+          orderable: false
+        }
+        ],
+        dom: "Bfrtip",
+        buttons: ["pageLength", "csvHtml5", "excelHtml5", "print"],
+        responsive: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+    });
+}
+function initAttendanceTable () {
+   // Initialize Attendance DataTable
+   attendanceTable =  $("#attendanceTable").DataTable({
+      processing: true,
+      serverSide: false, // Set to true if the server handles pagination
+      ajax: {
+        url: API_URL + "attendance", // Replace with the correct endpoint
+        dataSrc: "",
+        error: function (xhr, error, thrown) {
+          console.error("Error fetching attendance data:", error, thrown);
+          console.error("XHR Response:", xhr.responseText);
+        },
+      },
+      columns: [
+        { data: "exam_id"},
+        { data: "exam_name" },
+        { data: "registration_number" },
+        { data: "student_name"},
+        {data: "department"},
+        { data: "status" },
+        { data: "ip_address"},
+        {data: "login_timestamp",
+          render : function(data) {
+            return dateTime(data)
+          } 
+        },
+        {data: "logout_timestamp",
+          render : function(data) {
+            return dateTime(data)
+          } 
+        },
+      ],
+      dom: "Bfrtip",
+      buttons: ["pageLength", "csvHtml5", "excelHtml5", "print"],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+    });
+}
 
   function addExam() {
     clearExamForm();
@@ -1014,11 +1262,10 @@ function initExamsDataTable() {
       .then(() => {
         alert(`Exam ${active == 1 ?`Deactivated`: `Activated`}!`);
         examsTable.ajax.reload(null, false);
+        if(activeExamsTable) activeExamsTable.ajax.reload(null, false);
       })
       .catch(() => alert("Failed to activate exam."));
   }
-
-  
   function deleteQuestions(exam_id) {
     const url = `${API_URL}exams/${exam_id}/remove-questions`;
     if (!confirm(` Delete questions for this exam?`)) return;

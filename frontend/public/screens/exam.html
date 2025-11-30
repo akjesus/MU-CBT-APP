@@ -67,7 +67,7 @@
     border-radius: 5px;
     border: none;
     color: white;
-    background-color: rgb(3, 143, 89); 
+   
     cursor: pointer;
     font-size: 12px;
   }
@@ -141,6 +141,7 @@
 <run>
 <script>
 
+  
   window.currentExamQuestions = [];
   window.currentQuestionIndex = 0;
   window.userAnswers = {};
@@ -151,6 +152,9 @@
   let userString = localStorage.getItem("user_data");
   let currentUser = userString ? JSON.parse(userString) : null;
   // If user is logged in, we can track tab switches
+
+  //Create a function to send student data to attendance endpoint when the exam starts 
+
 
   
   window.loadExamQuestions = function(examId) {
@@ -170,8 +174,6 @@ window.loadExam = examId;
   function checkIfExamResultExists(examId) {
     let user = getCurrentUser();
     if (!user || !user.id) return;
-    // Suppose we have an endpoint: GET /api/results?student_id=xx&exam_id=yy
-    // If it returns a result row, user has taken the exam.
     let resEndpoint = serverHost + api_prefix + "api/result?student_id="+user.id+"&exam_id="+examId;
     reqAsyncJSON("GET", resEndpoint, {}, "handleCheckExamResult", "Checking existing results...");
   }
@@ -251,49 +253,93 @@ window.loadExam = examId;
     // Show exam page
     document.getElementById("page-exam").style.display = "block";
 
-    //track tab switches
+    // Mark attendance for the student
+    markAttendance();
+
+    // Track tab switches
     const currentUser = getCurrentUser();
-     if (currentUser) {
-    let tabSwitchCount = 0;
-    let alertTime = null;
-    let alertShown = false;
-    const exam_name = document.getElementById("exam-title").innerText;
+    if (currentUser) {
+      let tabSwitchCount = 0;
+      let alertTime = null;
+      let alertShown = false;
+      const exam_name = document.getElementById("exam-title").innerText;
 
-    const visibilityHandler = async () => {
-      if (document.visibilityState === "hidden") {
-        tabSwitchCount++;
-        console.log(`Tab switch count: ${tabSwitchCount}`);
+      const visibilityHandler = async () => {
+        if (document.visibilityState === "hidden") {
+          tabSwitchCount++;
+          console.log(`Tab switch count: ${tabSwitchCount}`);
 
-        if (tabSwitchCount >= 5 && !alertShown) {
-          alertShown = true;
-          alertTime = Date.now(); // Record when alert was shown
-          // Send alert to server
-          let alertEndpoint = serverHost + api_prefix + "api/notification";
-          const payload = {...currentUser, exam_name}
-          await fetch(alertEndpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-          });
+          if (tabSwitchCount >= 5 && !alertShown) {
+            alertShown = true;
+            alertTime = Date.now(); // Record when alert was shown
+            // Send alert to server
+            let alertEndpoint = serverHost + api_prefix + "api/notification";
+            const payload = { ...currentUser, exam_name };
+            await fetch(alertEndpoint, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(payload)
+            });
+          }
         }
-      }
 
-      if (document.visibilityState === "visible") {
-        if (alertShown && alertTime && Date.now() - alertTime >= 10000) {
-          tabSwitchCount = 0;
-          alertShown = false;
-          alertTime = null;
-          console.log("Tab switch count reset after returning to tab.");
+        if (document.visibilityState === "visible") {
+          if (alertShown && alertTime && Date.now() - alertTime >= 10000) {
+            tabSwitchCount = 0;
+            alertShown = false;
+            alertTime = null;
+            console.log("Tab switch count reset after returning to tab.");
+          }
         }
+      };
+
+      document.addEventListener("visibilitychange", visibilityHandler);
+    }
+  };
+
+  // Function to mark attendance when the exam starts
+function markAttendance() {
+  const currentUser = getCurrentUser();
+  if (!currentUser || !currentUser.id) {
+    console.error("User not logged in or invalid user data.");
+    return;
+  }
+
+  if (!window.currentExam || !window.currentExam.id) {
+    console.error("Exam not loaded or invalid exam data.");
+    return;
+  }
+
+  const attendanceEndpoint = serverHost + api_prefix + "api/attendance";
+  const payload = {
+    student_id: currentUser.id,
+    exam_id: window.currentExam.id,
+  };
+
+  fetch(attendanceEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Failed to mark attendance");
       }
-    };
+      return response.json();
+    })
+    .then(data => {
+      console.log("Attendance marked successfully:", data);
+    })
+    .catch(error => {
+      console.error("Error marking attendance:", error);
+    });
+}
 
-    document.addEventListener("visibilitychange", visibilityHandler);
-  }  };
-
-  /*
+/*
     buildQuestionIndicators: build clickable question # boxes
   */
   window.buildQuestionIndicators = function() {
@@ -336,12 +382,14 @@ window.loadExam = examId;
     let q = window.currentExamQuestions[window.currentQuestionIndex];
     if (!q) return;
     document.getElementById("current-question-number").innerText = "Question " + (window.currentQuestionIndex + 1) + ".";
-    // Show image if present
+    // Show image if present and valid else just text
     let imageHTML = "";
-    if (q.file && typeof q.file === "string" && q.file.trim() !== "") {
-      // If file path does not start with /, add it
+    if (q.file && typeof q.file === "string" && q.file === null) {
       let imgSrc = q.file.startsWith("/") ? q.file : "/" + q.file;
       imageHTML = `<div style='margin-bottom:10px;'><img src='${imgSrc}' alt='Question Image' style='max-width:350px;max-height:250px;display:block;margin:auto;border:1px solid #ccc;border-radius:6px;'/></div>`;
+    }
+    else {
+      imageHTML = "";
     }
     document.getElementById("current-question-text").innerHTML = imageHTML + (q.text || "Untitled Question");
     document.getElementById("question-instructions").innerText = q.instructions || "No instructions provided for this question.";
