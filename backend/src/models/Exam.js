@@ -93,7 +93,6 @@ class Exam {
   static async activateExam(id) {
     await db.query(`UPDATE exams SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?`, [id]);
     const [status] = await db.query(`select active from exams where id = ?`, [id]);
-    console.log(status)
     return;
   }
 
@@ -165,12 +164,8 @@ class Exam {
     newValues.push(parseInt(id));
 
     const sql = `UPDATE exams SET ${query} WHERE id = ?`;
-    try {
       const [results] = await db.query(sql, newValues);
-      console.log(`Updated row with id ${id}`);
-    } catch (err) {
-      console.error(err);
-    }
+      return results;
   }
 
   static async delete(id) {

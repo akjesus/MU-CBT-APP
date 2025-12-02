@@ -95,7 +95,7 @@
     Duration: <span id="exam-duration"></span> <span id="exam-unit"></span>
     Time Left: <span id="exam-countdown" style="font-weight: bold; color: rgb(8, 85, 59);">--:--</span>
   </p>
-<h4 style = "color: rgb(3, 143, 89)"><span>Question Instructions: </span><span id="question-instructions" style = "color: rgb(3, 143, 89)">Loading instructions... </span> </h4>
+<h4 style = "color: rgb(3, 143, 89)"><span>Question Instructions: </span><span id="question-instructions" style = "color: rgb(3, 143, 89)"></span> </h4>
 
   <!-- SINGLE QUESTION VIEW -->
   <div
@@ -384,15 +384,24 @@ function markAttendance() {
     document.getElementById("current-question-number").innerText = "Question " + (window.currentQuestionIndex + 1) + ".";
     // Show image if present and valid else just text
     let imageHTML = "";
-    if (q.file && typeof q.file === "string" && q.file === null) {
+    if (q.file && typeof q.file === "string" && q.file.trim() !== "") {
       let imgSrc = q.file.startsWith("/") ? q.file : "/" + q.file;
-      imageHTML = `<div style='margin-bottom:10px;'><img src='${imgSrc}' alt='Question Image' style='max-width:350px;max-height:250px;display:block;margin:auto;border:1px solid #ccc;border-radius:6px;'/></div>`;
+      imageHTML = `<div style='margin-bottom:10px;'><img src='${imgSrc}' alt='' style='max-width:350px;max-height:250px;display:block;margin:auto;border:1px solid #ccc;border-radius:6px;'/></div>`;
     }
-    else {
-      imageHTML = "";
-    }
+    
     document.getElementById("current-question-text").innerHTML = imageHTML + (q.text || "Untitled Question");
-    document.getElementById("question-instructions").innerText = q.instructions || "No instructions provided for this question.";
+    
+    const instructionsElement = document.getElementById("question-instructions");
+    const instructionsContainer = instructionsElement.parentElement;
+
+    if (q.instructions && q.instructions.trim() !== "") {
+      instructionsElement.innerText = q.instructions;
+      instructionsContainer.style.display = "block";
+    } else {
+      instructionsElement.innerText = "";
+      instructionsContainer.style.display = "none";
+    }
+
     let savedAnswer = window.userAnswers[q.question_id] || "";
     let optionsHTML = `
       ${buildRadioOptionHTML(q.question_id, "A", q.option_a, savedAnswer)}
