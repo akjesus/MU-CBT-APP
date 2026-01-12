@@ -4,14 +4,14 @@ const bcrypt = require("bcryptjs");
 class Staff {
     static async getAll() {
         const [rows] = await db.query(
-            `SELECT staff.id, staff.role, CONCAT(staff.first_name, ' ', staff.last_name) AS name, staff.email, 
+            `SELECT staff.id, staff.role, staff.first_name, staff.last_name, staff.email, 
                     staff.username, staff.photo, staff.phone, staff.address, 
                     staff.department_id, departments.name AS department_name, 
                     faculties.name AS faculty_name
              FROM staff
              LEFT JOIN departments ON staff.department_id = departments.id
              LEFT JOIN faculties ON departments.faculty_id = faculties.id`
-        )
+        );
         return rows;
     }
 

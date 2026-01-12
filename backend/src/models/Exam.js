@@ -24,29 +24,6 @@ class Exam {
     return rows;
   }
 
-  static async getAllActive() {
-    const [rows] = await db.query(
-      `SELECT exams.id, exams.course_id, courses.name AS course_name,courses.code AS course_code, 
-                    exams.session_id, sessions.name AS session_name, levels.name AS course_level,
-                    exams.semester, exams.level, exams.exam_name, 
-                    exams.max_score_obtainable, exams.exam_mode, exams.server_time,
-                    exams.start_time, exams.duration, exams.unit_of_time, exams.active,
-                    exams.exam_date, exams.instruction, exams.venue, exams.display_question_randomly, 
-                    exams.allow_multiple_attempts, exams.unordered_answering, 
-                    exams.created_at, exams.updated_at, 
-                    GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
-             FROM exams
-             JOIN courses ON exams.course_id = courses.id
-             JOIN levels ON courses.level_id = levels.id
-             JOIN sessions ON exams.session_id = sessions.id
-             LEFT JOIN exam_departments ON exams.id = exam_departments.exam_id
-             LEFT JOIN departments ON exam_departments.department_id = departments.id
-            WHERE exams.active = 1
-             GROUP BY exams.id, courses.name, sessions.name
-             ORDER BY exams.start_time DESC`
-    );
-    return rows;
-  }
   static async getAllWithDepartments() {
     const sql = `
             SELECT 
@@ -91,8 +68,7 @@ class Exam {
     return questions;
   }
   static async activateExam(id) {
-    await db.query(`UPDATE exams SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END WHERE id = ?`, [id]);
-    const [status] = await db.query(`select active from exams where id = ?`, [id]);
+    await db.query(`UPDATE exams SET active = NOT active WHERE id = ?`, [id]);
     return;
   }
 
@@ -164,8 +140,23 @@ class Exam {
     newValues.push(parseInt(id));
 
     const sql = `UPDATE exams SET ${query} WHERE id = ?`;
+    try {
       const [results] = await db.query(sql, newValues);
-      return results;
+      console.log(`Updated row with id ${id}`);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  static async getAllActiveExams() {
+    const [rows] = await db.query(
+      `SELECT exams.id, courses.name AS course_name, exams.level as course_level, 
+        exams.exam_name, exams.start_time, exams.duration, exams.unit_of_time, exams.active
+            FROM exams
+            JOIN courses ON exams.course_id = courses.id
+            WHERE exams.active = 1`,
+    );
+    return rows;
   }
 
   static async delete(id) {

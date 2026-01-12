@@ -58,6 +58,8 @@ const reportRoutes = require("./routes/reportRoutes");
 const notifierRoutes =  require("./utils/notifier")
 const attendanceRoutes = require("./routes/attendanceRoutes");
 
+// Use Routes
+
 
 
 app.use("/api/auth", authRoutes);
@@ -93,6 +95,8 @@ app.use("/api/result", resultRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notification", notifierRoutes);
 app.use("/api/attendance", attendanceRoutes);
+
+// Handle Undefined Routes
 
 app.all("*", (req, res, next) => {
   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;

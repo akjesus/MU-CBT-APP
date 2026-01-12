@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <h2>Manage Exams</h2>
 
-  <!-- Add tabs for All Exams, Active Exams, and Attendance -->
+  <!-- Add tabs for All Exams, Ongoing Exams, and Attendance -->
   <ul class="nav nav-tabs" id="examTabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button
@@ -28,7 +28,7 @@
         aria-controls="active-exams"
         aria-selected="false"
       >
-        Active Exams
+        Ongoing Exams
       </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -91,7 +91,7 @@
       </div>
     </div>
 
-    <!-- Active Exams Tab -->
+    <!-- Ongoing Exams Tab -->
     <div
       class="tab-pane fade"
       id="active-exams"
@@ -99,7 +99,7 @@
       aria-labelledby="active-exams-tab"
     >
       <div class="container mt-4" style="overflow: scroll;">
-        <h2>Active Exams</h2>
+        <h2>Ongoing Exams</h2>
         <table
           id="activeExamsTable"
           class="display nowrap table table-striped"
@@ -953,7 +953,7 @@ function initActiveExamsDataTable() {
           render: function (row) {
 
             return `
-              <button class="btn btn-sm btn-primary me-1" onclick="editExam(${row.id})">Edit</button>
+             <button class="btn btn-sm btn-primary me-1" onclick="editExam(${row.id})">Edit</button>
               <button class="btn btn-sm ${row.active ?`btn-warning`: `btn-success`} me-1" onclick="activateExam(${row.id}, ${row.active})">${row.active ?`Deactivate`: `Activate`}</button>
               <button class="btn btn-sm btn-info" onclick="manageExamQuestions(${row.id},'${row.exam_name}',${row.course_id})">Manage Questions</button>
             `;
