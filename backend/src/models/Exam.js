@@ -150,7 +150,7 @@ class Exam {
 
   static async getAllActiveExams() {
     const [rows] = await db.query(
-      `SELECT exams.id, courses.name AS course_name, exams.level as course_level, 
+      `SELECT exams.id, courses.name AS course_name, courses.level as course_level, 
         exams.exam_name, exams.start_time, exams.duration, exams.unit_of_time, exams.active
             FROM exams
             JOIN courses ON exams.course_id = courses.id

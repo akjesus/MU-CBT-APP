@@ -4,5 +4,7 @@ const attendanceController = require("../controllers/attendanceController");
 
 // Admin Dashboard Data (Protected Route)
 router.get("/", attendanceController.getAttendance);
+router.post("/", attendanceController.markAttendance);
+router.put("/", attendanceController.signAttendance);
 
 module.exports = router;
