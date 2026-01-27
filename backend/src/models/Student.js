@@ -49,7 +49,7 @@ class Student {
         last_name,
         email,
         username,
-        password,
+        registration_number,
         photo,
       ]
     );

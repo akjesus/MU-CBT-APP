@@ -162,25 +162,11 @@
         }
       </script>
     <script>
-    /*getSettings*/
-        function getSettings(){
-            w3.getHttpObject(appData.root_url + "api/get_settings", getSettingsRender);
-        }
-		function getSettingsRender(dataObject) {
-            appData.settings=dataObject;
-            $(".new_update").html(appData.settings.new_update);
-            $(".loan_min_limit").html(Number(appData.settings.loan_min_limit).toLocaleString('en-US', 'numeric'));
-            $(".loan_max_limit").html(Number(appData.settings.loan_max_limit).toLocaleString('en-US', 'numeric'));
-            $("#input-loan-amount").attr("min",appData.settings.loan_min_limit);
-            $("#input-loan-amount").attr("max",appData.settings.loan_max_limit);
-            $(".usd_rate").html(appData.settings.usd_rate);
-            $(".usd_limit").html(appData.settings.usd_limit);
-		}       
+      
 	</script>        
       <script>
         $(document).ready(function(){
             hideSplash();
-            getSettings();
         });        
       </script>   
       <script src="screens/app.js"></script>

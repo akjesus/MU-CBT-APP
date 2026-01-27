@@ -48,10 +48,10 @@ exports.getStudentById = async (req, res) => {
 exports.createStudent = async (req, res) => {
     try {
         const { department_id, level_id, registration_number, first_name, last_name, email, username, password, photo } = req.body;
-        console.log(req.body)
         const id = await Student.create(department_id, level_id, registration_number, first_name, last_name, email, username, password, photo);
         res.status(201).json({ message: "Student created", id });
     } catch (err) {
+        console.log(err);
         res.status(500).json({ error: err.message });
     }
 };
