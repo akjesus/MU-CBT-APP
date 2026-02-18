@@ -43,20 +43,6 @@
         Courses
       </button>
     </li>
-    <li class="nav-item" role="presentation">
-      <button
-        class="nav-link"
-        id="notifications-tab"
-        data-bs-toggle="tab"
-        data-bs-target="#notifications"
-        type="button"
-        role="tab"
-        aria-controls="notifications"
-        aria-selected="false"
-      >
-        Notifications
-      </button>
-    </li>
   </ul>
 
   <div class="tab-content mt-3" id="schoolTabContent">
@@ -127,33 +113,6 @@
             <th>Credit Load</th>
             <th>Department</th>
             <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody><!-- DataTables will fill --></tbody>
-      </table>
-    </div>
-
-    <!-- NOTIFICATIONS TAB -->
-    <div
-      class="tab-pane fade"
-      id="notifications"
-      role="tabpanel"
-      aria-labelledby="notifications-tab"
-    >
-      <div class="mb-3">
-        <button class="btn btn-primary" id="btnToggleNotificationLength">Toggle All/Paginated</button>
-      </div>
-      <table id="notificationTable" class="display nowrap table table-striped" style="width:100%;">
-        <thead>
-          <tr>
-            <th>S/N</th>
-            <th> Date</th>
-            <th>Exam </th>
-            <th>Student Name</th>
-            <th>Matric Number</th>
-            <th>Department </th>
-            <th>IP Address</th>
-            <th> Alert Type</th>
           </tr>
         </thead>
         <tbody><!-- DataTables will fill --></tbody>
@@ -317,7 +276,7 @@
     initFacultyDataTable();
     initDepartmentDataTable();
     initCourseDataTable();
-    initNotificationDataTable();
+    //initNotificationDataTable();
 
     // Buttons
     document.getElementById("btnAddFaculty").addEventListener("click", function () {
@@ -345,7 +304,7 @@
     document.getElementById("btnToggleCourseLength").addEventListener("click", toggleCourseLength);
 
 
-    document.getElementById("btnToggleNotificationLength").addEventListener("click", toggleNotificationLength);
+    //document.getElementById("btnToggleNotificationLength").addEventListener("click", toggleNotificationLength);
 
     // Form Submits
     document.getElementById("facultyForm").addEventListener("submit", function (e) {
@@ -822,64 +781,7 @@ function clearCourseForm() {
 
   //Notifications
 
-  function initNotificationDataTable() {
-    notificationTable = $("#notificationTable").DataTable({
-      processing: true,
-      ajax: {
-        url: API_URL + "notification",
-        dataSrc: ""
-      },
-      columns: [
-        { data: null, 
-          render: function(data, type, row, meta) {
-            return (meta.row + 1)
-          }
-        },
-        { data: null,
-          render: function(row) {
-          return dateTime(row.created_at)
-        }},
-        { data: "exam_name" },
-        { data: "student_name" },
-        { data: "registration_number" },
-        { data: "department",},
-        { data: "ip_address"},
-        { data: "alert"},
-      ],
-      dom: "Bfrtip",
-      buttons: [
-        "pageLength",
-        { extend: "csvHtml5", title: "Notifications_Export" },
-        { extend: "excelHtml5", title: "Notifications_Export" },
-        { extend: "print", title: "Notifications List" }
-      ],
-      responsive: true,
-      pageLength: 10,
-      lengthMenu: [
-        [10, 25, 50, -1],
-        [10, 25, 50, "All"]
-      ]
-    });
-  }
-
- function toggleNotificationLength() {
-    showingNotificationAll = !showingNotificationAll;
-    notificationTable.page.len(showingNotificationAll ? -1 : 10).draw(false);
-  }
-
-function dateTime(dateStr) {
-const date = new Date(dateStr.replace(' ', 'T'));
-  const pad = n => n.toString().padStart(2, '0');
-  const day = pad(date.getDate());
-  const month = pad(date.getMonth() + 1);
-  const year = date.getFullYear();
-  let hours = date.getHours();
-  const minutes = pad(date.getMinutes());
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  hours = hours % 12 || 12;
-  hours = pad(hours);
-  return `${day}/${month}/${year} ${hours}:${minutes}${ampm}`
-}
+ 
 
 </script>
 <script>

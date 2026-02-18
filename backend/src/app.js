@@ -25,6 +25,7 @@ app.get("/", (req, res) => {
 
 // Import Routes
 const authRoutes = require("./routes/authRoutes");
+const blocklistRoutes = require("./routes/blocklistRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const semesterRoutes = require("./routes/semesterRoutes");
@@ -64,6 +65,7 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/blocklist", blocklistRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/semesters", semesterRoutes);
 app.use("/api/levels", levelRoutes);

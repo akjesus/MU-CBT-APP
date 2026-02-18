@@ -33,9 +33,9 @@ exports.markAttendance =  async(req, res)=> {
     if (existing.length > 0) {
       return res.status(304).json({ error: "Attendance already marked for this student and exam." });
     }
-    const sql = `INSERT INTO exam_attendance (student_id, exam_id, ip_address, department_id, status)
-    VALUES (?, ?, ?, ?, ?)`;
-    await db.query(sql, [student_id, exam_id, req.ip, department_id, status], (err, result) => {
+    const sql = `INSERT INTO exam_attendance (student_id, exam_id, ip_address, status)
+    VALUES (?, ?, ?, ?)`;
+    await db.query(sql, [student_id, exam_id, req.ip, status], (err, result) => {
       if (err) {
         console.error("Mark Attendance Error:", err);
         return res.status(500).json({ error: err.message });

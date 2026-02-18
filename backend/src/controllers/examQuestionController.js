@@ -60,7 +60,6 @@ exports.addQuestionToExam = async (req, res) => {
 };
 
 exports.addNewQuestionAndLinkToExam = async (req, res) => {
-  console.log("Request files:", req.files.file);
   const path = require("path");
   try {
     const { exam_id } = req.body;

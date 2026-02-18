@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <h2>Manage Exams</h2>
 
-  <!-- Add tabs for All Exams, Ongoing Exams, and Attendance -->
+  <!-- Add tabs for All Exams, Ongoing Exams, Attendance, and Block List -->
   <ul class="nav nav-tabs" id="examTabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button
@@ -43,6 +43,34 @@
         aria-selected="false"
       >
         Attendance
+      </button>
+    </li>
+    <!-- <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="notifications-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#notifications"
+        type="button"
+        role="tab"
+        aria-controls="notifications"
+        aria-selected="false"
+      >
+        Notifications
+      </button>
+    </li> -->
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link"
+        id="block-list-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#block-list"
+        type="button"
+        role="tab"
+        aria-controls="block-list"
+        aria-selected="false"
+      >
+        Block List
       </button>
     </li>
   </ul>
@@ -152,7 +180,61 @@
         </table>
       </div>
     </div>
+
+    <!-- Notifications Tab -->
+    <div
+      class="tab-pane fade"
+      id="notifications"
+      role="tabpanel"
+      aria-labelledby="notifications-tab"
+    >
+      <div class="mb-3">
+        <button class="btn btn-primary" id="btnToggleNotificationLength">Toggle All/Paginated</button>
+      </div>
+      <table id="notificationTable" class="display nowrap table table-striped" style="width:100%;">
+        <thead>
+          <tr>
+            <th>S/N</th>
+            <th> Date</th>
+            <th>Exam </th>
+            <th>Student Name</th>
+            <th>Matric Number</th>
+            <th>Department </th>
+            <th>IP Address</th>
+            <th> Alert Type</th>
+          </tr>
+        </thead>
+        <tbody><!-- DataTables will fill --></tbody>
+      </table>
+    </div>
+
+    <!-- Block List Tab -->
+    <div
+      class="tab-pane fade"
+      id="block-list"
+      role="tabpanel"
+      aria-labelledby="block-list-tab"
+    >
+      <div class="container mt-4">
+        <button class="btn btn-danger mb-3" onclick="showBlockListModal()">Add Students to Block List</button>
+        <table id="blockListTable" class="display table table-striped w-100">
+          <thead>
+            <tr>
+              <th>Matric NO</th>
+              <th>Student Name</th>
+              <th>Exam Name</th>
+              <th>Department</th>
+              <th>Level</th>
+              <th>Actions</th>
+            </tr> 
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    
   </div>
+  
 </div>
 <!-- Modal: Add/Edit Exam -->
 <div class="modal fade" id="examModal" tabindex="-1" aria-labelledby="examModalLabel" aria-hidden="true">
@@ -566,6 +648,59 @@
 </div>
 
 
+<!-- Modal: Add Students to Block List -->
+<div
+  class="modal fade"
+  id="blockListModal"
+  tabindex="-1"
+  aria-labelledby="blockListModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="blockListForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blockListModalLabel">Add Students to Block List</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>Select a CSV file containing student data to block for specific exams.</p>
+          <div class="mb-3">
+            <label for="blockExamSelect" class="form-label">Select Exam</label>
+            <select class="form-select" id="blockExamSelect">
+              <option value="" disabled selected>Select an exam</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="blockCSV" class="form-label">Upload CSV</label>
+            <input
+              class="form-control"
+              type="file"
+              id="blockCSV"
+              accept=".csv"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-danger" onclick="bulkUploadBlockList();">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Bulk upload questions
@@ -577,6 +712,11 @@
     document.getElementById("examQuestionForm").addEventListener("submit", (e) => {
       e.preventDefault();
       saveExamQuestion();
+    });
+    // Block list form
+    document.getElementById("blockListForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      bulkUploadBlockList();
     });
   });
 
@@ -807,6 +947,105 @@
       .catch(() => alert("Failed to delete question."));
   }
 
+  // ====================== BLOCK LIST MGMT ======================
+  function showBlockListModal() {
+    const examSelect = document.getElementById("blockExamSelect");
+    examSelect.innerHTML = "<option value='' disabled selected>Select an exam</option>"; // Reset options
+
+    fetch(API_URL + "exams") // Adjust API endpoint as needed
+      .then((response) => response.json())
+      .then((data) => {
+        data.forEach((exam) => {
+          const option = document.createElement("option");
+          option.value = exam.id;
+          option.textContent = `${exam.exam_name}`;
+          examSelect.appendChild(option);
+        });
+      })
+      .catch(() => {
+        alert("Failed to fetch exams.");
+      });
+
+    document.getElementById("blockCSV").value = "";
+    new bootstrap.Modal(document.getElementById("blockListModal")).show();
+  }
+
+  function bulkUploadBlockList() {
+    const examId = document.getElementById("blockExamSelect").value;
+    const fileInput = document.getElementById("blockCSV");
+    if (!examId) {
+      alert("Please select an exam.");
+      return;
+    }
+    if (!fileInput.files[0]) {
+      alert("Please select a CSV file for the block list.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    formData.append("exam_id", examId);
+
+    fetch(API_URL + `blocklist/${examId}/bulk-upload`, {
+      method: "POST",
+      body: formData
+    })
+      .then(res => res.json())
+      .then((data) => {
+        alert("Block list updated successfully.");
+        document.getElementById("blockCSV").value = "";
+        bootstrap.Modal.getInstance(document.getElementById("blockListModal")).hide();
+        blockListTable.ajax.reload(null, false);
+      })
+      .catch(() => {
+        alert("Failed to update block list.");
+      });
+  }
+
+  let blockListTable;
+  document.addEventListener("DOMContentLoaded", function () {
+    blockListTable = $("#blockListTable").DataTable({
+      processing: true,
+      ajax: {
+        url: API_URL + "blocklist",
+        dataSrc: ""
+      },
+      columns: [
+        { data: "matric_no" },
+        { data: "student_name" },
+        { data: "exam_name" },
+        { data: "level"},
+        { data: "department"},
+        { data: null,
+          render: function (data, type, row) {
+            return `<button class='btn btn-danger btn-sm' onclick='removeFromBlockList(${row.id})'>Remove</button>`;
+          }
+        }
+      ],
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "BlockList_Export" },
+        { extend: "excelHtml5", title: "BlockList_Export" },
+        { extend: "print", title: "Block List" }
+      ],
+      responsive: true
+    });
+  });
+
+  function removeFromBlockList(id) {
+    if (confirm("Are you sure you want to remove this student from the block list?")) {
+      fetch(API_URL + `blocklist/${id}`, {
+        method: "DELETE"
+      })
+        .then(() => {
+          alert("Student removed from block list.");
+          blockListTable.ajax.reload(null, false);
+        })
+        .catch(() => {
+          alert("Failed to remove student from block list.");
+        });
+    }
+  }
 </script>
 <script>
   showingAll = false;
@@ -815,10 +1054,13 @@
   examsTable;
   activeExamsTable;
   attendanceTable;
+  blockListTable;
+  notificationTable;
 
   if (document.readyState !== 'loading') {
     initActiveExamsDataTable();
     initAttendanceTable();
+    initBlockListTable();
   } else {
     document.addEventListener('DOMContentLoaded', function () {
     document.getElementById("btnAddExam").addEventListener("click", addExam);
@@ -1008,7 +1250,96 @@ function initAttendanceTable () {
       lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
     });
 }
+function initNotificationDataTable() {
+    notificationTable = $("#notificationTable").DataTable({
+      processing: true,
+      ajax: {
+        url: API_URL + "notification",
+        dataSrc: ""
+      },
+      columns: [
+        { data: null, 
+          render: function(data, type, row, meta) {
+            return (meta.row + 1)
+          }
+        },
+        { data: null,
+          render: function(row) {
+          return dateTime(row.created_at)
+        }},
+        { data: "exam_name" },
+        { data: "student_name" },
+        { data: "registration_number" },
+        { data: "department",},
+        { data: "ip_address"},
+        { data: "alert"},
+      ],
+      dom: "Bfrtip",
+      buttons: [
+        "pageLength",
+        { extend: "csvHtml5", title: "Notifications_Export" },
+        { extend: "excelHtml5", title: "Notifications_Export" },
+        { extend: "print", title: "Notifications List" }
+      ],
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [
+        [10, 25, 50, -1],
+        [10, 25, 50, "All"]
+      ]
+    });
+  }
 
+function initBlockListTable() {
+  blockListTable = $("#blockListTable").DataTable({
+    processing: true,
+    ajax: {
+      url: API_URL + "blocklist",
+      dataSrc: ""
+    },
+    columns: [
+      { data: "matric_no" },
+      { data: "student_name" },
+      { data: "exam_name" },
+      {data: "level"},
+      {data: "department"},
+      {
+        data: null,
+        render: function (data, type, row) {
+          return `<button class='btn btn-danger btn-sm' onclick='removeFromBlockList(${row.id})'>Remove</button>`;
+        }
+      }
+    ],
+    dom: "Bfrtip",
+    buttons: [
+      "pageLength",
+      { extend: "csvHtml5", title: "BlockList_Export" },
+      { extend: "excelHtml5", title: "BlockList_Export" },
+      { extend: "print", title: "Block List" }
+    ],
+    responsive: true,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+  });
+}
+ function toggleNotificationLength() {
+    showingNotificationAll = !showingNotificationAll;
+    notificationTable.page.len(showingNotificationAll ? -1 : 10).draw(false);
+  }
+
+function dateTime(dateStr) {
+const date = new Date(dateStr.replace(' ', 'T'));
+  const pad = n => n.toString().padStart(2, '0');
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = pad(date.getMinutes());
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12 || 12;
+  hours = pad(hours);
+  return `${day}/${month}/${year} ${hours}:${minutes}${ampm}`
+}
   function addExam() {
     clearExamForm();
     document.getElementById("examModalLabel").textContent = "Add Exam";
