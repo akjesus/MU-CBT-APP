@@ -43,9 +43,13 @@ exports.addStudentToBlockList = async (req, res) => {
 
 
 exports.bulkUploadBlockList = async (req, res) => {
-
   try {
-    const { exam_id } = req.params;
+    //get data from form-data, which should include the exam_id and the csv file
+    const { exams } = req.body;
+    if(!exams) {
+      return res.status(400).json({ error: "Exam ID(s) are required" });
+    }
+    const examIds = exams.split(",").map(id => id.trim());  
     if (!req.files || !req.files.file) {
       return res.status(400).json({ error: "CSV file is required" });
     }
@@ -63,26 +67,28 @@ exports.bulkUploadBlockList = async (req, res) => {
       })
       .on("end", async () => {
         if (!blockList.length) {
+          console.log("No valid registration numbers rows found in CSV");
           return res
             .status(400)
-            .json({ error: "No valid question rows found in CSV" });
+            .json({ error: "No valid registration numbers rows found in CSV" });
         }
-
+        // For each exam ID, add all the registration numbers to the block list with that exam ID
         let insertedCount = 0;
-        for (const qRow of blockList) {
-          try {
-             await db.query(
-              `INSERT INTO blocklist 
-               (registration_number, exam_id, created_at)
-             VALUES (?, ?, NOW())`,
-              [qRow.registration_number, exam_id]
-            );
-          } catch (err) {
-            console.log(err.message);
-            return res.status(500).json({ error: err.message });
+        for (const examId of examIds) {
+          for (const qRow of blockList) {
+            try {
+              await db.query(
+                `INSERT INTO blocklist 
+                 (registration_number, exam_id, created_at)
+               VALUES (?, ?, NOW())`,
+                [qRow.registration_number, examId]
+              );
+              insertedCount++;
+            } catch (err) {
+              console.log(err.message);
+              return res.status(500).json({ error: err.message });
+            }
           }
-
-          insertedCount++;
         }
 
         res.status(201).json({

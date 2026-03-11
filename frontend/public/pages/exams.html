@@ -672,7 +672,7 @@
           <p>Select a CSV file containing student data to block for specific exams.</p>
           <div class="mb-3">
             <label for="blockExamSelect" class="form-label">Select Exam</label>
-            <select class="form-select" id="blockExamSelect">
+            <select class="form-select" id="blockExamSelect" multiple>
               <option value="" disabled selected>Select an exam</option>
             </select>
           </div>
@@ -949,6 +949,7 @@
 
   // ====================== BLOCK LIST MGMT ======================
   function showBlockListModal() {
+    //use multiple select to allow selection of multiple exams for blocking, but for now just single exam selection
     const examSelect = document.getElementById("blockExamSelect");
     examSelect.innerHTML = "<option value='' disabled selected>Select an exam</option>"; // Reset options
 
@@ -965,27 +966,24 @@
       .catch(() => {
         alert("Failed to fetch exams.");
       });
-
     document.getElementById("blockCSV").value = "";
     new bootstrap.Modal(document.getElementById("blockListModal")).show();
   }
 
   function bulkUploadBlockList() {
-    const examId = document.getElementById("blockExamSelect").value;
+    const examSelect = document.getElementById("blockExamSelect");
+    const selectedOptions = examSelect.selectedOptions;
+    const exams = Array.from(selectedOptions).map(option => option.value);
     const fileInput = document.getElementById("blockCSV");
-    if (!examId) {
-      alert("Please select an exam.");
-      return;
-    }
     if (!fileInput.files[0]) {
       alert("Please select a CSV file for the block list.");
       return;
     }
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-    formData.append("exam_id", examId);
+    formData.append("exams", exams);
 
-    fetch(API_URL + `blocklist/${examId}/bulk-upload`, {
+    fetch(API_URL + `blocklist/bulk-upload`, {
       method: "POST",
       body: formData
     })
