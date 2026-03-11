@@ -71,13 +71,14 @@ exports.bulkUploadBlockList = async (req, res) => {
         let insertedCount = 0;
         for (const qRow of blockList) {
           try {
-            const [insertRes] = await db.query(
+             await db.query(
               `INSERT INTO blocklist 
                (registration_number, exam_id, created_at)
              VALUES (?, ?, NOW())`,
               [qRow.registration_number, exam_id]
             );
           } catch (err) {
+            console.log(err.message);
             return res.status(500).json({ error: err.message });
           }
 

@@ -1,5 +1,5 @@
 const token = localStorage.getItem("token");
-const API_URL = "http://127.0.0.1:5000/api/";
+const API_URL = "http://10.0.8.4:5000/api/";
 
 if (!token) {
   window.location.href = "admin-login.html"; // Redirect to login if not authenticated

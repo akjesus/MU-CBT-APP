@@ -1,5 +1,5 @@
 // Handles API calls
-const BASE_URL = "http://127.0.0.1:5000/api"; // Adjust as needed
+const BASE_URL = "http://10.0.8.4:5000/api"; // Adjust as needed
 
 // Example: Fetch All Students
 async function fetchAllStudents() {

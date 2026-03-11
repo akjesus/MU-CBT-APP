@@ -69,7 +69,6 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
 
     // Extract question fields from request body
     const {
-      course_id,
       text,
       option_a,
       option_b,
@@ -80,7 +79,11 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       score_obtainable,
       level,
     } = req.body;
-
+    if(!text || !option_a || !option_b || !option_c || !option_d || !correct_option) {
+      return res.status(400).json({ error: "Missing required question fields" });
+    }
+    const [course] = await db.query(`select course_id from exams where id = ${exam_id}`);
+    const {course_id} = course[0]
     // Handle file upload if present
     let filePath = null;
     if (req.files && req.files.file) {
@@ -148,6 +151,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       file: filePath,
     });
   } catch (err) {
+    console.log(err.message)
     res.status(500).json({ error: err.message });
   }
 };
