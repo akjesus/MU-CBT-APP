@@ -59,8 +59,6 @@ const reportRoutes = require("./routes/reportRoutes");
 const notifierRoutes =  require("./utils/notifier")
 const attendanceRoutes = require("./routes/attendanceRoutes");
 
-// Use Routes
-
 
 
 app.use("/api/auth", authRoutes);

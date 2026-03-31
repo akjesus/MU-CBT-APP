@@ -3,7 +3,7 @@ const db = require("../config/database");
 class BlockList {
     static async getAll() {
         const sql = `
-            SELECT blocklist.id AS id,CONCAT(students.first_name, ' ', students.last_name) AS student_name,
+            SELECT blocklist.id AS id, CONCAT(students.first_name, ' ', students.last_name) AS student_name,
             blocklist.registration_number AS matric_no,
             exams.exam_name AS exam_name,
             levels.name AS level,

@@ -1,13 +1,15 @@
 const Faculty = require("../models/Faculty");
 
+
 exports.getAllFaculties = async (req, res) => {
     try {
         const faculties = await Faculty.getAll();
         if (!faculties || faculties.length === 0) {
             return res.status(404).json({ error: "No faculties found" });
         }
-        res.json(faculties);
+        res.status(200).json({success: true, faculties});
     } catch (err) {
+        console.log(err.message)
         res.status(500).json({ error: err.message });
     }
 };
@@ -49,6 +51,7 @@ exports.deleteFaculty = async (req, res) => {
         await Faculty.delete(req.params.id);
         res.json({ message: "Faculty deleted" });
     } catch (err) {
+        console.log(err.message)
         res.status(500).json({ error: err.message });
     }
 };

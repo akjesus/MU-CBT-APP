@@ -1,193 +1,22 @@
 <!DOCTYPE html>
-<html dir="ltr" lang="en-US">
+<html lang="en">
   <head>
-    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-    <meta charset="UTF-8" />
-    <title>MU-CBT</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/mulogo.webp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
     <meta
-      name="viewport"
-      content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width"
+      name="description"
+      content="maduka university cbt application"
     />
-    <!-- <meta http-equiv="Content-Security-Policy" content="connect-src *;default-src 'self' data: gap: https://ssl.gstatic.com http://127.0.0.0:9900/ 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;"> -->
-    <meta name="color-scheme" content="light" />
-    <link rel="stylesheet" href="style.css" media="screen" />
-    <link rel="stylesheet" href="style.responsive.css" media="all" />
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/w3.css" />
-    <link rel="stylesheet" href="css/font-awesome.css" />
-    <!-- Waves Effect Css -->
-    <link href="plugins/node-waves/waves.css" rel="stylesheet" />
-    <!-- Animation Css -->
-    <link href="plugins/animate-css/animate.css" rel="stylesheet" />
-    <!-- Sweetalert Css -->
-    <link href="plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <link rel="stylesheet" href="mobileui/imports.css" />
-    <script src="js/lib/jquery.js"></script>
-    <script src="script.js"></script>
-    <script src="script.responsive.js"></script>
-    <script src="js/lib/w3.js"></script>
-    <script src="js/lib/requester.js"></script>
-    <script src="js/helpers.js"></script>
-    <style>
-      .app {
-      }
-      .art-content .art-postcontent-0 .layout-item-0 {
-        padding-right: 10px;
-        padding-left: 10px;
-      }
-      .ie7 .art-post .art-layout-cell {
-        border: none !important;
-        padding: 0 !important;
-      }
-      .ie6 .art-post .art-layout-cell {
-        border: none !important;
-        padding: 0 !important;
-      }
-    </style>
-    <script type="text/javascript" src="mobileui/swiper.min.js"></script>
-    <script type="text/javascript" src="mobileui/alertX.min.js"></script>
+    <title>MU CBT App 3.0</title>
   </head>
-  <body onload="hideSplash()">
-    <script>
-      //END POINTS
-      var serverHost = "http://10.0.8.4:5000/";
-      var api_prefix = "";
-      var current_lang = "en";
-      function isNotEmpty(arr) {
-        if (arr.isArray()) {
-          if (arr.length > 0) {
-            return false;
-          } else {
-            return true;
-          }
-        } else {
-          if (arr == "undefined" || arr == "" || arr == null) {
-            return false;
-          } else {
-            return true;
-          }
-        }
-      }
-    </script>
-    <script>
-      let appData = {
-        root_url: serverHost,
-      };
-    </script>
-    <div id="art-main" style="margin: 0px !important">
-      <div class="art-sheet clearfix" style="margin: 0px !important">
-        <div id="main_app" class="">
-          <div w3-include-script="screens/splashscreen.html"></div>
-          <div w3-include-script="screens/welcome.html"></div>
-          <div w3-include-script="screens/home.html"></div>
-          <div w3-include-script="screens/login.html"></div>
-          <div w3-include-script="screens/profile.html"></div>
-          <div w3-include-script="screens/setting.html"></div>
-          <div w3-include-script="screens/fund_wallet.html"></div>
-          <div w3-include-script="screens/eNaira.html"></div>
-          <div w3-include-script="screens/mortgage_loan.html"></div>
-          <div w3-include-script="screens/pay_bills.html"></div>
-          <div w3-include-script="screens/exam.html"></div>
-          <div w3-include-script="screens/transactions.html"></div>
-          <div w3-include-script="screens/banks.html"></div>
-          <div w3-include-script="screens/terms.html"></div>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
 
-          <div w3-include-script="screens/helpers.html"></div>
-        </div>
-      </div>
-    </div>
-    <script src="plugins/sweetalert/sweetalert.min.js"></script>
-    <script src="js/routes.js"></script>
-    <script>
-      window.balancePage = function () {
-        w3.getHttpObject(
-          appData.root_url + "api/wallet/balance_page/" + user_info.member_id,
-          balancePageRender
-        );
-      };
-    </script>
-    <script>
-      window.balancePageRender = function (dataObject) {
-        appData.balance_page = dataObject;
-        $(".total_balance").html(
-          dataObject.total_balance.toLocaleString("en-US", "numeric")
-        );
-        $(".total_deposit").html(
-          dataObject.total_deposit.toLocaleString("en-US", "numeric")
-        );
-        $(".total_withdraw").html(
-          dataObject.total_withdraw.toLocaleString("en-US", "numeric")
-        );
-        $(".total_charges").html(
-          dataObject.total_charges.toLocaleString("en-US", "numeric")
-        );
-      };
-    </script>
-    <script>
-      w3.includeHTML();
-      w3.includeScript();
-      function initScripts() {
-        //  document.getElementById("runScripts").click();
-        w3.scripts = [];
-      }
-      setTimeout(initScripts, 500);
-      setTimeout(initRoutes, 500);
-    </script>
-    <script>
-      window.hideSplash = function () {
-        //hide_loading1();
-        setTimeout(function () {
-          $("#screen-1").fadeOut(500);
-        }, 500);
-        if (localStorage.getItem("login") == null) {
-          setTimeout(function () {
-            $("#swiper_container").animate({ opacity: 1 });
-          }, 500);
-        } else {
-          //setTimeout(function (){$(".show-login").click()},4300);
-        }
-      };
-
-      //ACTIVE DEV PAGE
-      //setTimeout(function (){$(".show-login").click()},5000);
-      setTimeout(function () {
-        if (JSON.parse(localStorage.getItem("user_data")).id) {
-          if (JSON.parse(localStorage.getItem("cookie")).id) {
-            document.getElementById("email").value = JSON.parse(
-              localStorage.getItem("cookie")
-            ).email;
-            document.getElementById("password").value = JSON.parse(
-              localStorage.getItem("cookie")
-            ).password;
-            doLogin();
-          }
-        }
-      }, 500);
-    </script>
-    <script></script>
-    <script>
-      $(document).ready(function () {
-        hideSplash();
-      });
-    </script>
-    <script src="screens/appx.js"></script>
-    <script>
-      //   setTimeout(appScript, 6000);
-      setTimeout(function () {
-        eval(w3.scripts2);
-      }, 1000);
-    </script>
-    <script>
-      window.showHome = function (examId) {
-        /* Show Home page */
-        $(".app-page").hide();
-        $("#page-home").show();
-        $("#page-exam").hide();
-        resetScroll();
-      };
-    </script>
-
-    <!--PAYSTAK FUNDING-->
   </body>
 </html>

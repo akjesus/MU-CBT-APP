@@ -3,13 +3,12 @@ const db = require("../config/database");
 class Exam {
   static async getAll() {
     const [rows] = await db.query(
-      `SELECT exams.id, exams.course_id, courses.name AS course_name,courses.code AS course_code, 
+      `SELECT exams.id as id, exams.course_id as course_id, courses.name AS course_name, courses.code AS course_code, 
                     exams.session_id, sessions.name AS session_name, levels.name AS course_level,
                     exams.semester, exams.level, exams.exam_name, 
                     exams.max_score_obtainable, exams.exam_mode, exams.server_time,
-                    exams.start_time, exams.duration, exams.unit_of_time, exams.active,
-                    exams.exam_date, exams.instruction, exams.venue, exams.display_question_randomly, 
-                    exams.allow_multiple_attempts, exams.unordered_answering, 
+                    exams.start_time, exams.duration, exams.active,
+                    exams.exam_date, exams.instruction, exams.display_question_randomly,
                     exams.created_at, exams.updated_at, 
                     GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
              FROM exams
@@ -19,7 +18,7 @@ class Exam {
              LEFT JOIN exam_departments ON exams.id = exam_departments.exam_id
              LEFT JOIN departments ON exam_departments.department_id = departments.id
              GROUP BY exams.id, courses.name, sessions.name
-             ORDER BY exams.start_time DESC`
+             ORDER BY exams.start_time DESC`,
     );
     return rows;
   }
@@ -51,7 +50,7 @@ class Exam {
              JOIN courses ON exams.course_id = courses.id
              JOIN sessions ON exams.session_id = sessions.id
              WHERE exams.id = ?`,
-      [id]
+      [id],
     );
     return rows[0];
   }
@@ -63,22 +62,25 @@ class Exam {
                 FROM exam_questions eq
                 JOIN questions q ON eq.question_id = q.id
                 WHERE eq.exam_id = ?`,
-      [id]
+      [id],
     );
     return questions;
   }
   static async activateExam(id) {
     await db.query(`UPDATE exams SET active = NOT active WHERE id = ?`, [id]);
-    return;
+    const [active] = await db.query(`SELECT active FROM exams WHERE id = ?`, [
+      id,
+    ]);
+    return active[0].active ? true : false;
   }
 
   static async create(data) {
     const [result] = await db.query(
-      `INSERT INTO exams (course_id, session_id, semester, level, exam_name, max_score_obtainable, 
-                           exam_mode, start_time, duration, unit_of_time, exam_date, instruction, venue, 
-                           server_time, display_question_randomly, allow_multiple_attempts, unordered_answering, 
-                          created_at, updated_at) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      `INSERT INTO exams 
+      (course_id, session_id, semester, level, exam_name, max_score_obtainable, 
+        exam_mode, start_time, duration,  exam_date, instruction,
+        server_time, display_question_randomly, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         data.course_id,
         data.session_id,
@@ -89,15 +91,11 @@ class Exam {
         data.exam_mode,
         data.start_time,
         data.duration,
-        data.unit_of_time,
         data.exam_date,
         data.instruction,
-        data.venue,
         data.server_time,
         data.display_question_randomly,
-        data.allow_multiple_attempts,
-        data.unordered_answering,
-      ]
+      ],
     );
     return result.insertId;
   }
@@ -127,19 +125,30 @@ class Exam {
         data.allow_multiple_attempts,
         data.unordered_answering,
         id,
-      ]
+      ],
     );
   }
   static async updateNewExam(id, columns, values) {
     if (columns.length === 0) {
       return { message: "No data to update" };
     }
+    // Remove 'id' and 'department_id' from the columns and values arrays if they exist
+    const filteredColumns = columns.filter(
+      (col) => col !== "id" && col !== "department_id" && col !== "departments",
+    );
+    const filteredValues = values.filter(
+      (_, index) =>
+        columns[index] !== "id" &&
+        columns[index] !== "department_id" &&
+        columns[index] !== "departments",
+    );
 
-    const query = columns.map((columns) => `${columns} = ?`).join(", ");
-    const newValues = values.map((values) => values);
+    const query = filteredColumns.map((column) => `${column} = ?`).join(", ");
+    const newValues = filteredValues;
     newValues.push(parseInt(id));
 
     const sql = `UPDATE exams SET ${query} WHERE id = ?`;
+
     try {
       const [results] = await db.query(sql, newValues);
       console.log(`Updated row with id ${id}`);

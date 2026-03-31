@@ -3,9 +3,9 @@ const Department = require("../models/Department");
 exports.getAllDepartments = async (req, res) => {
     try {
         const departments = await Department.getAll();
-        res.json(departments);
+        res.status(200).json({ success: true, departments });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 };
 

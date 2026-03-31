@@ -22,7 +22,7 @@ class Student {
   static async getByRegNumberOrEmail(regnumberoremail) {
     const [rows] = await db.query(
       `SELECT * FROM students WHERE LOWER(registration_number) = ? or email = ?`,
-      [regnumberoremail.toLowerCase(), regnumberoremail]
+      [regnumberoremail.toLowerCase(), regnumberoremail],
     );
     return rows[0];
   }
@@ -36,7 +36,7 @@ class Student {
     email,
     username,
     password,
-    photo
+    photo,
   ) {
     //const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await db.query(
@@ -51,7 +51,7 @@ class Student {
         username,
         registration_number,
         photo,
-      ]
+      ],
     );
     return result.insertId;
   }
@@ -59,18 +59,20 @@ class Student {
   static async update(
     id,
     department_id,
+    registration_number,
     level_id,
     first_name,
     last_name,
     email,
     username,
     password,
-    photo
+    photo,
   ) {
     // Base query (without password)
     let query = `
           UPDATE students
           SET department_id = ?,
+              registration_number = ?,
               level_id = ?,
               first_name = ?,
               last_name = ?,
@@ -83,6 +85,7 @@ class Student {
     // Params for the placeholders in our SQL
     const params = [
       department_id,
+      registration_number,
       level_id,
       first_name,
       last_name,
@@ -112,6 +115,19 @@ class Student {
   static async verifyPassword(inputPassword, storedPassword) {
     return await bcrypt.compare(inputPassword, storedPassword);
   }
+  static async getByDepartmentAndLevel(departmentId, levelId) {
+    const [rows] = await db.query(
+      `SELECT students.id, students.registration_number, students.first_name, students.last_name,
+                    students.email, students.username, students.photo, students.department_id, departments.name AS department_name, 
+                    students.level_id, levels.name AS level_name, faculties.name AS faculty_name
+             FROM students  
+                JOIN levels ON students.level_id = levels.id
+                JOIN departments ON students.department_id = departments.id
+                JOIN faculties ON departments.faculty_id = faculties.id
+             WHERE students.department_id = ? AND students.level_id = ?`,
+             [departmentId, levelId]
+    );
+    return rows;
+  }
 }
-
 module.exports = Student;

@@ -12,7 +12,7 @@ class Course {
             FROM courses c
             LEFT JOIN departments d ON c.department_id = d.id
             LEFT JOIN levels l ON c.level_id = l.id
-            ORDER BY c.code;
+            ORDER BY c.id ASC;
         `;
     
         const [rows] = await db.query(sql);

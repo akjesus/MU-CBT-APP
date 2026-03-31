@@ -9,7 +9,7 @@ class Department {
                 f.id AS faculty_id
             FROM departments d
             LEFT JOIN faculties f ON d.faculty_id = f.id
-            ORDER BY f.name, d.name;
+            ORDER BY d.id ASC
         `;
     
         const [rows] = await db.query(sql);

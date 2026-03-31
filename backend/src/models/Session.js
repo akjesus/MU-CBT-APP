@@ -11,18 +11,18 @@ class Session {
     return rows[0];
   }
 
-  static async create(name, start_date, end_date, is_active) {
+  static async create(name, start_date, end_date) {
     const [result] = await db.query(
       "INSERT INTO sessions (name, start_date, end_date, is_active) VALUES (?, ?, ?, ?)",
-      [name, start_date, end_date, is_active]
+      [name, start_date, end_date, 0]
     );
     return result.insertId;
   }
 
-  static async update(id, name, start_date, end_date, is_active) {
+  static async update(id, name, start_date, end_date) {
     await db.query(
-      "UPDATE sessions SET name = ?, start_date = ?, end_date = ?, is_active = ? WHERE id = ?",
-      [name, start_date, end_date, is_active, id]
+      "UPDATE sessions SET name = ?, start_date = ?, end_date = ? WHERE id = ?",
+      [name, start_date, end_date, id]
     );
   }
   static async activate(id) {

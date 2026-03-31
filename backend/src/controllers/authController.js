@@ -41,6 +41,54 @@ exports.adminLogin = async (req, res) => {
     }
   };
 
+exports.login = async (req, res) => {
+  
+    try {
+      const { username, password } = req.body; 
+        if (!username || !password) {
+            return res.status(400).json({ message: "User and password are required" });
+        }
+        const [rows] = await db.query(`SELECT * FROM staff WHERE email = ? or username = ?`, 
+            [username, username]);
+        let user = rows[0];
+        let isMatch;
+        if (user) {
+          isMatch = await bcrypt.compare(password, user.password);
+        }
+        else {
+           const [rows] = await db.query(
+          `SELECT students.id as id,
+          students.password as password, 
+          students.first_name as first_name,
+          students.last_name as last_name,
+          students.email as email,
+          students.role as role,
+          departments.name as department,
+          levels.name as level
+          FROM students 
+          JOIN departments on students.department_id = departments.id
+          JOIN levels on students.level_id = levels.id
+          WHERE registration_number = ? 
+          or email = ?`, [username, username]);
+           user = rows[0];
+           if (!user) {
+               return res.status(401).json({ message: "Invalid Username" });
+           }
+           isMatch = password === user.password? true : false;
+        }
+        if (!isMatch) {
+            return res.status(401).json({ message: "Invalid password" });
+        }
+        user.password = undefined;
+        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        res.status(200).json({ success: true, token, user});
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
 
 exports.createAdmin = async (req, res) => {
     try {
@@ -116,3 +164,18 @@ exports.createAdmin = async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   };
+
+  exports.auth = async(req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token || blacklistedTokens.has(token)) {
+        return res.status(401).json({ error: "Unauthorized or logged out" });
+    }
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({ error: "Invalid token" });
+        }
+        req.user = user;
+        next();
+    });
+  };
+  

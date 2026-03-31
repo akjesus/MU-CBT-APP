@@ -21,19 +21,24 @@ exports.getDashboardStats = async (req, res) => {
     const [[questionBank]] = await db.query("SELECT COUNT(*) as total FROM questions");
 
     // Fetch school/faculty name (optional)
-    const [[school]] = await db.query("SELECT name FROM faculties LIMIT 1");
+    const [[school]] = await db.query("SELECT COUNT(*) as total FROM faculties");
+    const [[courses]] = await db.query("SELECT COUNT(*) as total FROM courses");
+    const [[departments]] = await db.query("SELECT COUNT(*) as total FROM departments");
 
-    res.json({
+    res.status(200).json({ success: true, data: {   
       students: students.total || 0,
       active_exams: activeExams.total || 0,
       total_exams: totalExams.total || 0,
       pass_rate: passRate.avg_pass_rate || 0,
       staff: staff.total || 0,
       questions: questionBank.total || 0,
-      school_name: school?.name || "Maduka University"
-    });
+      schools: school.total || 0,
+      courses: courses.total || 0,
+      departments: departments.total || 0,
+    }});
   } catch (err) {
     console.error("Dashboard Stats Error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
+
