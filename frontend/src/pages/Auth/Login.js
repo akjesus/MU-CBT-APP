@@ -17,7 +17,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import backgroundImage from "../../assets/bg-large.jpg"; 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -52,9 +52,10 @@ export default function Login() {
         localStorage.setItem("role", res.data.user.role);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         showSnackbar("Logged in successfully!", "success");
+        console.log("User role:", res.data.user.role);
 
         // Redirect based on role
-        if (res.data.user.role === "admin") {
+        if (res.data.user.role === "admin" || res.data.user.role === "staff") {
           setTimeout(() => {
             navigate("/admin/dashboard");
           }, 1500);
@@ -72,7 +73,7 @@ export default function Login() {
       }
     } catch (err) {
       if (err.response) {
-        const message = err.response.data.message;
+        const message = err.response.data.error;
         showSnackbar(message, "error");
       } else {
         showSnackbar("Server Unreachable!", "error");

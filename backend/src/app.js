@@ -1,26 +1,33 @@
-
 // Import Required Modules
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
-const fileUpload = require("express-fileupload");
 const dotenv = require("dotenv");
+const path = require("path");
+
+
 dotenv.config({ path: "../../.env" });
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(helmet());
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-// Enable files upload
-app.use(fileUpload());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
+app.use(express.static(path.join(__dirname, "../uploads")));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
+
 // Test Route
 app.get("/", (req, res) => {
-    res.json({ message: "University CBT App Backend is Running!" });
+  res.json({ message: "CBT App Backend is Running!" });
 });
 
 // Import Routes
@@ -50,16 +57,14 @@ const studentCourseRoutes = require("./routes/studentCourseRoutes");
 const carryoverCourseRoutes = require("./routes/carryoverCourseRoutes");
 const examTakingRoutes = require("./routes/examTakingRoutes");
 const resultProcessingRoutes = require("./routes/resultProcessingRoutes");
-const studentBulkRoutes = require("./routes/studentBulkRoutes");
 const eligibleExamRoutes = require("./routes/eligibleExamRoutes");
 const examExaminerRoutes = require("./routes/examExaminerRoutes");
 const examQuestionRoutes = require("./routes/examQuestionRoutes");
 const resultRoutes = require("./routes/resultRoutes");
 const reportRoutes = require("./routes/reportRoutes");
-const notifierRoutes =  require("./utils/notifier")
+const notifierRoutes = require("./utils/notifier");
 const attendanceRoutes = require("./routes/attendanceRoutes");
-
-
+const examMonitoringRoutes = require("./routes/examMonitoringRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -87,7 +92,6 @@ app.use("/api/student-courses", studentCourseRoutes);
 app.use("/api/carryover-courses", carryoverCourseRoutes);
 app.use("/api/exam-taking", examTakingRoutes);
 app.use("/api/results", resultProcessingRoutes);
-app.use("/api/student", studentBulkRoutes);
 app.use("/api/eligible-exams", eligibleExamRoutes);
 app.use("/api/exam-examiners", examExaminerRoutes);
 app.use("/api/exam-questions", examQuestionRoutes);
@@ -95,6 +99,7 @@ app.use("/api/result", resultRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/notification", notifierRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/exam-monitoring", examMonitoringRoutes);
 
 // Handle Undefined Routes
 
@@ -107,6 +112,5 @@ app.all("*", (req, res, next) => {
   });
   next();
 });
-
 
 module.exports = app;

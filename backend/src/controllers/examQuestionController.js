@@ -193,6 +193,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
   try {
     const { exam_id } = req.params;
     if (!exam_id) {
+      console.log("No exam_id provided in URL");
       return res.status(400).json({ error: "No exam_id in URL" });
     }
     const [courseId] = await db.query(
@@ -203,22 +204,19 @@ exports.bulkUploadNewQuestions = async (req, res) => {
       return res.status(404).json({ error: "Exam not found" });
     }
     // Check if file is present
-    if (!req.files || !req.files.file) {
+    if (!req.file ) {
+      console.log("No file uploaded in request");
       return res.status(400).json({ error: "CSV file is required" });
     }
 
-    const csvFile = req.files.file;
+    const csvFile = req.file;
     const bufferStream = new stream.PassThrough();
-    bufferStream.end(csvFile.data);
+    bufferStream.end(csvFile.buffer);
 
     const questionsToInsert = []; // for question fields
-    // We'll store them as arrays of [course_id, text, ... user_id], then link after
-
     bufferStream
       .pipe(csvParser())
       .on("data", (row) => {
-        // Extract the fields from CSV row
-        // We'll parse them carefully, assuming columns are consistent
         const {
           option_a,
           option_b,
@@ -227,15 +225,10 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           correct_option,
           instructions,
           score_obtainable,
-          level,
-          file,
-          answers,
         } = row;
 
         const firstText = replaceQuestionMarkWithArrow(row.text);
         const text = replaceSuperscript(firstText);
-
-        // We'll store this row data
         questionsToInsert.push({
           course_id,
           text,
@@ -246,21 +239,17 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           correct_option,
           instructions,
           score_obtainable,
-          level,
-          file,
-          answers,
         });
       })
       .on("end", async () => {
         if (!questionsToInsert.length) {
+          console.log("No valid question rows found in CSV");
           return res
             .status(400)
             .json({ error: "No valid question rows found in CSV" });
         }
 
         let insertedCount = 0;
-
-        // We'll process each question row individually
         for (const qRow of questionsToInsert) {
           // Insert new question
           try {
@@ -278,9 +267,9 @@ exports.bulkUploadNewQuestions = async (req, res) => {
                 qRow.correct_option,
                 qRow.instructions,
                 qRow.score_obtainable,
-                qRow.level,
-                qRow.file,
-                qRow.answers,
+                null,
+                null,
+                null,
               ]
             );
 
@@ -336,11 +325,11 @@ exports.removeQuestionFromExam = async (req, res) => {
  */
 exports.removeAllQuestionsFromExam = async (req, res) => {
   try {
-    const { id } = req.params;
-    await db.query(`DELETE FROM exam_questions WHERE exam_id = ?`, [id]);
+    const { exam_id } = req.params;
+    await db.query(`DELETE FROM exam_questions WHERE exam_id = ?`, [exam_id]);
     res.json({ message: "All questions removed from exam successfully" });
   } catch (err) {
-    console.log(err);
+    console.log(err.message);
     res.status(500).json({ error: err.message });
   }
 };

@@ -2,7 +2,6 @@ const db = require("../config/database");
 const csv = require("csv-parser");
 const fs = require("fs");
 const stream = require("stream");
-const Exam = require("../models/Exam");
 
 exports.getAllQuestions = async (req, res) => {
   const { course_id } = req.query;
@@ -63,79 +62,19 @@ exports.createQuestionAndAddtoExam = async (req, res) => {
       correct_option,
       score_obtainable,
       instructions,
-    } = req.body.question;
+      question_type,
+    } = req.body;
+    let questionType = question_type || "Objective";
     const user_id = req.user.id;
     const { exam_id } = req.params;
     const { course_id } = req.body;
 
-    const [result] = await db.query(
-      "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, score_obtainable, instructions, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
-      [
-        course_id,
-        text,
-        option_a,
-        option_b,
-        option_c,
-        option_d,
-        correct_option,
-        score_obtainable,
-        instructions,
-        user_id,
-      ],
-    );
-    console.log(req.body, req.params, user_id, result.insertId);
-    await db.query(
-      "INSERT INTO exam_questions (exam_id, question_id, created_at, updated_at) VALUES (?, ?, NOW(), NOW())",
-      [exam_id, result.insertId],
-    );
-    res.status(201).json({
-      message: "Question added to Question Bank",
-      id: result.insertId,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-    console.log(err);
-  }
-};
-
-exports.updateQuestion = async (req, res) => {
-  try {
-    const questionId = req.params.id;
-    const {
-      course_id,
-      text,
-      option_a,
-      option_b,
-      option_c,
-      option_d,
-      correct_option,
-      instructions,
-      difficulty_level,
-      question_type,
-      score_obtainable,
-      level,
-      file,
-      answers,
-      user_id,
-    } = req.body;
-    // Check if question exists
-    const [existingQuestion] = await db.query(
-      "SELECT * FROM questions WHERE id = ?",
-      [questionId],
-    );
-    if (!existingQuestion.length) {
-      return res.status(404).json({ error: "Question not found" });
-    }
-
-    let fullPath;
-    if (req.files && req.files.file) {
-      const uploadedFile = req.files.file;
-      // Save to frontend/public/uploads so it is accessible from the browser
+    let file = null;
+    if (req.file) {
+      const uploadedImage = req.file;
       const path = require("path");
-      const uploadDir = path.resolve(
-        __dirname,
-        "../../../frontend/public/uploads",
-      );
+      const uploadDir = path.resolve(__dirname, "../../uploads");
+
       try {
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
@@ -147,30 +86,131 @@ exports.updateQuestion = async (req, res) => {
           details: dirErr.message,
         });
       }
-      // Generate unique filename
+
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      const fileExt = uploadedFile.name.split(".").pop();
+      const fileExt = uploadedImage.originalname.split(".").pop();
       const filename = `question_${uniqueSuffix}.${fileExt}`;
-      filePath = `uploads/${filename}`; // relative to public
-      fullPath = path.join(uploadDir, filename);
+      const filePath = `${filename}`;
+      const fullPath = path.join(uploadDir, filename);
+
       try {
-        fs.writeFileSync(fullPath, uploadedFile.data);
-        console.log("File saved successfully:", fullPath);
+        fs.writeFileSync(fullPath, uploadedImage.buffer);
+        console.log("Image saved successfully:", fullPath);
+        file = filePath;
       } catch (fileErr) {
-        console.error("Error saving file:", fullPath, fileErr);
-        return res
-          .status(500)
-          .json({ error: "Failed to save file", details: fileErr.message });
+        console.error("Error saving image:", fullPath, fileErr);
+        return res.status(500).json({
+          error: "Failed to save image",
+          details: fileErr.message,
+        });
       }
-    } else {
-      console.warn("No file found in req.files:", req.files);
+    }
+
+    const [result] = await db.query(
+      "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, score_obtainable, instructions, question_type, user_id, file, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+      [
+        course_id,
+        text,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        correct_option,
+        score_obtainable,
+        instructions,
+        questionType,
+        user_id,
+        file,
+      ],
+    );
+
+    if (exam_id) {
+      await db.query(
+        "INSERT INTO exam_questions (exam_id, question_id, created_at, updated_at) VALUES (?, ?, NOW(), NOW())",
+        [exam_id, result.insertId],
+      );
+    }
+
+    res.status(201).json({
+      message: "Question added successfully",
+      id: result.insertId,
+      file,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    console.log(err);
+  }
+};
+
+exports.updateQuestion = async (req, res) => {
+  try {
+    const {
+      text,
+      option_a,
+      option_b,
+      option_c,
+      option_d,
+      correct_option,
+      score_obtainable,
+      instructions,
+      question_type,
+      course_id,
+    } = req.body;
+    let questionType = question_type || "Objective";
+    const user_id = req.user.id;
+    const { question_id } = req.params;
+    console.log("Updating question ID:", question_id);
+
+    // Check if question exists
+    const [existingQuestion] = await db.query(
+      "SELECT * FROM questions WHERE id = ?",
+      [question_id],
+    );
+    if (!existingQuestion.length) {
+      return res.status(404).json({ error: "Question not found" });
+    }
+    let file = null;
+    if (req.file) {
+      const uploadedImage = req.file;
+      const path = require("path");
+      const uploadDir = path.resolve(__dirname, "../../uploads");
+
+      try {
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+      } catch (dirErr) {
+        console.error("Error creating upload directory:", uploadDir, dirErr);
+        return res.status(500).json({
+          error: "Failed to create upload directory",
+          details: dirErr.message,
+        });
+      }
+
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const fileExt = uploadedImage.originalname.split(".").pop();
+      const filename = `question_${uniqueSuffix}.${fileExt}`;
+      const filePath = `${filename}`;
+      const fullPath = path.join(uploadDir, filename);
+
+      try {
+        fs.writeFileSync(fullPath, uploadedImage.buffer);
+        console.log("Image saved successfully:", fullPath);
+        file = filePath;
+      } catch (fileErr) {
+        console.error("Error saving image:", fullPath, fileErr);
+        return res.status(500).json({
+          error: "Failed to save image",
+          details: fileErr.message,
+        });
+      }
     }
 
     await db.query(
       `UPDATE questions 
              SET course_id = ?, text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, 
-                 correct_option = ?, instructions = ?, difficulty_level = ?, question_type = ?, score_obtainable = ?, 
-                 level = ?, file = ?, answers = ?, user_id = ?, updated_at = NOW() 
+                 correct_option = ?, instructions = ?, question_type = ?, score_obtainable = ?, 
+                 file = ?, user_id = ?, updated_at = NOW() 
              WHERE id = ?`,
       [
         course_id,
@@ -181,18 +221,15 @@ exports.updateQuestion = async (req, res) => {
         option_d,
         correct_option,
         instructions,
-        difficulty_level,
-        question_type,
+        questionType,
         score_obtainable,
-        level,
-        fullPath,
-        answers,
+        file,
         user_id,
-        questionId,
+        question_id,
       ],
     );
 
-    res.json({ message: "Question updated successfully" });
+    res.json({ success: true, message: "Question updated successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -200,18 +237,18 @@ exports.updateQuestion = async (req, res) => {
 
 exports.deleteQuestion = async (req, res) => {
   try {
-    const questionId = req.params.id;
+    const { question_id } = req.params;
     const [existingQuestion] = await db.query(
       "SELECT * FROM questions WHERE id = ?",
-      [questionId],
+      [question_id],
     );
     if (!existingQuestion.length) {
       return res.status(404).json({ error: "Question not found" });
     }
     await db.query("DELETE FROM exam_questions WHERE question_id = ?", [
-      questionId,
+      question_id,
     ]);
-    await db.query("DELETE FROM questions WHERE id = ?", [questionId]);
+    await db.query("DELETE FROM questions WHERE id = ?", [question_id]);
 
     res
       .status(200)
@@ -283,14 +320,22 @@ exports.bulkUploadExamQuestions = async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const examId = req.params.exam_id;
+    const [exam] = await db.query("SELECT * FROM exams WHERE id = ?", [examId]);
+    if (!exam.length) {
+      return res.status(404).json({ error: "Exam not found" });
+    }
+    const course_id = exam[0].course_id;
+    const questionType = req.body.question_type || "Objective";
     const questions = [];
 
-    fs.createReadStream(req.file.path)
+    // Convert buffer to readable stream
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(req.file.buffer);
+    bufferStream
       .pipe(csv())
       .on("data", (row) => {
         questions.push([
-          examId,
-          row.course_id,
+          course_id,
           row.text,
           row.option_a,
           row.option_b,
@@ -298,37 +343,36 @@ exports.bulkUploadExamQuestions = async (req, res) => {
           row.option_d,
           row.correct_option,
           row.instructions,
-          row.difficulty_level,
-          row.question_type,
+          row.question_type || questionType,
           row.score_obtainable,
-          row.level,
-          row.file,
-          row.answers,
-          row.user_id,
+          null, // file column is not supported in bulk upload
+          req.user_id,
         ]);
       })
       .on("end", async () => {
         const [result] = await db.query(
-          "INSERT INTO questions (course_id, text, option_a, option_b, option_c, option_d, correct_option, instructions, difficulty_level, question_type, score_obtainable, level, file, answers, user_id, created_at, updated_at) VALUES ?",
+          `INSERT INTO questions 
+          (course_id, text, option_a, option_b, option_c, option_d, correct_option, 
+          instructions, question_type, score_obtainable, file, user_id, created_at, updated_at) 
+          VALUES ?`,
           [questions.map((q) => [...q, new Date(), new Date()])],
         );
-
         const questionIds = Array.from(
           { length: result.affectedRows },
           (_, i) => result.insertId + i,
         );
         const examQuestions = questionIds.map((qId) => [examId, qId]);
-
         await db.query(
           "INSERT INTO exam_questions (exam_id, question_id, created_at, updated_at) VALUES ?",
           [examQuestions.map((q) => [...q, new Date(), new Date()])],
         );
 
-        res.json({
+        return res.json({
           message: "Bulk Exam Questions uploaded and assigned successfully",
         });
       });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };

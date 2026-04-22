@@ -9,7 +9,7 @@ exports.verifyAdmin = (req, res, next) => {
     if (err) {
       return res.status(403).json({ error: "Invalid token" });
     }
-    if (user.role !== "admin") {
+    if (user.role !== "admin" && user.role !== "superadmin" && user.role !== "staff") {
       return res.status(403).json({ error: "Access denied" });
     }
 

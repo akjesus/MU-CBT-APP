@@ -9,8 +9,7 @@ const ProtectedRoute = ({ children, roles }) => {
 
   // For other admin pages, allow staff and admin
   if (location.pathname.startsWith("/admin")) {
-    if (userRole === "admin") {
-      console.log(userRole, location)
+    if (userRole === "admin" || userRole === "staff") {
       return children;
     }
     return <Navigate to="/login" />;
@@ -19,8 +18,7 @@ const ProtectedRoute = ({ children, roles }) => {
 
   // Only allow /admin/staff for admin role
   if (location.pathname.startsWith("/admin/staff") || location.pathname.startsWith("/admin/settings")) {
-    if (userRole !== "admin") {
-      console.log(userRole, location)
+    if (userRole !== "admin" || userRole !== "staff") {
       return <Navigate to="/login" />;
     }
     return children;

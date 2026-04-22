@@ -10,7 +10,6 @@ exports.getEligibleExams = async (req, res) => {
         .status(204)
         .json({ message: "You have no current exam, check back later" });
     }
-    console.log(exams);
     res.status(200).json({success: true,exams});
   } catch (err) {
     console.log(err);

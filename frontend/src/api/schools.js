@@ -48,7 +48,7 @@ export const createCourse = (data) => {
   return axios.post(
     `${BASE_URL}/courses`,
     {
-      name: data.title,
+      name: data.name,
       code: data.code,
       department_id: data.department,
       level_id: data.level,
@@ -109,7 +109,7 @@ export const getCoursesWithResults = () => {
 export const addSchool = (data) => {
   const token = localStorage.getItem("token");
   return axios.post(
-    `${BASE_URL}/schools/faculties`,
+    `${BASE_URL}/faculties`,
     {
       name: data.name,
     },

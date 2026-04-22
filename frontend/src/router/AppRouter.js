@@ -10,9 +10,11 @@ import AdminExams from "../pages/Admin/Exams";
 import AdminSchools from "../pages/Admin/Schools";
 import StaffSettings from "../pages/Admin/Staff";
 import AdminLayout from "../components/AdminLayout"
+import AdminResults from "../pages/Admin/Results";
 
 // Student Pages
 import StudentDashboard from "../pages/Student/Dashboard";
+import StudentExam from "../pages/Student/StudentExam";
 import StudentLayout from "../components/StudentLayout";
 
 
@@ -28,7 +30,7 @@ const AppRouter = () => {
         <Route
         path="/admin"
         element={
-          <ProtectedRoute roles={["admin", "superadmin"]}>
+          <ProtectedRoute roles={["admin", "superadmin", "staff"]}>
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -40,7 +42,7 @@ const AppRouter = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute roles={["admin"]}>
+          <ProtectedRoute roles={["admin", "superadmin", "staff"]}>
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -49,6 +51,7 @@ const AppRouter = () => {
         <Route path="students" element={<AdminStudents />} />
         <Route path="exams" element={<AdminExams />} />
         <Route path="schools" element={<AdminSchools />} />
+        <Route path="results" element={<AdminResults />} />
         <Route path="staff" element={<StaffSettings />} />
       </Route>
 
@@ -63,6 +66,16 @@ const AppRouter = () => {
       >
         <Route path="dashboard" element={<StudentDashboard />} />
       </Route>
+
+      {/* Student Exam Route (protected but no layout - fullscreen mode) */}
+      <Route
+        path="/student/exam/:exam_id"
+        element={
+          <ProtectedRoute roles={["student"]}>
+            <StudentExam />
+          </ProtectedRoute>
+        }
+      />
       {/* Catch-all route for 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>

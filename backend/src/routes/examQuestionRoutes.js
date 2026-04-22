@@ -1,14 +1,27 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer();
 const examQuestionController = require("../controllers/examQuestionController");
-const upload = require("../middleware/uploadCSV");
+const { auth } = require("../controllers/authController");
 
-// Get questions for a specific exam
+// Apply authentication middleware to all routes in this router
+router.use(auth);
+router.delete(
+  "/remove/:exam_id",
+  examQuestionController.removeAllQuestionsFromExam,
+);
 router.get("/:exam_id", examQuestionController.getQuestionsByExam);
 router.post("/", examQuestionController.addQuestionToExam);
 router.post("/addNew", examQuestionController.addNewQuestionAndLinkToExam);
-router.post("/:exam_id/bulk-upload", examQuestionController.bulkUploadNewQuestions);
-router.delete("/:exam_id/:question_id", examQuestionController.removeQuestionFromExam);
-router.delete("/:exam_id/remove-all", examQuestionController.removeAllQuestionsFromExam);
+router.post(
+  "/:exam_id/bulk-upload",
+  upload.single("file"),
+  examQuestionController.bulkUploadNewQuestions,
+);
+router.delete(
+  "/:exam_id/:question_id",
+  examQuestionController.removeQuestionFromExam,
+);
 
 module.exports = router;

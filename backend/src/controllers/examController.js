@@ -14,7 +14,7 @@ exports.getAllExams = async (req, res) => {
 
 exports.getAllExamsWithCourseSession = async (req, res) => {
   try {
-    const { course_id, session_id } = req.query; // e.g. /api/exams?course_id=5&session_id=2
+    const { course_id, session_id } = req.query;
 
     let sql = `
         SELECT e.*
@@ -35,13 +35,8 @@ exports.getAllExamsWithCourseSession = async (req, res) => {
 
     // Optionally order by start_time or exam_name, etc.
     sql += " ORDER BY e.start_time DESC";
-
-    // Or, if you have a separate model function, do:
-    // const exams = await Exam.getAllFiltered(course_id, session_id);
-    // But for inline, we query directly here:
-
     const [rows] = await db.query(sql, params);
-    res.json(rows);
+    res.status(200).json({success: true, exams: rows});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

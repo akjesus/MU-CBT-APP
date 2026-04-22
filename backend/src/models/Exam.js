@@ -12,9 +12,9 @@ class Exam {
                     exams.created_at, exams.updated_at, 
                     GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
              FROM exams
-             JOIN courses ON exams.course_id = courses.id
-             JOIN levels ON courses.level_id = levels.id
-             JOIN sessions ON exams.session_id = sessions.id
+             LEFT JOIN courses ON exams.course_id = courses.id
+             LEFT JOIN levels ON courses.level_id = levels.id
+             LEFT JOIN sessions ON exams.session_id = sessions.id
              LEFT JOIN exam_departments ON exams.id = exam_departments.exam_id
              LEFT JOIN departments ON exam_departments.department_id = departments.id
              GROUP BY exams.id, courses.name, sessions.name

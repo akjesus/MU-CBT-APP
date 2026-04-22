@@ -31,10 +31,12 @@ exports.createDepartment = async (req, res) => {
 
 exports.updateDepartment = async (req, res) => {
     try {
-        const { faculty_id, name } = req.body;
+        const faculty_id = req.body.school
+        const { name } = req.body;
         await Department.update(req.params.id, faculty_id, name);
         res.json({ message: "Department updated" });
     } catch (err) {
+        console.log(err)
         res.status(500).json({ error: err.message });
     }
 };

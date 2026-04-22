@@ -1,5 +1,6 @@
 import React from "react";
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { getEligibleExams } from "../../api/exams";
 import {
   Card,
@@ -9,9 +10,15 @@ import {
   Snackbar,
   Alert,
   Grid,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 
 const StudentDashboard = () => {
+  const navigate = useNavigate();
   const [eligibleExams, setEigibleExams] = useState([]);
   const [userDetails, setUserDetails] = useState([]);
   const [snackbar, setSnackbar] = useState({
@@ -19,12 +26,31 @@ const StudentDashboard = () => {
     message: "",
     severity: "success",
   });
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    exam_id: null,
+  });
+  const [openExamResultModal, setOpenExamResultModal] = useState(false);
+  const [examResult, setExamResult] = useState(null);
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleTakeExamClick = (exam_id) => {
+    setConfirmDialog({ open: true, exam_id });
+  };
+
+  const handleConfirmTakeExam = () => {
+    navigate(`/student/exam/${confirmDialog.exam_id}`);
+    setConfirmDialog({ open: false, exam_id: null });
+  };
+
+  const handleCancelTakeExam = () => {
+    setConfirmDialog({ open: false, exam_id: null });
   };
 
   const fetchEligibleExams = useCallback(async () => {
@@ -46,7 +72,15 @@ const StudentDashboard = () => {
   useEffect(() => {
     fetchEligibleExams();
     const user = JSON.parse(localStorage.getItem("user"));
-    setUserDetails(user);
+    setUserDetails(user);    
+    // Check for exam result from auto-submission
+    const savedResult = localStorage.getItem("examResult");
+    if (savedResult) {
+      const result = JSON.parse(savedResult);
+      setExamResult(result);
+      setOpenExamResultModal(true);
+      localStorage.removeItem("examResult");
+    }
   }, [fetchEligibleExams]);
 
   return (
@@ -64,10 +98,13 @@ const StudentDashboard = () => {
       </Typography>
       <Box sx={{ mb: 3, p: 2, border: "1px solid #ccc", borderRadius: 2 }}>
         <Typography variant="body1">
-          Name: {userDetails.first_name } {userDetails.last_name}
+          Name: {userDetails.first_name} {userDetails.last_name}
         </Typography>
         <Typography variant="body1">
           Email: {userDetails?.email || "N/A"}
+        </Typography>
+        <Typography variant="body1">
+          Matriculation Number: {userDetails?.matriculation_number || "N/A"}
         </Typography>
         <Typography variant="body1">
           Department: {userDetails?.department || "N/A"}
@@ -88,18 +125,35 @@ const StudentDashboard = () => {
           <Grid container spacing={2}>
             {eligibleExams.map((exam, index) => (
               <Grid item xs={12} key={index}>
-                <Card sx={{ border: "1px solid #ccc", borderRadius: 2 }}>
+                <Card
+                  sx={{
+                    border: "1px solid #ccc",
+                    borderRadius: 2,
+                    textAlign: "center",
+                  }}
+                >
                   <CardContent>
                     <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                      {exam.name}
+                      {exam.exam_name}
+                    </Typography>
+                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                      {exam.course_name}
                     </Typography>
                     <Typography variant="body2">
-                      Date: {exam.date || "N/A"}
+                      Date: {exam.exam_date || "N/A"}
                     </Typography>
                     <Typography variant="body2">
-                      Venue: {exam.venue || "N/A"}
+                      Start Time: {exam.start_time || "N/A"}
                     </Typography>
                   </CardContent>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ m: 2 }}
+                    onClick={() => handleTakeExamClick(exam.exam_id)}
+                  >
+                    Take Exam
+                  </Button>
                 </Card>
               </Grid>
             ))}
@@ -110,6 +164,61 @@ const StudentDashboard = () => {
           </Typography>
         )}
       </Box>
+
+      <Dialog open={confirmDialog.open} onClose={handleCancelTakeExam}>
+        <DialogTitle>Take Exam?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to start this exam? Once started, you cannot
+            go back.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelTakeExam}>Cancel</Button>
+          <Button
+            onClick={handleConfirmTakeExam}
+            variant="contained"
+            color="primary"
+          >
+            Start Exam
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openExamResultModal}
+        onClose={() => setOpenExamResultModal(false)}
+      >
+        <DialogTitle sx={{ color: "#4caf50", fontWeight: "bold" }}>
+          Exam Submitted
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>Exam:</strong> {examResult?.examName}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              <strong>Course:</strong> {examResult?.courseName}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ mt: 2, color: "#1976d2", fontWeight: "bold" }}
+            ></Typography>
+            <Typography variant="body2" sx={{ mt: 2, color: "#999" }}>
+              Submitted at: {new Date(examResult?.timestamp).toLocaleString()}
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setOpenExamResultModal(false)}
+            variant="contained"
+            color="primary"
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}

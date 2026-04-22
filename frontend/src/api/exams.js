@@ -12,6 +12,16 @@ export const getEligibleExams = () => {
   });
 };
 
+export const getExamById = (examId) => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${BASE_URL}/exams/${examId}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getAllExams = () => {
   const token = localStorage.getItem("token");
   return axios.get(`${BASE_URL}/exams`, {
@@ -24,29 +34,37 @@ export const getAllExams = () => {
 
 export const updateExam = (exam) => {
   const token = localStorage.getItem("token");
-  return axios.put(`${BASE_URL}/exams/${exam.id}`, {
-    exam
-  }, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  return axios.put(
+    `${BASE_URL}/exams/${exam.id}`,
+    {
+      exam,
     },
-  });
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 };
 
 export const createExam = (exam) => {
   const token = localStorage.getItem("token");
-  return axios.post(`${BASE_URL}/exams`, {
-    exam
-  }, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  return axios.post(
+    `${BASE_URL}/exams`,
+    {
+      exam,
     },
-  });
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 };
 
-export const deleteExam = (examId) => { 
+export const deleteExam = (examId) => {
   const token = localStorage.getItem("token");
   return axios.delete(`${BASE_URL}/exams/${examId}`, {
     headers: {
@@ -54,17 +72,21 @@ export const deleteExam = (examId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-}
+};
 
 export const toggleExamActive = (id) => {
   const token = localStorage.getItem("token");
-  return axios.patch(`${BASE_URL}/exams/${id}`, {}, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  return axios.patch(
+    `${BASE_URL}/exams/${id}`,
+    {},
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
-} 
+  );
+};
 
 export const getQuestionsForExam = (examId) => {
   const token = localStorage.getItem("token");
@@ -74,19 +96,16 @@ export const getQuestionsForExam = (examId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-}
+};
 
-export const addQuestionsToExam = (exam_id, course_id, question) => {
+export const addQuestionsToExam = (exam_id, formData) => {
   const token = localStorage.getItem("token");
-  return axios.post(`${BASE_URL}/questions/${exam_id}/add-to-exam`, {
-    course_id, question
-  }, {
+  return axios.post(`${BASE_URL}/questions/${exam_id}/add-to-exam`, formData, {
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
-} 
+};
 
 export const deleteQuestion = (question_id) => {
   const token = localStorage.getItem("token");
@@ -96,4 +115,109 @@ export const deleteQuestion = (question_id) => {
       Authorization: `Bearer ${token}`,
     },
   });
-}
+};
+
+export const updateQuestion = (question_id, formData) => {
+  const token = localStorage.getItem("token");
+  return axios.put(`${BASE_URL}/questions/${question_id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const submitExam = (studentId, exam_id, responses) => {
+  const token = localStorage.getItem("token");
+  return axios.post(
+    `${BASE_URL}/exam-taking/${exam_id}/student/${studentId}/submit`,
+    {
+      responses,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
+
+export const isEligilbe = (exam_id, student_id) => {
+  const token = localStorage.getItem("token");
+  return axios.get(
+    `${BASE_URL}/exam-taking/${exam_id}/student/${student_id}/eligibility`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
+
+export const bulkUploadQuestions = (exam_id, formData) => {
+  const token = localStorage.getItem("token");
+  return axios.post(
+    `${BASE_URL}/exam-questions/${exam_id}/bulk-upload`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
+
+export const deleteAllQuestionsFromExam = (exam_id) => {
+  const token = localStorage.getItem("token");
+  return axios.delete(`${BASE_URL}/exam-questions/remove/${exam_id}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const createExamMonitoringSession = (activeData) => {
+  const token = localStorage.getItem("token");
+  return axios.post(`${BASE_URL}/exam-monitoring/create`, activeData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const updateExamMonitoringSession = (activeData) => {
+  const token = localStorage.getItem("token");
+  return axios.put(`${BASE_URL}/exam-monitoring/update`, activeData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const endExamMonitoringSession = (activeData) => {
+  const token = localStorage.getItem("token");
+  return axios.post(`${BASE_URL}/exam-monitoring/end`, activeData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getExamSession = (exam_id, matriculation_number) => {
+  const token = localStorage.getItem("token");
+  return axios.post(
+    `${BASE_URL}/exam-monitoring/session`,
+    { exam_id, matriculation_number },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};

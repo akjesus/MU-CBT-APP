@@ -1,1 +1,1 @@
-module.exports = (res, data, message = 'Success') => res.json({ message, data });
+module.exports = (res, data, status, message = 'Success') => res.status(status).json({ message, data });

@@ -14,7 +14,6 @@ import {
   TextField,
   DialogActions,
   IconButton,
-  Input,
   TablePagination,
   MenuItem,
   FormControl,
@@ -26,6 +25,7 @@ import {
   Tabs,
   Tab,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, UploadFile, LockReset } from "@mui/icons-material";
 import { getSchools, getLevels } from "../../api/schools";
@@ -40,24 +40,6 @@ import {
 } from "../../api/students";
 
 export default function AdminStudents() {
-  const handleBulkUpload = async (event) => {
-    try {
-      const file = event.target.files[0];
-      if (!file) return;
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await bulkUploadStudents(formData);
-      if (res.status === 200) {
-        showSnackbar(res.data?.message || "Bulk upload successful!", "success");
-      } else {
-        showSnackbar("Bulk upload failed!", "info");
-      }
-    } catch (err) {
-      showSnackbar("Bulk upload failed!", "error");
-      console.log(err);
-    }
-  };
-
   // Fetch students from API and setStudents
   const [students, setStudents] = useState([]);
   const [schools, setSchools] = useState([]);
@@ -79,7 +61,7 @@ export default function AdminStudents() {
     last_name: "",
     levelId: "",
   });
-
+  const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -93,6 +75,25 @@ export default function AdminStudents() {
     severity: "success",
   });
   const [tab, setTab] = useState(0);
+  const handleBulkUpload = async (event) => {
+    setUploading(true);
+    try {
+      const file = event.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await bulkUploadStudents(formData);
+      if (res.data.success) {
+        showSnackbar(res.data?.message || "Bulk upload successful!", "success");
+      } else {
+        showSnackbar("Bulk upload failed, check server logs!", "info");
+      }
+    } catch (err) {
+      showSnackbar("Bulk upload failed!", "error");
+      console.log(err);
+    }
+    setUploading(false);
+  };
 
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
@@ -151,7 +152,7 @@ export default function AdminStudents() {
   const handleFetchStudents = async () => {
     if (!selectedFaculty || !selectedDepartment || !selectedLevel) {
       showSnackbar("All fields required!", "error");
-      return
+      return;
     }
     try {
       const res = await getStudentsForDepartment(
@@ -265,10 +266,11 @@ export default function AdminStudents() {
     }
   };
 
-  const filteredStudents = students.filter((s) =>
-    s.first_name.toLowerCase().includes(search.toLowerCase()) ||
-    s.last_name.toLowerCase().includes(search.toLowerCase()) ||
-    s.email.toLowerCase().includes(search.toLowerCase())
+  const filteredStudents = students.filter(
+    (s) =>
+      s.first_name.toLowerCase().includes(search.toLowerCase()) ||
+      s.last_name.toLowerCase().includes(search.toLowerCase()) ||
+      s.email.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -438,14 +440,15 @@ export default function AdminStudents() {
               <Table sx={{ minWidth: 320, width: "100%" }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Matric Number</TableCell>
-                    <TableCell
-                      sx={{ display: { xs: "none", sm: "table-cell" } }}
-                    >
-                      Email
+                    <TableCell sx={{ fontWeight: "bold" }}>S/No</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+                      Name
                     </TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Matric Number
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -454,17 +457,15 @@ export default function AdminStudents() {
                     .map((student, index) => (
                       <TableRow key={index}>
                         <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
+                          {index + 1}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
                           {student.first_name} {student.last_name}
                         </TableCell>
                         <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
                           {student.registration_number}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            display: { xs: "none", sm: "table-cell" },
-                            fontSize: { sm: 15 },
-                          }}
-                        >
+                        <TableCell sx={{ width: "20%" }}>
                           {student.email}
                         </TableCell>
                         <TableCell
@@ -479,7 +480,7 @@ export default function AdminStudents() {
                           <Box
                             sx={{
                               display: "flex",
-                              gap: 1.5,
+                              gap: 1,
                               justifyContent: "center",
                               alignItems: "center",
                               width: "100%",
@@ -666,13 +667,11 @@ export default function AdminStudents() {
                         onChange={handleLevelChange}
                         label="Level"
                       >
-                        {levels.map((l) => {
-                          return (
-                            <MenuItem key={l.id} value={l.id}>
-                              {l.name}
-                            </MenuItem>
-                          );
-                        })}
+                        {levels.map((l) => (
+                          <MenuItem key={l.id} value={l.id}>
+                            {l.name}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                     <TextField
@@ -770,22 +769,28 @@ export default function AdminStudents() {
                   </Button>
 
                   <Button
+                    startIcon={<UploadFile />}
                     variant="contained"
                     component="label"
-                    startIcon={<UploadFile />}
                     sx={{
-                      bgcolor: "#2C2C78",
-                      ":hover": { bgcolor: "#1f1f5c" },
-                      width: { xs: "100%", sm: "auto" },
+                      bgcolor: uploading ? "#d1d1f7" : "#2C2C78",
+                      color: uploading ? "#000" : "#fff",
+                      ":hover": { bgcolor: uploading ? "#c2c2f5" : "#1f1f5c" },
                     }}
+                    // disabled={uploading}
                   >
-                    Upload Students
-                    <Input
-                      type="file"
-                      accept=".csv"
-                      sx={{ display: "none" }}
-                      onChange={handleBulkUpload}
-                    />
+                    {uploading ? (
+                      <>
+                        <CircularProgress
+                          size={20}
+                          sx={{ color: "#2C2C78", mr: 1 }}
+                        />
+                        Uploading
+                      </>
+                    ) : (
+                      "Upload Students"
+                    )}
+                    <input type="file" hidden onChange={handleBulkUpload} />
                   </Button>
                 </Box>
               </Paper>

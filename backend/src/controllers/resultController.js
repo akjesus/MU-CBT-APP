@@ -99,7 +99,7 @@ exports.getResultsByExam = async (req, res) => {
   
       const [rows] = await db.query(sql, params);
   
-      res.json(rows);
+      res.status(200).json({success: true, results: rows});
     } catch (err) {
       console.error("Get Results Error:", err);
       res.status(500).json({ error: err.message });

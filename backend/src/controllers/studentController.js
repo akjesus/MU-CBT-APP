@@ -1,6 +1,8 @@
 const Student = require("../models/Student");
 const db = require("../config/database");
 const jwt = require("jsonwebtoken");
+const csvParser = require("csv-parser");
+const stream = require("stream");
 
 exports.getAllStudents = async (req, res) => {
   try {
@@ -162,6 +164,83 @@ exports.getStudentsByDepartmentAndLevel = async (req, res) => {
       levelId,
     );
     res.status(200).json({success: true, students});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.bulkUploadStudents = async (req, res) => {
+  try {
+    // Check if file is present
+    if (!req.file ) {
+      console.log("No file uploaded");
+      return res.status(400).json({ error: "CSV file is required" });
+    }
+    console.log("Received file:", req.file.originalname);
+    const csvFile = req.file;
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(csvFile.buffer);
+    const studentsToImsert = []; 
+    bufferStream
+      .pipe(csvParser())
+      .on("data", (row) => {
+        const {
+          department_id,
+          level_id,
+          registration_number,
+          first_name,
+          last_name,
+          email,
+          username,
+        } = row;
+
+        // We'll store this row data
+        studentsToImsert.push({
+          department_id,
+          level_id,
+          registration_number,
+          first_name,
+          last_name,
+          email,
+          username,
+          password: registration_number, // default password is reg number
+        });
+      })
+      .on("end", async () => {
+        if (!studentsToImsert.length) {
+          return res
+            .status(400)
+            .json({ error: "No valid student data found in CSV" });
+        }
+
+        let insertedCount = 0;
+
+        // We'll process each question row individually
+        for (const qRow of studentsToImsert) {
+          // Insert new question
+
+            const [insertRes] = await db.query(
+              `INSERT INTO students 
+               (department_id, level_id, registration_number, first_name, last_name, email, username,
+                password, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+              [
+                qRow.department_id,
+                qRow.level_id,
+                qRow.registration_number,
+                qRow.first_name,
+                qRow.last_name,
+                qRow.email,
+                qRow.username,
+                qRow.password,
+              ]
+            );
+            insertedCount++;
+        }
+        res.status(201).json({ success: true,
+          message: `${insertedCount} students successfully uploaded`,
+        });
+      });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

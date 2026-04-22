@@ -54,8 +54,18 @@ export default function AdminDashboard() {
             value: data.active_exams,
             link: "/admin/exams",
           },
-          { key: "schools", label: "Schools", value: data.schools },
-          { key: "questions", label: "Total Questions", value: data.questions },
+          {
+            key: "schools",
+            label: "Schools",
+            value: data.schools,
+            link: "/admin/schools",
+          },
+          {
+            key: "questions",
+            label: "Total Questions",
+            value: data.questions,
+            link: "/admin/exams",
+          },
         ];
         setStats(formattedStats);
         showSnackbar("Dashboard data fetched successfully", "success");

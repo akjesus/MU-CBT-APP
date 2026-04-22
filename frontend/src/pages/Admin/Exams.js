@@ -11,7 +11,11 @@ import {
   getQuestionsForExam,
   addQuestionsToExam,
   deleteQuestion,
+  updateQuestion,
+  bulkUploadQuestions,
+  deleteAllQuestionsFromExam,
 } from "../../api/exams";
+import moment from "moment";
 
 import {
   Box,
@@ -23,6 +27,7 @@ import {
   TableCell,
   TableBody,
   Dialog,
+  IconButton,
   DialogTitle,
   DialogContent,
   TextField,
@@ -31,7 +36,9 @@ import {
   MenuItem,
   Snackbar,
   Alert,
+  Tooltip,
 } from "@mui/material";
+import { Delete, Edit, QuestionMark, Check , CheckBox} from "@mui/icons-material";
 
 export default function AdminExams() {
   const [exams, setExams] = useState([]);
@@ -81,19 +88,19 @@ export default function AdminExams() {
     button: "Save Question",
     action: (question) => {
       console.log("Add question:", question);
-    },  
+    },
   });
 
-   const [editQuestionModal, setEditQuestionModal] = useState({
-     open: false,
-     question: null,
-     title: "Edit Question",
-     button: "Save Changes",
-     action: (question) => {
-       console.log("Edit question:", question);
-     },
-   });
-
+  const [editQuestionModal, setEditQuestionModal] = useState({
+    open: false,
+    question: null,
+    title: "Edit Question",
+    button: "Save Changes",
+    action: (question) => {
+      console.log("Edit question:", question);
+    },
+  });
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [examQuestions, setExamQuestions] = useState([]);
   const getExamQuestions = async (id) => {
     try {
@@ -258,7 +265,9 @@ export default function AdminExams() {
   const handleChange = (e) => {
     setNewExam({ ...newExam, [e.target.name]: e.target.value });
   };
-
+  const handleBulkUpload = (e) => {
+    setFile(e.target.files[0]);
+  };
   const handleSaveExam = async () => {
     if (editIndex !== null) {
       try {
@@ -270,7 +279,7 @@ export default function AdminExams() {
         }
       } catch (error) {
         console.log(error);
-        showSnackbar("Error Updating Exam", "error");
+        showSnackbar(error.response.data.error, "error");
       }
     } else {
       handleSubmitExam();
@@ -316,6 +325,7 @@ export default function AdminExams() {
             <TableCell sx={{ fontWeight: "bold" }}>Correct Option</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Instructions</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Score Obtainable</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Question Type</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -325,14 +335,16 @@ export default function AdminExams() {
               <TableCell>{index + 1}</TableCell>
               <TableCell>{question.text}</TableCell>
               <TableCell>{question.correct_option}</TableCell>
-              <TableCell>{question.instruction || "N/A"}</TableCell>
+              <TableCell>{question.instructions || "N/A"}</TableCell>
               <TableCell>{question.score_obtainable}</TableCell>
+              <TableCell>{question.question_type}</TableCell>
               <TableCell>
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button
                     variant="contained"
                     color="primary"
                     size="small"
+                    sx={{ fontSize: "0.75rem", padding: "4px 8px" }}
                     onClick={() =>
                       setEditQuestionModal({
                         open: true,
@@ -340,7 +352,7 @@ export default function AdminExams() {
                         title: "Edit Question",
                         button: "Save Changes",
                         action: () => {
-                          handleEditQuestion(question.question_id);
+                          handleEditQuestion(question);
                         },
                       })
                     }
@@ -351,6 +363,7 @@ export default function AdminExams() {
                     variant="contained"
                     color="error"
                     size="small"
+                    sx={{ fontSize: "0.75rem", padding: "4px 8px" }}
                     onClick={() =>
                       setOpenConfirm({
                         open: true,
@@ -376,46 +389,93 @@ export default function AdminExams() {
     );
   };
 
-  // Handlers for editing and deleting questions
-  const handleEditQuestion = (question) => {
-    console.log("Edit question:", question);
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleEditQuestion = async (question) => {
+    try {
+      const formData = new FormData();
+      if (file) {
+        formData.append("file", file);
+      }
+      Object.keys(question).forEach((key) => {
+        formData.append(key, question[key]);
+      });
+      await updateQuestion(question.question_id, formData);
+      await getExamQuestions(openExamQuestionModal.exam.id);
+      showSnackbar("Question updated successfully!", "success");
+      setFile(null);
+      setEditQuestionModal({
+        ...editQuestionModal,
+        open: false,
+        question: null,
+      });
+    } catch (error) {
+      console.error("Error updating question:", error);
+      showSnackbar(error.response.data.error, "error");
+    }
   };
 
   const handleDeleteQuestion = async (id) => {
     try {
       const res = await deleteQuestion(id);
-      console.log(res.data);
       if (res.data.success) {
         showSnackbar("Question deleted successfully!", "success");
         await getExamQuestions(openExamQuestionModal.exam.id);
       }
     } catch (error) {
-      showSnackbar("Error deleting question!", "error");
+      console.log(error);
+      showSnackbar(error.response.data.error, "error");
     }
   };
 
   // Handlers for new actions
   const handleAddNewQuestion = async (exam, question) => {
-    console.log(exam.id, exam.course_id, question);
     try {
-      const res = await addQuestionsToExam(exam.id, exam.course_id, question);
-      console.log(res.data);
-      getExamQuestions(exam.id);
+      const formData = new FormData();
+      if (file) {
+        formData.append("file", file);
+      }
+      Object.keys(question).forEach((key) => {
+        formData.append(key, question[key]);
+      });
+      formData.append("course_id", exam.course_id);
+      await addQuestionsToExam(exam.id, formData);
+      await getExamQuestions(exam.id);
       showSnackbar("Question added to exam successfully!", "success");
     } catch (error) {
       console.log("Error adding question to exam:", error);
-      showSnackbar("Error adding question to exam!", "error");
+      showSnackbar(error.response.data.error, "error");
     }
   };
 
-  const handleDeleteAllQuestions = () => {
-    console.log("Delete all questions");
-    // Implement delete all questions functionality here
+  const handleDeleteAllQuestions = async (id) => {
+    try {
+      await deleteAllQuestionsFromExam(id);
+      showSnackbar("All questions deleted from exam successfully!", "success");
+      await getExamQuestions(id);
+    } catch (error) {
+      showSnackbar(error.response.data.error, "error");
+      console.log(error);
+    }
   };
 
-  const handleBulkUploadQuestions = () => {
-    console.log("Bulk upload questions via CSV");
-    // Implement bulk upload functionality here
+  const handleBulkUploadQuestions = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      await bulkUploadQuestions(openExamQuestionModal.exam.id, formData);
+      showSnackbar("Questions uploaded successfully!", "success");
+      await getExamQuestions(openExamQuestionModal.exam.id);
+      setFile(null);
+      setBulkUploadOpen(false);
+    } catch (error) {
+      showSnackbar("There was an error uploading the questions", "error");
+      console.log(error);
+    }
   };
 
   return (
@@ -449,7 +509,6 @@ export default function AdminExams() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </Box>
-
         <Table>
           <TableHead>
             <TableRow>
@@ -468,16 +527,12 @@ export default function AdminExams() {
               <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
                 Level
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Date
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Time
-              </TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
               <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
                 Duration
               </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -497,97 +552,123 @@ export default function AdminExams() {
                   <TableCell>{ex.course_name}</TableCell>
                   <TableCell>{ex.departments}</TableCell>
                   <TableCell>{ex.level}</TableCell>
-                  <TableCell>{ex.exam_date}</TableCell>
-                  <TableCell>{ex.start_time}</TableCell>
+                  <TableCell>
+                    {moment(ex.exam_date).format("MMMM Do YYYY")}
+                  </TableCell>
+                  <TableCell sx={{ width: "50%" }}>
+                    {moment(ex.start_time, "HH:mm").format("LT")}
+                  </TableCell>
                   <TableCell>{ex.duration} mins</TableCell>
                   <TableCell>
                     <Box
                       sx={{
                         display: "flex",
-                        gap: 1.5,
+                        gap: 1,
                         justifyContent: "center",
                         alignItems: "center",
                       }}
                     >
-                      <Button
-                        onClick={() =>
-                          setOpenConfirm({
-                            open: true,
-                            title: `${ex.active ? "Deactivate" : "Activate"} Exam`,
-                            data: ex,
-                            message: `Are you sure you want to ${ex.active ? "deactivate" : "activate"} ${ex.exam_name}?`,
-                            button: `${ex.active ? "Deactivate" : "Activate"} Exam`,
-                            action: () => handleActivate(ex.id, !ex.active),
-                          })
-                        }
-                        variant="contained"
-                        sx={{
-                          bgcolor: ex.active ? "orange" : "green",
-                          ":hover": {
-                            bgcolor: ex.active ? "darkorange" : "darkgreen",
-                          },
-                        }}
+                      <Tooltip
+                        title={ex.active ? "Deactivate Exam" : "Activate Exam"}
+                        arrow
                       >
-                        {ex.active ? "Deactivate" : "Activate"}
-                      </Button>
-                      <Button
-                        color="white"
-                        size="small"
-                        sx={{
-                          bgcolor: "#7f7ff5",
-                          borderRadius: 2,
-                          p: 1,
-                          boxShadow: 1,
-                          ":hover": { bgcolor: "#1515e9", color: "white" },
-                        }}
-                        onClick={() => handleOpen(ex, index)}
-                        aria-label="Edit Course"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        color="error"
-                        size="small"
-                        sx={{
-                          bgcolor: "#fdecea",
-                          borderRadius: 2,
-                          p: 1,
-                          boxShadow: 1,
-                          ":hover": { bgcolor: "#ef1912", color: "white" },
-                        }}
-                        onClick={() =>
-                          setOpenConfirm({
-                            open: true,
-                            title: "Confirm Exam Deletion",
-                            message: `Are you sure you want to delete ${ex.exam_name}?`,
-                            data: ex,
-                            button: "Delete Exam",
-                            action: () => handleDeleteExam(ex.id),
-                          })
-                        }
-                        aria-label="Delete Course"
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        color="white"
-                        size="small"
-                        sx={{
-                          bgcolor: "#25d0f3",
-                          borderRadius: 2,
-                          p: 1,
-                          boxShadow: 1,
-                          ":hover": { bgcolor: "#0b97ba", color: "white" },
-                        }}
-                        onClick={() =>
-                          setOpenExamQuestionModal({
-                            open: true,
-                            exam: ex,
-                          })
-                        }
-                      >
-                        Manage Questions
-                      </Button>
+                        <IconButton
+                          aria-label={
+                            ex.active ? "Deactivate Exam" : "Activate Exam"
+                          }
+                          color={ex.active ? "success" : "default"}
+                          size="small"
+                          sx={{
+                            bgcolor: "#c0f1ce",
+                            borderRadius: 2,
+                            p: 0.25,
+                            boxShadow: 1,
+                            ":hover": { bgcolor: "#d1d1f7" },
+                          }}
+                          onClick={() =>
+                            setOpenConfirm({
+                              open: true,
+                              title: `${ex.active ? "Deactivate" : "Activate"} Exam`,
+                              data: ex,
+                              message: `Are you sure you want to ${ex.active ? "deactivate" : "activate"} ${ex.exam_name}?`,
+                              button: `${ex.active ? "Deactivate" : "Activate"} Exam`,
+                              action: () => handleActivate(ex.id, !ex.active),
+                            })
+                          }
+                        >
+                          {" "}
+                          {ex.active ? (
+                            <CheckBox defaultChecked />
+                          ) : (
+                            <Check fontSize="small" />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Edit Exam" arrow>
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          sx={{
+                            bgcolor: "#e3e3fa",
+                            borderRadius: 2,
+                            p: 0.25,
+                            boxShadow: 1,
+                            ":hover": { bgcolor: "#d1d1f7" },
+                          }}
+                          onClick={() => handleOpen(ex, index)}
+                          aria-label="Edit Exam"
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Exam" arrow>
+                        <IconButton
+                          color="error"
+                          size="small"
+                          sx={{
+                            bgcolor: "#e3e3fa",
+                            borderRadius: 2,
+                            p: 0.25,
+                            boxShadow: 1,
+                            ":hover": { bgcolor: "#d1d1f7" },
+                          }}
+                          onClick={() =>
+                            setOpenConfirm({
+                              open: true,
+                              title: "Confirm Exam Deletion",
+                              message: `Are you sure you want to delete ${ex.exam_name}?`,
+                              data: ex,
+                              button: "Delete Exam",
+                              action: () => handleDeleteExam(ex.id),
+                            })
+                          }
+                          aria-label="Delete Exam"
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Manage Questions" arrow>
+                        <IconButton
+                          color="secondary"
+                          size="small"
+                          sx={{
+                            bgcolor: "#e3e3fa",
+                            borderRadius: 2,
+                            p: 0.25,
+                            boxShadow: 1,
+                            ":hover": { bgcolor: "#d1d1f7" },
+                          }}
+                          onClick={() =>
+                            setOpenExamQuestionModal({
+                              open: true,
+                              exam: ex,
+                            })
+                          }
+                          aria-label="Manage Questions"
+                        >
+                          <QuestionMark fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -925,14 +1006,26 @@ export default function AdminExams() {
               <Button
                 variant="contained"
                 color="error"
-                onClick={handleDeleteAllQuestions}
+                onClick={() =>
+                  setOpenConfirm({
+                    open: true,
+                    title: "Delete All Questions",
+                    message:
+                      "Are you sure you want to delete all questions from this exam?",
+                    button: "Delete All",
+                    data: openExamQuestionModal.exam,
+                    action: () => {
+                      handleDeleteAllQuestions(openExamQuestionModal.exam.id);
+                    },
+                  })
+                }
               >
                 Delete All Questions
               </Button>
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={handleBulkUploadQuestions}
+                onClick={() => setBulkUploadOpen(true)}
               >
                 Bulk Upload CSV
               </Button>
@@ -1051,6 +1144,28 @@ export default function AdminExams() {
               ))}
             </TextField>
             <TextField
+              select
+              margin="dense"
+              label="Question Type"
+              fullWidth
+              value={addQuestionModal.question?.question_type || ""}
+              onChange={(e) =>
+                setAddQuestionModal((prev) => ({
+                  ...prev,
+                  question: {
+                    ...prev.question,
+                    question_type: e.target.value,
+                  },
+                }))
+              }
+            >
+              {["Objective", "Theory"].map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
               type="number"
               margin="dense"
               label="Score Obtainable"
@@ -1066,24 +1181,25 @@ export default function AdminExams() {
                 }))
               }
             />
+
             <TextField
               margin="dense"
               label="Instructions"
               fullWidth
               multiline
               rows={3}
-              value={addQuestionModal.question?.instruction || ""}
+              value={addQuestionModal.question?.instructions || ""}
               onChange={(e) =>
                 setAddQuestionModal((prev) => ({
                   ...prev,
-                  question: { ...prev.question, instruction: e.target.value },
+                  question: { ...prev.question, instructions: e.target.value },
                 }))
               }
             />
             <Box sx={{ mt: 2 }}>
-              {addQuestionModal.question?.image && (
+              {addQuestionModal.question?.file && (
                 <img
-                  src={addQuestionModal.question.image}
+                  src={addQuestionModal.question.file}
                   alt="Question"
                   style={{ maxWidth: "100%", marginBottom: "10px" }}
                 />
@@ -1095,17 +1211,7 @@ export default function AdminExams() {
                   hidden
                   accept="image/*"
                   onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        setAddQuestionModal((prev) => ({
-                          ...prev,
-                          question: { ...prev.question, image: reader.result },
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
+                    handleFileChange(e);
                   }}
                 />
               </Button>
@@ -1263,40 +1369,30 @@ export default function AdminExams() {
               fullWidth
               multiline
               rows={3}
-              value={editQuestionModal.question?.instruction || ""}
+              value={editQuestionModal.question?.instructions || ""}
               onChange={(e) =>
                 setEditQuestionModal((prev) => ({
                   ...prev,
-                  question: { ...prev.question, instruction: e.target.value },
+                  question: { ...prev.question, instructions: e.target.value },
                 }))
               }
             />
             <Box sx={{ mt: 2 }}>
-              {editQuestionModal.question?.image && (
+              {editQuestionModal.question?.file && (
                 <img
-                  src={editQuestionModal.question.image}
+                  src={`http://localhost:5000/${editQuestionModal.question.file}`}
                   alt="Question"
                   style={{ maxWidth: "100%", marginBottom: "10px" }}
                 />
               )}
               <Button variant="contained" component="label" color="secondary">
-                Upload Image
+                Change Image
                 <input
                   type="file"
                   hidden
                   accept="image/*"
                   onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        setEditQuestionModal((prev) => ({
-                          ...prev,
-                          question: { ...prev.question, image: reader.result },
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
+                    handleFileChange(e);
                   }}
                 />
               </Button>
@@ -1318,15 +1414,42 @@ export default function AdminExams() {
               variant="contained"
               color="primary"
               onClick={() => {
-                editQuestionModal.action(editQuestionModal.question);
-                setEditQuestionModal({
-                  open: false,
-                  question: null,
-                  title: "",
-                });
+                handleEditQuestion(editQuestionModal.question);
               }}
             >
               {editQuestionModal.button}
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={bulkUploadOpen} onClose={() => setBulkUploadOpen(false)}>
+          <DialogTitle>Bulk Upload Questions via CSV</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              Please upload the template CSV file with questions!.
+            </Typography>
+            <Button variant="contained" component="label" color="primary">
+              Select CSV
+              <input
+                type="file"
+                hidden
+                accept=".csv"
+                onChange={(e) => {
+                  handleBulkUpload(e);
+                }}
+              />
+            </Button>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setBulkUploadOpen(false)}>Cancel</Button>
+            <Button
+              disabled={!file}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleBulkUploadQuestions(file);
+              }}
+            >
+              Upload
             </Button>
           </DialogActions>
         </Dialog>

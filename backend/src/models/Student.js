@@ -125,7 +125,7 @@ class Student {
                 JOIN departments ON students.department_id = departments.id
                 JOIN faculties ON departments.faculty_id = faculties.id
              WHERE students.department_id = ? AND students.level_id = ?`,
-             [departmentId, levelId]
+      [departmentId, levelId],
     );
     return rows;
   }

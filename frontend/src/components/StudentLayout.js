@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import {
   Drawer,
   List,
@@ -15,9 +14,6 @@ import {
 } from "@mui/material";
 import {
   Dashboard,
-  Book,
-  BarChart,
-  Settings,
   Logout,
   ChevronLeft,
   ChevronRight,
@@ -28,7 +24,6 @@ const drawerWidth = 240;
 
 const menuItems = [
   { text: "Dashboard", icon: <Dashboard />, path: "/student/dashboard" },
-  { text: "Profile", icon: <Book />, path: "/student/exams" },
 ];
 
 const StudentLayout = () => {
@@ -38,7 +33,7 @@ const StudentLayout = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const user = JSON.parse(localStorage.getItem("user"));
 
-  function showSnackbar(message, severity) {
+  const  showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   }
 

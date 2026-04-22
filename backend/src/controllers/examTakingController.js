@@ -2,105 +2,106 @@ const ExamTaking = require("../models/ExamTaking");
 const db = require("../config/database");
 
 exports.checkEligibility = async (req, res) => {
-    try {
-        const { student_id, exam_id } = req.params;
-
-        // Check if student is eligible
-        const eligibility = await ExamTaking.checkEligibility(student_id, exam_id);
-        if (!eligibility) {
-            return res.status(403).json({ error: "You are not eligible for this exam or exam has not started." });
-        }
-
-        // Check if student has already attempted (if multiple attempts are not allowed)
-        const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
-        if (hasAttempted) {
-            return res.status(403).json({ error: "You have already taken this exam." });
-        }
-
-        res.json({ message: "You are eligible to take this exam.", exam: eligibility });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+  try {
+    const { student_id, exam_id } = req.params;
+    const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
+    if (hasAttempted) {
+      return res
+        .status(200)
+        .json({
+          code: 304,
+          message: "You have already taken this exam.",
+          success: false,
+        });
     }
+    return res.json({
+      message: "You are eligible to take this exam.",
+      success: true,
+    });
+  } catch (err) {
+    console.log("Error in checkEligibility:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 exports.getExamQuestions = async (req, res) => {
-    try {
-        const { exam_id } = req.params;
-        const questions = await ExamTaking.getExamQuestions(exam_id);
-        res.json(questions);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const { exam_id } = req.params;
+    const questions = await ExamTaking.getExamQuestions(exam_id);
+    res.json(questions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 exports.submitExam = async (req, res) => {
-    try {
-      const { exam_id, student_id } = req.params;
+  try {
+    const { exam_id, student_id } = req.params;
 
-        // Check if student has already attempted
-        const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
-        if (hasAttempted) {
-            return res.status(403).json({ error: "You have already taken this exam." });
-        }
+    // Check if student has already attempted
+    const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
+    if (hasAttempted) {
+      return res
+        .status(403)
+        .json({ error: "You have already taken this exam." });
+    }
 
-      const { responses } = req.body; // e.g. { "7": "A", "8": "C" }
-      if (!responses) {
-        return res.status(400).json({ error: "No responses provided." });
-      }
-  
-      // 1) Fetch all relevant questions for this exam from the DB,
-      //    including their correct_option and score_obtainable.
-      const [questions] = await db.query(
-        `SELECT id AS question_id, correct_option, score_obtainable
+    const { responses } = req.body;
+    if (!responses) {
+      return res.status(400).json({ error: "No responses provided." });
+    }
+
+    // 1) Fetch all relevant questions for this exam from the DB,
+    //    including their correct_option and score_obtainable.
+    const [questions] = await db.query(
+      `SELECT id AS question_id, correct_option, score_obtainable
          FROM questions
          WHERE id IN (
            SELECT question_id FROM exam_questions WHERE exam_id = ?
          )`,
-        [exam_id]
-      );
-  
-      if (!questions || questions.length === 0) {
-        return res.status(404).json({ error: "No questions found for this exam." });
+      [exam_id],
+    );
+
+    if (!questions || questions.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No questions found for this exam." });
+    }
+
+    // 2) For each question, check if user response matches the correct_option.
+    let totalScore = 0;
+    questions.forEach((q) => {
+      const userAnswer = responses[q.question_id];
+      // Convert score_obtainable to a real number
+      const questionScore = parseFloat(q.score_obtainable) || 0;
+
+      if (userAnswer && userAnswer === q.correct_option) {
+        totalScore += questionScore;
       }
-  
-      // 2) For each question, check if user response matches the correct_option.
-      let totalScore = 0;
-      questions.forEach((q) => {
-        const userAnswer = responses[q.question_id];
-        // Convert score_obtainable to a real number
-        const questionScore = parseFloat(q.score_obtainable) || 0;
-      
-        if (userAnswer && userAnswer === q.correct_option) {
-          totalScore += questionScore;
-        }
-      });
-  
-      // 3) Save the result in the `results` table (status=completed, etc.)
-      //    We'll assume there's only one attempt. If multiple attempts are allowed,
-      //    you'd handle that logic.
-      await db.query(
-        `INSERT INTO results (student_id, exam_id, score, responses, status, start_time, submitted_time,
+    });
+    await db.query(
+      `INSERT INTO results (student_id, exam_id, score, responses, status, start_time, submitted_time,
                               active_duration, created_at, updated_at)
          VALUES (?, ?, ?, ?, 'completed', NOW(), NOW(), 0, NOW(), NOW())`,
-        [student_id, exam_id, totalScore, JSON.stringify(responses)]
-      );
-  
-      // 4) Respond with a success message and the final score if you wish.
-      res.json({
-        message: "Exam submitted and auto-graded successfully!",
-        finalScore: totalScore
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: err.message });
-    }
-  };
+      [student_id, exam_id, totalScore, JSON.stringify(responses)],
+    );
+
+    // 4) Respond with a success message and the final score if you wish.
+    res.json({
+      message: "Exam submitted and auto-graded successfully!",
+      finalScore: totalScore,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
 
 //controller function to take in bulk student responses as array and submit
 exports.submitBulkExam = async (req, res) => {
   try {
     const { exam_id } = req.params;
-    const studentResponses = req.body; 
+    const studentResponses = req.body;
     // e.g. [{ student_id: 1, responses: { "7": "A", "8": "C" } }, ...]
 
     if (!Array.isArray(studentResponses) || studentResponses.length === 0) {
@@ -110,7 +111,10 @@ exports.submitBulkExam = async (req, res) => {
     // Process each student's responses
     for (const { student_id, responses } of studentResponses) {
       // Check if student has already attempted
-      const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
+      const hasAttempted = await ExamTaking.hasAttemptedExam(
+        student_id,
+        exam_id,
+      );
       if (hasAttempted) {
         continue; // Skip this student if they have already taken the exam
       }
@@ -123,7 +127,7 @@ exports.submitBulkExam = async (req, res) => {
          WHERE id IN (
            SELECT question_id FROM exam_questions WHERE exam_id = ?
          )`,
-        [exam_id]
+        [exam_id],
       );
 
       if (!questions || questions.length === 0) {
@@ -149,17 +153,17 @@ exports.submitBulkExam = async (req, res) => {
         `INSERT INTO results (student_id, exam_id, score, responses, status, start_time, submitted_time,
                               active_duration, created_at, updated_at)
          VALUES (?, ?, ?, ?, 'completed', NOW(), NOW(), 0, NOW(), NOW())`,
-        [student_id, exam_id, totalScore, JSON.stringify(responses)]
+        [student_id, exam_id, totalScore, JSON.stringify(responses)],
       );
     }
 
     // 4) Respond with a success message.
     res.json({
-      message: "Bulk exam submissions processed successfully!"
+      message: "Bulk exam submissions processed successfully!",
     });
   } catch (err) {
     console.error(err);
-    console.log
+    console.log;
     res.status(500).json({ error: err.message });
   }
 };
