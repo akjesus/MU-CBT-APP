@@ -35,7 +35,7 @@ const getMenuItems = (role) => {
       { text: "Dashboard", icon: <Dashboard />, path: "/admin/dashboard" },
       { text: "Students", icon: <People />, path: "/admin/students" },
       { text: "Exams", icon: <Book />, path: "/admin/exams" },
-      { text: "Schools", icon: <School />, path: "/admin/schools" },
+      { text: "Faculties", icon: <School />, path: "/admin/faculties" },
       { text: "Results", icon: <BarChart />, path: "/admin/results" },
       { text: "Staff", icon: <PeopleOutline />, path: "/admin/staff" },
     ];

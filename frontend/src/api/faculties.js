@@ -3,7 +3,7 @@ import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:5000/api";
 
-export const getSchools = () => {
+export const getFaculties = () => {
   const token = localStorage.getItem("token");
   return axios.get(`${BASE_URL}/faculties`, {
     headers: {
@@ -106,7 +106,7 @@ export const getCoursesWithResults = () => {
   });
 };
 
-export const addSchool = (data) => {
+export const addFaculty = (data) => {
   const token = localStorage.getItem("token");
   return axios.post(
     `${BASE_URL}/faculties`,
@@ -121,10 +121,10 @@ export const addSchool = (data) => {
     },
   );
 };
-export const updateSchool = (id, data) =>
+export const updateFaculty = (id, data) =>
   axios.put(`${BASE_URL}/faculties/${id}`, data);
 
-export const deleteSchool = (id) => {
+export const deleteFaculty = (id) => {
   const token = localStorage.getItem("token");
   return axios.delete(`${BASE_URL}/faculties/${id}`, {
     headers: {

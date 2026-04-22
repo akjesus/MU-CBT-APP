@@ -28,7 +28,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, UploadFile, LockReset } from "@mui/icons-material";
-import { getSchools, getLevels } from "../../api/schools";
+import { getFaculties, getLevels } from "../../api/faculties";
 import { getDepartments } from "../../api/departments";
 import {
   createStudent,
@@ -42,7 +42,7 @@ import {
 export default function AdminStudents() {
   // Fetch students from API and setStudents
   const [students, setStudents] = useState([]);
-  const [schools, setSchools] = useState([]);
+  const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [levels, setLevels] = useState([]);
   const [open, setOpen] = useState(false);
@@ -50,12 +50,12 @@ export default function AdminStudents() {
   const [editIndex, setEditIndex] = useState(null);
   const [newStudent, setNewStudent] = useState({
     matric: "",
-    school: "",
+    faculty: "",
     department: "",
     level: "",
     email: "",
     username: "",
-    schoolId: "",
+    facultyId: "",
     departmentId: "",
     first_name: "",
     last_name: "",
@@ -129,22 +129,22 @@ export default function AdminStudents() {
       }
     }
   };
-  // Fetch schools & departments
+  // Fetch faculties & departments
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const schoolsRes = await getSchools();
+      const facultiesRes = await getFaculties();
       const departmentsRes = await getDepartments();
       const levelsRes = await getLevels();
-      setSchools(schoolsRes.data.faculties);
+      setFaculties(facultiesRes.data.faculties);
       setDepartments(departmentsRes.data.departments);
       setLevels(levelsRes.data.levels);
     } catch (error) {
       setSnackbar("Error fetching data: " + error.message, "error");
-      setSchools([]);
+      setFaculties([]);
       setDepartments([]);
       setLevels([]);
     }
@@ -182,12 +182,12 @@ export default function AdminStudents() {
       first_name: "",
       last_name: "",
       matric: "",
-      school: "",
+      faculty: "",
       department: "",
       level: "",
       email: "",
       username: "",
-      schoolId: "",
+      facultyId: "",
       departmentId: "",
     });
     setEditIndex(null);
@@ -346,7 +346,7 @@ export default function AdminStudents() {
                   }}
                 >
                   <MenuItem value="">Select Faculty</MenuItem>
-                  {schools.map((fac) => (
+                  {faculties.map((fac) => (
                     <MenuItem key={fac.id} value={fac.id}>
                       {fac.name}
                     </MenuItem>
@@ -614,14 +614,14 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Faculty</InputLabel>
                       <Select
-                        name="school"
-                        value={newStudent.school}
+                        name="faculty"
+                        value={newStudent.faculty}
                         onChange={handleChange}
                         label="Faculty"
                       >
-                        {schools.map((s) => (
-                          <MenuItem key={s.id} value={s.name}>
-                            {s.name}
+                        {faculties.map((f) => (
+                          <MenuItem key={f.id} value={f.id}>
+                            {f.name}
                           </MenuItem>
                         ))}
                       </Select>
@@ -640,7 +640,7 @@ export default function AdminStudents() {
                         label="Department"
                       >
                         {departments
-                          .filter((d) => d.school_id === newStudent.schoolId)
+                          .filter((d) => d.faculty_id === newStudent.facultyId)
                           .map((d) => (
                             <MenuItem key={d.id} value={d.id}>
                               {d.name}
@@ -859,14 +859,14 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Faculty</InputLabel>
                       <Select
-                        name="school"
-                        value={newStudent.school}
+                        name="faculty"
+                        value={newStudent.faculty}
                         onChange={handleChange}
                         label="Faculty"
                       >
-                        {schools.map((s) => (
-                          <MenuItem key={s.id} value={s.name}>
-                            {s.name}
+                        {faculties.map((f) => (
+                          <MenuItem key={f.id} value={f.id}>
+                            {f.name}
                           </MenuItem>
                         ))}
                       </Select>
@@ -887,8 +887,8 @@ export default function AdminStudents() {
                         {departments
                           .filter(
                             (d) =>
-                              d.school_id ===
-                              schools.find((s) => s.name === newStudent.school)
+                              d.faculty_id ===
+                              faculties.find((f) => f.name === newStudent.faculty)
                                 ?.id,
                           )
                           .map((d) => (

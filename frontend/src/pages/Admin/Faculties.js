@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
 import moment from "moment";
 import {
-  getSchools,
-  addSchool,
-  updateSchool,
-  deleteSchool,
+  getFaculties,
+  addFaculty,
+  updateFaculty,
+  deleteFaculty,
   getCourses,
   createCourse,
   deleteCourse,
   updateCourse,
   getLevels,
-} from "../../api/schools";
+} from "../../api/faculties";
 import {
   getSessions,
   createSession,
@@ -52,11 +52,11 @@ import {
 import { Edit, Delete, Add } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 
-export default function SchoolsPage() {
+export default function FacultiesPage() {
   const { register, handleSubmit, reset, setValue } = useForm();
-  const [schools, setSchools] = useState([]);
-  const [editingSchool, setEditingSchool] = useState(null);
-  const [openSchoolDialog, setOpenSchoolDialog] = useState(false);
+  const [faculties, setFaculties] = useState([]);
+  const [editingFaculty, setEditingFaculty] = useState(null);
+  const [openFacultyDialog, setOpenFacultyDialog] = useState(false);
 
   // Departments state
   const [departments, setDepartments] = useState([]);
@@ -113,14 +113,14 @@ export default function SchoolsPage() {
   };
   // Tabs
   const [tab, setTab] = useState(0);
-  const fetchSchools = useCallback(async () => {
+  const fetchFaculties = useCallback(async () => {
     try {
-      const res = await getSchools();
-      setSchools(res.data.faculties);
-      showSnackbar("Schools Fetched!");
+      const res = await getFaculties();
+      setFaculties(res.data.faculties);
+      showSnackbar("Faculties Fetched!");
     } catch (error) {
       showSnackbar(
-        `${error.response?.data?.message || "Failed to fetch schools"}`,
+        `${error.response?.data?.message || "Failed to fetch faculties"}`,
         "error",
       );
       console.log(error);
@@ -327,19 +327,19 @@ export default function SchoolsPage() {
    };
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // School Section
-  const handleSchoolEdit = (school) => {
-    setEditingSchool(school);
-    setValue("name", school.name);
-    setOpenSchoolDialog(true);
+  // Faculty Section
+  const handleFacultyEdit = (faculty) => {
+    setEditingFaculty(faculty);
+    setValue("name", faculty.name);
+    setOpenFacultyDialog(true);
   };
 
-  const handleSchoolDelete = async (id) => {
+  const handleFacultyDelete = async (id) => {
     try {
-      await deleteSchool(id);
-      showSnackbar("School deleted successfully!", "success");
-      const res = await getSchools();
-      setSchools(res.data.faculties);
+      await deleteFaculty(id);
+      showSnackbar("Faculty deleted successfully!", "success");
+      const res = await getFaculties();
+      setFaculties(res.data.faculties);
     } catch (error) {
       showSnackbar(
         error.response.data.message || "There was an error",
@@ -349,23 +349,23 @@ export default function SchoolsPage() {
     }
     return;
   };
-  const onSchoolSubmit = async (data) => {
+  const onFacultySubmit = async (data) => {
     try {
-      if (editingSchool) {
-        await updateSchool(editingSchool.id, data);
+      if (editingFaculty) {
+        await updateFaculty(editingFaculty.id, data);
         reset();
-        showSnackbar("School updated successfully!", "success");
-        setEditingSchool(null);
-        setOpenSchoolDialog(false);
-        const res = await getSchools();
-        setSchools(res.data.faculties);
+        showSnackbar("Faculty updated successfully!", "success");
+        setEditingFaculty(null);
+        setOpenFacultyDialog(false);
+        const res = await getFaculties();
+        setFaculties(res.data.faculties);
       } else {
-        await addSchool(data);
+        await addFaculty  (data);
         reset();
-        showSnackbar("School added successfully!");
-        setOpenSchoolDialog(false);
-        const res = await getSchools();
-        setSchools(res.data.faculties);
+        showSnackbar("Faculty added successfully!");
+        setOpenFacultyDialog(false);
+        const res = await getFaculties();
+        setFaculties(res.data.faculties);
       }
     } catch (error) {
       showSnackbar(
@@ -389,18 +389,18 @@ export default function SchoolsPage() {
   };
 
   useEffect(() => {
-    if (tab === 0) fetchSchools();
+    if (tab === 0) fetchFaculties();
     else if (tab === 1) fetchDepartments();
     else if (tab === 2) {
       fetchCourses();
       fetchDepartments();
       fetchLevels();
     } else if (tab === 3) fetchSessions();
-  }, [tab, fetchSchools, fetchDepartments, fetchCourses]);
+  }, [tab, fetchFaculties, fetchDepartments, fetchCourses]);
 
-  // Filtered & paginated schools
-  const filtered = schools.filter((school) =>
-    school.name.toLowerCase().includes(search.toLowerCase()),
+  // Filtered & paginated faculties
+  const filtered = faculties.filter((faculty) =>
+    faculty.name.toLowerCase().includes(search.toLowerCase()),
   );
   const paginated = filtered.slice(
     (page - 1) * rowsPerPage,
@@ -454,7 +454,7 @@ export default function SchoolsPage() {
             fontSize: { xs: 18, sm: 24 },
           }}
         >
-          Manage Schools, Departments, Courses and Sessions
+          Manage Faculties, Departments, Courses and Sessions
         </Typography>
 
         {/* Tabs */}
@@ -462,17 +462,17 @@ export default function SchoolsPage() {
           <Tabs
             value={tab}
             onChange={handleChangeTab}
-            aria-label="schools-departments-tabs"
+            aria-label="faculties-departments-tabs"
             variant="fullWidth"
           >
-            <Tab label="Schools" />
+            <Tab label="Faculties" />
             <Tab label="Departments" />
             <Tab label="Courses" />
             <Tab label="Sessions" />
           </Tabs>
         </Box>
 
-        {/* Schools Tab */}
+        {/* Faculties Tab */}
         {tab === 0 && (
           <>
             {/* Search + Add Button */}
@@ -485,7 +485,7 @@ export default function SchoolsPage() {
               }}
             >
               <TextField
-                placeholder="Search School"
+                placeholder="Search Faculty"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 sx={{ width: "50%" }}
@@ -494,13 +494,13 @@ export default function SchoolsPage() {
                 variant="contained"
                 sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
                 startIcon={<Add />}
-                onClick={() => setOpenSchoolDialog(true)}
+                onClick={() => setOpenFacultyDialog(true)}
               >
-                Add School
+                Add Faculty
               </Button>
             </Box>
 
-            {/* Schools Table */}
+            {/* Faculties Table */}
             <Paper>
               <Table>
                 <TableHead>
@@ -510,9 +510,9 @@ export default function SchoolsPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginated.map((school) => (
-                    <TableRow key={school.id}>
-                      <TableCell>{school.name}</TableCell>
+                  {paginated.map((faculty) => (
+                    <TableRow key={faculty.id}>
+                      <TableCell>{faculty.name}</TableCell>
                       <TableCell
                         align="right"
                         sx={{
@@ -541,8 +541,8 @@ export default function SchoolsPage() {
                               boxShadow: 1,
                               ":hover": { bgcolor: "#d1d1f7" },
                             }}
-                            onClick={() => handleSchoolEdit(school)}
-                            aria-label="Edit School"
+                            onClick={() => handleFacultyEdit(faculty)}
+                            aria-label="Edit Faculty"
                           >
                             <Edit fontSize="small" />
                           </IconButton>
@@ -559,17 +559,17 @@ export default function SchoolsPage() {
                             onClick={() =>
                               setOpenConfirm({
                                 open: true,
-                                data: school,
-                                title: "Delete School",
+                                data: faculty,
+                                title: "Delete Faculty",
                                 message:
-                                  "Are you sure you want to delete this School?",
-                                button: "Delete School",
+                                  "Are you sure you want to delete this Faculty?",
+                                button: "Delete Faculty",
                                 action: () => {
-                                  handleSchoolDelete(school.id);
+                                  handleFacultyDelete(faculty.id);
                                 },
                               })
                             }
-                            aria-label="Delete School"
+                            aria-label="Delete Faculty"
                           >
                             <Delete fontSize="small" />
                           </IconButton>
@@ -580,7 +580,7 @@ export default function SchoolsPage() {
                   {paginated.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={2} align="center">
-                        No schools found
+                        No faculties found
                       </TableCell>
                     </TableRow>
                   )}
@@ -600,22 +600,22 @@ export default function SchoolsPage() {
               </Box>
             )}
 
-            {/* School Form Dialog */}
+            {/* Faculty Form Dialog */}
             <Dialog
-              open={openSchoolDialog}
+              open={openFacultyDialog}
               onClose={() => {
-                setOpenSchoolDialog(false);
-                setEditingSchool(null);
+                setOpenFacultyDialog(false);
+                setEditingFaculty(null);
               }}
             >
               <DialogTitle>
-                {editingSchool ? "Edit School" : "Add School"}
+                {editingFaculty ? "Edit Faculty" : "Add Faculty"}
               </DialogTitle>
               <DialogContent>
-                <form id="school-form" onSubmit={handleSubmit(onSchoolSubmit)}>
+                <form id="faculty-form" onSubmit={handleSubmit(onFacultySubmit)}>
                   <TextField
                     fullWidth
-                    label="School Name"
+                    label="Faculty Name"
                     {...register("name", { required: true })}
                     sx={{ mt: 2 }}
                   />
@@ -624,19 +624,19 @@ export default function SchoolsPage() {
               <DialogActions>
                 <Button
                   onClick={() => {
-                    setOpenSchoolDialog(false);
-                    setEditingSchool(null);
+                    setOpenFacultyDialog(false);
+                    setEditingFaculty(null);
                   }}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  form="school-form"
+                  form="faculty-form"
                   variant="contained"
                   color="primary"
                 >
-                  {editingSchool ? "Update" : "Add"}
+                  {editingFaculty ? "Update" : "Add"}
                 </Button>
               </DialogActions>
             </Dialog>
@@ -798,12 +798,12 @@ export default function SchoolsPage() {
                   <FormControl fullWidth sx={{ mt: 2 }}>
                     <InputLabel>Faculty</InputLabel>
                     <Select
-                      {...register("school", { required: true })}
-                      defaultValue={editingDept?.school || ""}
+                      {...register("faculty_id", { required: true })}
+                      defaultValue={editingDept?.faculty_id || ""}
                     >
-                      {schools.map((school) => (
-                        <MenuItem key={school.id} value={school.id}>
-                          {school.name}
+                      {faculties.map((faculty) => (
+                        <MenuItem key={faculty.id} value={faculty.id}>
+                          {faculty.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -1206,7 +1206,7 @@ export default function SchoolsPage() {
               </Box>
             )}
 
-            {/* School Form Dialog */}
+            {/* Faculty Form Dialog */}
             <Dialog
               open={openSessionDialog}
               onClose={() => {

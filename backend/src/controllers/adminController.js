@@ -20,8 +20,8 @@ exports.getDashboardStats = async (req, res) => {
     // Fetch total questions in Question Bank
     const [[questionBank]] = await db.query("SELECT COUNT(*) as total FROM questions");
 
-    // Fetch school/faculty name (optional)
-    const [[school]] = await db.query("SELECT COUNT(*) as total FROM faculties");
+    // Fetch faculty name (optional)
+    const [[faculty]] = await db.query("SELECT COUNT(*) as total FROM faculties");
     const [[courses]] = await db.query("SELECT COUNT(*) as total FROM courses");
     const [[departments]] = await db.query("SELECT COUNT(*) as total FROM departments");
 
@@ -32,7 +32,7 @@ exports.getDashboardStats = async (req, res) => {
       pass_rate: passRate.avg_pass_rate || 0,
       staff: staff.total || 0,
       questions: questionBank.total || 0,
-      schools: school.total || 0,
+      faculties: faculty.total || 0,
       courses: courses.total || 0,
       departments: departments.total || 0,
     }});

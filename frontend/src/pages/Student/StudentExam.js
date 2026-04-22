@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
@@ -41,10 +41,7 @@ import {
 } from "../../api/exams";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
-const wsUrl = `${BASE_URL.replace("/api", "").replace("http", "ws")}`;
 
-// Global WebSocket instance
-let globalWebSocket = null;
 
 export default function StudentExam() {
   const { exam_id } = useParams();
@@ -296,10 +293,7 @@ export default function StudentExam() {
         }
       });
 
-      const result = await submitExam(user.id, exam_id, formattedResponses);
-
       showSnackbar(`Exam submitted successfully!`, "success");
-      // Store exam result for dashboard modal
       localStorage.setItem(
         "examResult",
         JSON.stringify({

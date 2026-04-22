@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { useEffect } from "react";
-import { getCourses, getSessions } from "../../api/schools";
+import { getCourses, getSessions } from "../../api/faculties";
 import { getDepartments } from "../../api/departments";
 import {
   getAllExams,

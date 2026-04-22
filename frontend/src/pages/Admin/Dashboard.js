@@ -46,7 +46,7 @@ export default function AdminDashboard() {
             key: "courses",
             label: "Total Courses",
             value: data.courses,
-            link: "/admin/schools",
+            link: "/admin/faculties",
           },
           {
             key: "active_exams",
@@ -55,10 +55,10 @@ export default function AdminDashboard() {
             link: "/admin/exams",
           },
           {
-            key: "schools",
-            label: "Schools",
-            value: data.schools,
-            link: "/admin/schools",
+            key: "faculties",
+            label: "Faculties",
+            value: data.faculties,
+            link: "/admin/faculties",
           },
           {
             key: "questions",

@@ -19,7 +19,7 @@ import {
   ToggleButtonGroup,
 } from "@mui/material";
 import { getExamsForCourses, getResults } from "../../api/results";
-import { getSessions, getCourses } from "../../api/schools";
+import { getSessions, getCourses } from "../../api/faculties";
 import TablePagination from "@mui/material/TablePagination";
 import { saveAs } from "file-saver";
 
@@ -37,7 +37,7 @@ export default function AdminResults() {
     severity: "success",
   });
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [departmentSortOrder, setDepartmentSortOrder] = useState("asc");
   const [userRole, setUserRole] = useState("viewer"); // Default role
 

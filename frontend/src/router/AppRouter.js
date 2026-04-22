@@ -7,7 +7,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import AdminStudents from "../pages/Admin/Students";
 import AdminExams from "../pages/Admin/Exams";
-import AdminSchools from "../pages/Admin/Schools";
+import AdminFaculties from "../pages/Admin/Faculties";
 import StaffSettings from "../pages/Admin/Staff";
 import AdminLayout from "../components/AdminLayout"
 import AdminResults from "../pages/Admin/Results";
@@ -50,7 +50,7 @@ const AppRouter = () => {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="students" element={<AdminStudents />} />
         <Route path="exams" element={<AdminExams />} />
-        <Route path="schools" element={<AdminSchools />} />
+        <Route path="faculties" element={<AdminFaculties />} />
         <Route path="results" element={<AdminResults />} />
         <Route path="staff" element={<StaffSettings />} />
       </Route>
