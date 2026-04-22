@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useEffect } from "react";
 import { getCourses, getSessions } from "../../api/schools";
 import { getDepartments } from "../../api/departments";
@@ -38,9 +38,22 @@ import {
   Alert,
   Tooltip,
 } from "@mui/material";
-import { Delete, Edit, QuestionMark, Check , CheckBox} from "@mui/icons-material";
+import {
+  Delete,
+  Edit,
+  QuestionMark,
+  Check,
+  CheckBox,
+} from "@mui/icons-material";
+import { Editor } from "@tinymce/tinymce-react";
 
 export default function AdminExams() {
+  const editorRef = useRef(null);
+  const log = () => {
+    if (editorRef.current) {
+      console.log(editorRef.current.getContent());
+    }
+  };
   const [exams, setExams] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -90,7 +103,15 @@ export default function AdminExams() {
       console.log("Add question:", question);
     },
   });
-
+  const [addTheoryQuestionModal, setAddTheoryQuestionModal] = useState({
+    open: false,
+    question: "",
+    title: "Add Theory Question",
+    button: "Save Theory Question",
+    action: (question) => {
+      console.log("Add theory question:", question);
+    },
+  });
   const [editQuestionModal, setEditQuestionModal] = useState({
     open: false,
     question: null,
@@ -442,6 +463,7 @@ export default function AdminExams() {
       Object.keys(question).forEach((key) => {
         formData.append(key, question[key]);
       });
+      formData.append("question_type", "objective");
       formData.append("course_id", exam.course_id);
       await addQuestionsToExam(exam.id, formData);
       await getExamQuestions(exam.id);
@@ -476,6 +498,44 @@ export default function AdminExams() {
       showSnackbar("There was an error uploading the questions", "error");
       console.log(error);
     }
+  };
+  const handleAddTheoryQuestion = async (exam, question) => {
+    console.log("Adding theory question:", exam.id, exam.course_id, question);
+    try {
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("course_id", exam.course_id);
+        formData.append("text", question);
+        formData.append("question_type", "theory");
+        await addQuestionsToExam(exam.id, formData);
+      } else {
+        const payload = {
+          course_id: exam.course_id,
+          text: question,
+          question_type: "theory",
+        };
+
+        const res = await addQuestionsToExam(exam.id, payload);
+        console.log(res.data);
+        if (res.data.success) {
+          showSnackbar("Theory question added successfully!", "success");
+        }
+
+        await getExamQuestions(exam.id);
+        setAddTheoryQuestionModal({
+          ...addTheoryQuestionModal,
+          open: false,
+          question: "",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      showSnackbar("There was an error adding the theory question", "error");
+    }
+  };
+  const handleEditorChange = (content, editor) => {
+    console.log("Content was updated:", content);
   };
 
   return (
@@ -1001,7 +1061,21 @@ export default function AdminExams() {
                   })
                 }
               >
-                Add New Question
+                Add New Objective Question
+              </Button>
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={() =>
+                  setAddTheoryQuestionModal({
+                    open: true,
+                    question: null,
+                    title: "Add New Theory Question",
+                    button: "Save Theory Question",
+                  })
+                }
+              >
+                Add New Theory Question
               </Button>
               <Button
                 variant="contained"
@@ -1144,28 +1218,6 @@ export default function AdminExams() {
               ))}
             </TextField>
             <TextField
-              select
-              margin="dense"
-              label="Question Type"
-              fullWidth
-              value={addQuestionModal.question?.question_type || ""}
-              onChange={(e) =>
-                setAddQuestionModal((prev) => ({
-                  ...prev,
-                  question: {
-                    ...prev.question,
-                    question_type: e.target.value,
-                  },
-                }))
-              }
-            >
-              {["Objective", "Theory"].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
               type="number"
               margin="dense"
               label="Score Obtainable"
@@ -1242,6 +1294,108 @@ export default function AdminExams() {
               }}
             >
               {addQuestionModal.button}
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          open={addTheoryQuestionModal.open}
+          onClose={() =>
+            setAddTheoryQuestionModal({
+              open: false,
+              question: null,
+              title: "",
+            })
+          }
+        >
+          <DialogTitle>{addTheoryQuestionModal.title}</DialogTitle>
+          <DialogContent>
+            <Editor
+              tinymceScriptSrc="/tinymce/tinymce.min.js"
+              licenseKey="gpl"
+              onInit={(_evt, editor) => (editorRef.current = editor)}
+              init={{
+                height: 300,
+                menubar: true,
+                plugins: [
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "media",
+                  "table",
+                  "preview",
+                  "help",
+                  "wordcount",
+                ],
+                toolbar:
+                  "undo redo | formatselect | bold italic backcolor | \
+                  alignleft aligncenter alignright alignjustify | \
+                  bullist numlist outdent indent | removeformat | help",
+                content_style:
+                  "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+              }}
+              onEditorChange={(content) =>
+                setAddTheoryQuestionModal({
+                  ...addTheoryQuestionModal,
+                  question: content,
+                })
+              }
+            />
+            <Box sx={{ mt: 2 }}>
+              {addQuestionModal.question?.file && (
+                <img
+                  src={addQuestionModal.question.file}
+                  alt="Question"
+                  style={{ maxWidth: "100%", marginBottom: "10px" }}
+                />
+              )}
+              <Button variant="contained" component="label" color="secondary">
+                Upload Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => {
+                    handleFileChange(e);
+                  }}
+                />
+              </Button>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() =>
+                setAddTheoryQuestionModal({
+                  ...addTheoryQuestionModal,
+                  open: false,
+                })
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleAddTheoryQuestion(
+                  openExamQuestionModal.exam,
+                  addTheoryQuestionModal.question,
+                );
+                setAddTheoryQuestionModal({
+                  ...addTheoryQuestionModal,
+                  open: false,
+                });
+              }}
+            >
+              {addTheoryQuestionModal.button}
             </Button>
           </DialogActions>
         </Dialog>
