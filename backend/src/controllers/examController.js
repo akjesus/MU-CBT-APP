@@ -108,7 +108,13 @@ exports.updateExam = async (req, res) => {
   const id = req.params.id;
   const updateColumns = [];
   const updateValues = [];
-
+  delete payload.course_name;
+  delete payload.course_code;
+  delete payload.course_level;
+  delete payload.session_name;
+  delete payload.created_at;
+  delete payload.updated_at;
+  delete payload.departments;
   Object.keys(payload).forEach((key) => {
     if (
       payload[key] !== undefined &&

@@ -127,6 +127,7 @@ export const updateQuestion = (question_id, formData) => {
 };
 
 export const submitExam = (studentId, exam_id, responses) => {
+  console.log("Submitting exam with responses:", responses);
   const token = localStorage.getItem("token");
   return axios.post(
     `${BASE_URL}/exam-taking/${exam_id}/student/${studentId}/submit`,

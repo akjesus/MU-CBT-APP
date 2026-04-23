@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import {
   Drawer,
@@ -44,7 +43,6 @@ const getMenuItems = (role) => {
 };
 
 const AdminLayout = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);

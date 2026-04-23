@@ -54,6 +54,7 @@ export default function AdminExams() {
       console.log(editorRef.current.getContent());
     }
   };
+  log();
   const [exams, setExams] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -67,18 +68,24 @@ export default function AdminExams() {
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [newExam, setNewExam] = useState({
-    department_id: [],
-    semester: "",
-    level: "",
     course_id: "",
-    session_id: "",
-    start_time: "",
-    duration: 30,
     exam_name: "",
-    exam_date: "",
-    display_question_randomly: 1,
+    department_id: [],
+    level: "",
+    semester: "First",
+    session_id: 1,
+    start_time: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }),
+    duration: 30,
+    exam_date: new Date().toISOString().split("T")[0],
     exam_mode: "graded",
+    max_score_obtainable: 70,
+    display_question_randomly: 0,
     instruction: "Answer all questions",
+    server_time: 0,
   });
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -121,6 +128,17 @@ export default function AdminExams() {
       console.log("Edit question:", question);
     },
   });
+  const [editTheoryModal, setEditTheoryModal] = useState({
+    open: false,
+    content: "",
+    instructions: "",
+    title: "Edit Theory Question",
+    button: "Save Changes",
+    action: (question) => {
+      console.log("Edit theory question:", question);
+    },
+  });
+
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [examQuestions, setExamQuestions] = useState([]);
   const getExamQuestions = async (id) => {
@@ -239,49 +257,22 @@ export default function AdminExams() {
     fetchData();
   }, [fetchData]);
 
-  const handleOpen = (exam = null, index = null) => {
+  const handleOpen = (exam, index) => {
+    setEditIndex(index);
     if (exam) {
       setNewExam({
-        id: exam.id || "",
-        course_id: exam.course_id || "",
-        exam_name: exam.exam_name || "",
-        level: exam.level || "",
-        session_id: exam.session_id || "",
-        semester: exam.semester || "",
-        max_score_obtainable: exam.max_score_obtainable || "",
-        start_time: exam.start_time || "",
-        duration: exam.duration || "",
-        exam_date: exam.exam_date || "",
-        display_question_randomly: exam.display_question_randomly,
-        departments: exam.departments,
-        exam_mode: exam.exam_mode,
-        instruction: exam.instruction || "",
-        server_time: exam.server_time || "",
+        ...exam,
+        department_id: exam.department_ids
+          ? exam.department_ids?.split(",").map((id) => parseInt(id, 10))
+          : null,
       });
-      setEditIndex(index);
-    } else {
-      setNewExam({
-        course_id: "",
-        exam_name: "",
-        department_id: [],
-        level: "",
-        session_id: "",
-        semester: "",
-        duration: 30,
-        exam_date: "",
-        start_time: "",
-        exam_mode: "graded",
-        display_question_randomly: 1,
-        max_score_obtainable: 70,
-        instruction: "Answer all Question",
-        server_time: 0,
-      });
-      setEditIndex(null);
     }
     setOpen(true);
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleChange = (e) => {
     setNewExam({ ...newExam, [e.target.name]: e.target.value });
@@ -290,7 +281,7 @@ export default function AdminExams() {
     setFile(e.target.files[0]);
   };
   const handleSaveExam = async () => {
-    if (editIndex !== null) {
+    if (editIndex) {
       try {
         const res = await updateExam(newExam);
         if (res.status === 200) {
@@ -367,18 +358,22 @@ export default function AdminExams() {
                     size="small"
                     sx={{ fontSize: "0.75rem", padding: "4px 8px" }}
                     onClick={() =>
-                      setEditQuestionModal({
-                        open: true,
-                        question: question,
-                        title: "Edit Question",
-                        button: "Save Changes",
-                        action: () => {
-                          handleEditQuestion(question);
-                        },
-                      })
+                      question.question_type === "Objective"
+                        ? setEditQuestionModal({
+                            open: true,
+                            question: question,
+                            title: "Edit Question",
+                            button: "Save Changes",
+                            action: () => {
+                              handleEditQuestion(question);
+                            },
+                          })
+                        : editTheoryQuestion(question)
                     }
                   >
-                    Edit
+                    {question.question_type === "Theory"
+                      ? "Edit Theory Question"
+                      : "Edit"}
                   </Button>
                   <Button
                     variant="contained"
@@ -500,42 +495,77 @@ export default function AdminExams() {
     }
   };
   const handleAddTheoryQuestion = async (exam, question) => {
-    console.log("Adding theory question:", exam.id, exam.course_id, question);
     try {
+      const formData = new FormData();
       if (file) {
-        const formData = new FormData();
         formData.append("file", file);
-        formData.append("course_id", exam.course_id);
-        formData.append("text", question);
-        formData.append("question_type", "theory");
-        await addQuestionsToExam(exam.id, formData);
-      } else {
-        const payload = {
-          course_id: exam.course_id,
-          text: question,
-          question_type: "theory",
-        };
-
-        const res = await addQuestionsToExam(exam.id, payload);
-        console.log(res.data);
-        if (res.data.success) {
-          showSnackbar("Theory question added successfully!", "success");
-        }
-
+      }
+      formData.append("course_id", exam.course_id);
+      formData.append("text", addTheoryQuestionModal.question);
+      formData.append("instructions", addTheoryQuestionModal.instructions);
+      formData.append("question_type", "Theory");
+      const res = await addQuestionsToExam(exam.id, formData);
+      console.log(res.data);
+      if (res.data.success) {
+        showSnackbar("Theory question added successfully!", "success");
         await getExamQuestions(exam.id);
         setAddTheoryQuestionModal({
           ...addTheoryQuestionModal,
           open: false,
           question: "",
         });
+        setFile(null);
       }
     } catch (error) {
       console.log(error);
       showSnackbar("There was an error adding the theory question", "error");
     }
   };
-  const handleEditorChange = (content, editor) => {
-    console.log("Content was updated:", content);
+
+  const editTheoryQuestion = async (question) => {
+    setEditTheoryModal({
+      open: true,
+      id: question.question_id,
+      content: question.text || "",
+      instructions: question.instructions || "",
+      title: "Edit Theory Question",
+      button: "Save Changes",
+      action: () => {
+        handleEditTheoryQuestion(question);
+      },
+    });
+  };
+  const handleEditTheoryQuestion = async (exam, question) => {
+    try {
+      const formData = new FormData();
+      if (file) {
+        formData.append("file", file);
+      }
+      formData.append("text", question.question);
+      formData.append("instructions", question.instructions);
+      formData.append("question_type", "Theory");
+      formData.append("course_id", exam.course_id);
+      const res = await updateQuestion(question.id, formData);
+      if (res.data.success) {
+        showSnackbar("Theory question updated successfully!", "success");
+        await getExamQuestions(exam.id);
+        setEditTheoryModal({
+          ...editTheoryModal,
+          open: false,
+          content: "",
+        });
+        setFile(null);
+      }
+    } catch (error) {
+      console.log(error);
+      showSnackbar("There was an error updating the theory question", "error");
+    }
+  };
+
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
   };
 
   return (
@@ -696,7 +726,7 @@ export default function AdminExams() {
                             setOpenConfirm({
                               open: true,
                               title: "Confirm Exam Deletion",
-                              message: `Are you sure you want to delete ${ex.exam_name}?`,
+                              message: `Are you sure you want to delete ${ex.course_code}?`,
                               data: ex,
                               button: "Delete Exam",
                               action: () => handleDeleteExam(ex.id),
@@ -804,12 +834,12 @@ export default function AdminExams() {
                 shrink: true,
               }}
             >
-              <MenuItem value="Level 100">100 Level</MenuItem>
-              <MenuItem value="Level 200">200 Level</MenuItem>
-              <MenuItem value="Level 300">300 Level</MenuItem>
-              <MenuItem value="Level 400">400 Level</MenuItem>
-              <MenuItem value="Level 500">500 Level</MenuItem>
-              <MenuItem value="Level 600">600 Level</MenuItem>
+              <MenuItem value="100 Level">100 Level</MenuItem>
+              <MenuItem value="200 Level">200 Level</MenuItem>
+              <MenuItem value="300 Level">300 Level</MenuItem>
+              <MenuItem value="400 Level">400 Level</MenuItem>
+              <MenuItem value="500 Level">500 Level</MenuItem>
+              <MenuItem value="600 Level">600 Level</MenuItem>
             </TextField>
             <TextField
               select
@@ -1313,6 +1343,7 @@ export default function AdminExams() {
               tinymceScriptSrc="/tinymce/tinymce.min.js"
               licenseKey="gpl"
               onInit={(_evt, editor) => (editorRef.current = editor)}
+              initialValue="Type or Paste Theory question here ..."
               init={{
                 height: 300,
                 menubar: true,
@@ -1346,6 +1377,21 @@ export default function AdminExams() {
                 setAddTheoryQuestionModal({
                   ...addTheoryQuestionModal,
                   question: content,
+                })
+              }
+            />
+            <TextField
+              margin="dense"
+              label="Instructions"
+              name="instructions"
+              fullWidth
+              multiline
+              rows={2}
+              value={addTheoryQuestionModal.instructions || ""}
+              onChange={(e) =>
+                setAddTheoryQuestionModal({
+                  ...addTheoryQuestionModal,
+                  instructions: e.target.value,
                 })
               }
             />
@@ -1391,6 +1437,127 @@ export default function AdminExams() {
                 );
                 setAddTheoryQuestionModal({
                   ...addTheoryQuestionModal,
+                  open: false,
+                });
+              }}
+            >
+              {addTheoryQuestionModal.button}
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          open={editTheoryModal.open}
+          onClose={() =>
+            setEditTheoryModal({
+              open: false,
+              question: null,
+              title: "",
+            })
+          }
+        >
+          <DialogTitle>{editTheoryModal.title}</DialogTitle>
+          <DialogContent>
+            <Editor
+              tinymceScriptSrc="/tinymce/tinymce.min.js"
+              licenseKey="gpl"
+              onInit={(_evt, editor) => (editorRef.current = editor)}
+              initialValue={
+                editTheoryModal.content ||
+                "Type or Paste Theory question here ..."
+              }
+              init={{
+                height: 300,
+                menubar: true,
+                plugins: [
+                  "advlist",
+                  "autolink",
+                  "lists",
+                  "link",
+                  "image",
+                  "charmap",
+                  "anchor",
+                  "searchreplace",
+                  "visualblocks",
+                  "code",
+                  "fullscreen",
+                  "insertdatetime",
+                  "media",
+                  "table",
+                  "preview",
+                  "help",
+                  "wordcount",
+                ],
+                toolbar:
+                  "undo redo | formatselect | bold italic backcolor | \
+                  alignleft aligncenter alignright alignjustify | \
+                  bullist numlist outdent indent | removeformat | help",
+                content_style:
+                  "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+              }}
+              onEditorChange={(content) =>
+                setEditTheoryModal({
+                  ...editTheoryModal,
+                  question: content,
+                })
+              }
+            />
+            <TextField
+              margin="dense"
+              label="Instructions"
+              name="instructions"
+              fullWidth
+              multiline
+              rows={2}
+              value={editTheoryModal.instructions || ""}
+              onChange={(e) =>
+                setEditTheoryModal({
+                  ...editTheoryModal,
+                  instructions: e.target.value,
+                })
+              }
+            />
+            <Box sx={{ mt: 2 }}>
+              {addQuestionModal.question?.file && (
+                <img
+                  src={addQuestionModal.question.file}
+                  alt="Question"
+                  style={{ maxWidth: "100%", marginBottom: "10px" }}
+                />
+              )}
+              <Button variant="contained" component="label" color="secondary">
+                Upload Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => {
+                    handleFileChange(e);
+                  }}
+                />
+              </Button>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() =>
+                setEditTheoryModal({
+                  ...editTheoryModal,
+                  open: false,
+                })
+              }
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                handleEditTheoryQuestion(
+                  openExamQuestionModal.exam,
+                  editTheoryModal,
+                );
+                setEditTheoryModal({
+                  ...editTheoryModal,
                   open: false,
                 });
               }}

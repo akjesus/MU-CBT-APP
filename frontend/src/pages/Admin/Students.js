@@ -67,7 +67,7 @@ export default function AdminStudents() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [studentsFetched, setStudentsFetched] = useState(false);
+  const [ setStudentsFetched] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("");
   const [snackbar, setSnackbar] = useState({
     open: false,

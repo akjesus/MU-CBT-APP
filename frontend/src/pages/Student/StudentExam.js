@@ -39,9 +39,9 @@ import {
   endExamMonitoringSession,
   getExamSession,
 } from "../../api/exams";
+import parse from "html-react-parser";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
-
 
 export default function StudentExam() {
   const { exam_id } = useParams();
@@ -292,7 +292,8 @@ export default function StudentExam() {
           formattedResponses[q.question_id] = responses[q.question_id];
         }
       });
-
+      const submitRes = await submitExam(user.id, exam_id, formattedResponses);
+      console.log("Submit response:", submitRes.data);
       showSnackbar(`Exam submitted successfully!`, "success");
       localStorage.setItem(
         "examResult",
@@ -417,6 +418,15 @@ export default function StudentExam() {
   const currentQuestion = questions[currentQuestionIndex];
   const progress = (Object.keys(responses).length / questions.length) * 100;
 
+  const renderQuestion = (question) => {
+    if (question.question_type === "Theory") {
+      console.log("Rendering theory question:", question.text);
+      return <div>{parse(question.text)}</div>;
+    }
+    // Handle other question types here
+    return <div>{question.text}</div>;
+  };
+
   return (
     <Container sx={{ py: 1 }}>
       <Grid item xs={12}>
@@ -500,7 +510,8 @@ export default function StudentExam() {
                   alignItems: "center",
                 }}
               >
-                Question {currentQuestionIndex + 1}: {currentQuestion.text}
+                Question {currentQuestionIndex + 1}:
+                {renderQuestion(currentQuestion)}
               </Typography>
 
               {/* Question Image/File if exists */}

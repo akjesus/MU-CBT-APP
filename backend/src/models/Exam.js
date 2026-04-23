@@ -9,7 +9,7 @@ class Exam {
                     exams.max_score_obtainable, exams.exam_mode, exams.server_time,
                     exams.start_time, exams.duration, exams.active,
                     exams.exam_date, exams.instruction, exams.display_question_randomly,
-                    exams.created_at, exams.updated_at, 
+                    exams.created_at, exams.updated_at, GROUP_CONCAT(exam_departments.department_id) AS department_ids,
                     GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
              FROM exams
              LEFT JOIN courses ON exams.course_id = courses.id
@@ -18,7 +18,7 @@ class Exam {
              LEFT JOIN exam_departments ON exams.id = exam_departments.exam_id
              LEFT JOIN departments ON exam_departments.department_id = departments.id
              GROUP BY exams.id, courses.name, sessions.name
-             ORDER BY exams.start_time DESC`,
+             ORDER BY exams.created_at DESC`,
     );
     return rows;
   }

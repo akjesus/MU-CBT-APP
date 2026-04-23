@@ -132,12 +132,13 @@ exports.createQuestionAndAddtoExam = async (req, res) => {
     }
 
     res.status(201).json({
+      success: true,
       message: "Question added successfully",
       id: result.insertId,
       file,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
     console.log(err);
   }
 };
@@ -159,8 +160,6 @@ exports.updateQuestion = async (req, res) => {
     let questionType = question_type || "Objective";
     const user_id = req.user.id;
     const { question_id } = req.params;
-    console.log("Updating question ID:", question_id);
-
     // Check if question exists
     const [existingQuestion] = await db.query(
       "SELECT * FROM questions WHERE id = ?",
@@ -229,9 +228,11 @@ exports.updateQuestion = async (req, res) => {
       ],
     );
 
-    res.json({ success: true, message: "Question updated successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Question updated successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 };
 

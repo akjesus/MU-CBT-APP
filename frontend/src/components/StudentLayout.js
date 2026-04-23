@@ -31,7 +31,6 @@ const StudentLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
-  const user = JSON.parse(localStorage.getItem("user"));
 
   const  showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
