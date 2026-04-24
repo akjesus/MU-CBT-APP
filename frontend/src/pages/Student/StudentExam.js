@@ -42,6 +42,7 @@ import {
 import parse from "html-react-parser";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL;
+const user = JSON.parse(localStorage.getItem("user"));
 
 export default function StudentExam() {
   const { exam_id } = useParams();
@@ -70,12 +71,10 @@ export default function StudentExam() {
   });
   const [flaggedQuestions, setFlaggedQuestions] = useState(new Set());
 
-  // Show snackbar
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
 
-  // Close snackbar
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -156,21 +155,15 @@ export default function StudentExam() {
           if (examData.duration) {
             let initialTime = examData.duration * 60;
             const savedTime = localStorage.getItem(timeLeftKey);
-            console.log("Saved time from localStorage:", savedTime);
             if (savedTime) {
               initialTime = Math.min(initialTime, parseInt(savedTime, 10));
             }
-            console.log("Initial time set to:", initialTime);
             setTimeLeft(initialTime);
           }
 
           const savedResponses = localStorage.getItem(responsesKey);
           if (savedResponses) {
             setResponses(JSON.parse(savedResponses));
-          }
-          const savedFlagged = localStorage.getItem(flaggedKey);
-          if (savedFlagged) {
-            setFlaggedQuestions(new Set(JSON.parse(savedFlagged)));
           }
         }
       } catch (error) {
@@ -196,12 +189,6 @@ export default function StudentExam() {
       localStorage.setItem(timeLeftKey, timeLeft.toString());
     }
   }, [timeLeft, timeLeftKey]);
-
-  useEffect(() => {
-    if (flaggedQuestions.size > 0) {
-      localStorage.setItem(flaggedKey, JSON.stringify([...flaggedQuestions]));
-    }
-  }, [flaggedQuestions, flaggedKey]);
 
   // Timer effect
   useEffect(() => {
@@ -420,17 +407,57 @@ export default function StudentExam() {
 
   const renderQuestion = (question) => {
     if (question.question_type === "Theory") {
-      console.log("Rendering theory question:", question.text);
       return <div>{parse(question.text)}</div>;
     }
-    // Handle other question types here
     return <div>{question.text}</div>;
   };
+
+  // Enable fullscreen mode when exam starts
+  const enableFullScreen = () => {
+    const docElm = document.documentElement;
+    if (docElm.requestFullscreen) {
+      docElm.requestFullscreen();
+    } else if (docElm.mozRequestFullScreen) {
+      docElm.mozRequestFullScreen();
+    } else if (docElm.webkitRequestFullscreen) {
+      docElm.webkitRequestFullscreen();
+    } else if (docElm.msRequestFullscreen) {
+      docElm.msRequestFullscreen();
+    }
+  };
+  // if(isEligible && examInfo) {
+  //   enableFullScreen();
+  // }
 
   return (
     <Container sx={{ py: 1 }}>
       <Grid item xs={12}>
         <Paper sx={{ p: 2, mb: 1 }}>
+          <Box
+            sx={{
+              position: "fixed",
+              top: 10,
+              left: 10,
+              zIndex: 10000,
+              backgroundColor: "#f5f5f5",
+              padding: "8px 8px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+              {user?.first_name} {user?.other_names} {user?.last_name}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "gray" }}>
+              Matric No: {user?.matriculation_number}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "gray" }}>
+              Department: {user?.department}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "gray" }}>
+              Level: {user?.level}
+            </Typography>
+          </Box>
           <Box
             sx={{
               display: "flex",
@@ -470,7 +497,7 @@ export default function StudentExam() {
               </Stack>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", maxWidth: 500, mx: "auto", mb: 1 }}>
             <Typography variant="body2">
               Answered: {Object.keys(responses).length} of {questions.length}
             </Typography>
@@ -489,13 +516,13 @@ export default function StudentExam() {
               variant="determinate"
               color="success"
               value={progress}
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, maxWidth: 500, mx: "auto", height: 10, borderRadius: 5 }}
             />
           </Box>
           <Card
             sx={{
               backgroundColor: "#fafafa",
-              maxWidth: 1200,
+              maxWidth: 1000,
               mx: "auto",
             }}
           >

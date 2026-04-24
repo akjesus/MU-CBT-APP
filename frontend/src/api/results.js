@@ -24,3 +24,13 @@ export const getExamsForCourses = (session_id, course_id) => {
     },
   });
 };
+
+export const deleteResult = (id) => {
+  const token = localStorage.getItem("token");
+  return axios.delete(`${BASE_URL}/result/${id}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

@@ -32,6 +32,16 @@ export const getAllExams = () => {
   });
 };
 
+export const getActiveExams = () => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${BASE_URL}/exams/active`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const updateExam = (exam) => {
   const token = localStorage.getItem("token");
   return axios.put(

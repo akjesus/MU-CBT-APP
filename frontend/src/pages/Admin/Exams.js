@@ -4,6 +4,7 @@ import { getCourses, getSessions } from "../../api/faculties";
 import { getDepartments } from "../../api/departments";
 import {
   getAllExams,
+  getActiveExams,
   updateExam,
   createExam,
   deleteExam,
@@ -37,6 +38,8 @@ import {
   Snackbar,
   Alert,
   Tooltip,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import {
   Delete,
@@ -44,6 +47,7 @@ import {
   QuestionMark,
   Check,
   CheckBox,
+  Add
 } from "@mui/icons-material";
 import { Editor } from "@tinymce/tinymce-react";
 
@@ -85,6 +89,7 @@ export default function AdminExams() {
     max_score_obtainable: 70,
     display_question_randomly: 0,
     instruction: "Answer all questions",
+    exam_hall: 1,
     server_time: 0,
   });
   const [page, setPage] = useState(0);
@@ -168,8 +173,13 @@ export default function AdminExams() {
   const handleActivate = async (id, active) => {
     try {
       await toggleExamActive(id);
-      const exams = await getAllExams();
-      setExams(exams.data.exams || []);
+      if (tab === 0) {
+        const exams = await getAllExams();
+        setExams(exams.data.exams || []);
+      } else {
+        const res =  await getActiveExams();
+        setActiveExams(res.data || []);
+      }
       showSnackbar(
         `Exam ${active ? "Activated" : "Deactivated"} Successfully!`,
         "success",
@@ -199,7 +209,6 @@ export default function AdminExams() {
         getDepartments(),
         getSessions(),
       ]);
-
       setExams(examRes.data.exams);
       setCourses(courseRes.data.courses || []);
       setDepartments(deptRes.data.departments || []);
@@ -234,6 +243,7 @@ export default function AdminExams() {
         max_score_obtainable: newExam.max_score_obtainable,
         display_question_randomly: newExam.display_question_randomly,
         instruction: newExam.instruction,
+        exam_hall: newExam.exam_hall,
         server_time: newExam.server_time,
       };
       const res = await createExam(payload);
@@ -253,18 +263,36 @@ export default function AdminExams() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
   const handleOpen = (exam, index) => {
     setEditIndex(index);
     if (exam) {
       setNewExam({
         ...exam,
-        department_id: exam.department_ids
-          ? exam.department_ids?.split(",").map((id) => parseInt(id, 10))
+        department_id: exam.department_id
+          ? exam.department_id?.split(",").map((id) => parseInt(id, 10))
           : null,
+      });
+    } else {
+      setNewExam({
+        course_id: "",
+        exam_name: "",
+        department_id: [],
+        level: "",
+        semester: "First",
+        session_id: 1,
+        start_time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+        duration: 30,
+        exam_date: new Date().toISOString().split("T")[0],
+        exam_mode: "graded",
+        max_score_obtainable: 70,
+        display_question_randomly: 0,
+        instruction: "Answer all questions",
+        exam_hall: 1,
+        server_time: 0,
       });
     }
     setOpen(true);
@@ -562,15 +590,36 @@ export default function AdminExams() {
     }
   };
 
-  const [tabIndex, setTabIndex] = useState(0);
+  const [tab, setTab] = useState(0);
+  const [activeExams, setActiveExams] = useState([]);
 
   const handleTabChange = (event, newValue) => {
-    setTabIndex(newValue);
+    setTab(newValue);
   };
 
+  useEffect(() => {
+    if (tab === 0) fetchData();
+    else {
+      const res = getActiveExams();
+      res
+        .then((response) => {
+          setActiveExams(response.data);
+        })
+        .catch((error) => {
+          console.log("Error fetching active exams:", error);
+        });
+    }
+  }, [fetchData, tab]);
   return (
     <>
-      <Box p={{ xs: 1, sm: 3 }} sx={{ maxWidth: 1200, mx: "auto" }}>
+      <Box
+        p={{ xs: 1, sm: 3 }}
+        sx={{
+          maxWidth: 900,
+          mx: "auto",
+          width: "100%",
+        }}
+      >
         <Typography
           variant="h5"
           gutterBottom
@@ -578,201 +627,391 @@ export default function AdminExams() {
             fontWeight: "bold",
             color: "#2C2C78",
             fontSize: { xs: 18, sm: 24 },
+            textAlign: { xs: "center", sm: "left" },
+            mb: { xs: 2, sm: 3 },
           }}
         >
           Manage Exams
         </Typography>
-        <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
-          <Button
-            variant="contained"
-            sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
-            onClick={() => handleOpen()}
+        <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+          <Tabs
+            value={tab}
+            onChange={handleTabChange}
+            aria-label="students tabs"
+            variant="fullWidth"
+            sx={{ maxWidth: 900 }}
           >
-            Add Exam
-          </Button>
-          <TextField
-            label="Search Exams"
-            variant="outlined"
-            size="small"
-            sx={{ minWidth: 250 }}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+            <Tab label="View Exams" />
+            <Tab label="Active Exams" />
+          </Tabs>
         </Box>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold", width: "5%" }}>
-                S/N
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Exam Name
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
-                Exam Title
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
-                Departments
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Level
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Duration
-              </TableCell>
-              <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {exams
-              .filter(
-                (ex) =>
-                  ex.course_code.toLowerCase().includes(search.toLowerCase()) ||
-                  ex.course_name.toLowerCase().includes(search.toLowerCase()),
-              )
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((ex, index) => (
-                <TableRow key={ex.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{ex.course_code}</TableCell>
-                  <TableCell>{ex.course_name}</TableCell>
-                  <TableCell>{ex.departments}</TableCell>
-                  <TableCell>{ex.level}</TableCell>
-                  <TableCell>
-                    {moment(ex.exam_date).format("MMMM Do YYYY")}
+        {tab === 0 && (
+          <>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <TextField
+                placeholder="Search Exam"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                sx={{ width: "50%" }}
+              />
+              <Button
+                variant="contained"
+                sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
+                startIcon={<Add />}
+                onClick={() => handleOpen(null, null)}
+              >
+                Add Exam
+              </Button>
+            </Box>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: "bold", width: "5%" }}>
+                    S/N
                   </TableCell>
-                  <TableCell sx={{ width: "50%" }}>
-                    {moment(ex.start_time, "HH:mm").format("LT")}
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Exam Name
                   </TableCell>
-                  <TableCell>{ex.duration} mins</TableCell>
-                  <TableCell>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Tooltip
-                        title={ex.active ? "Deactivate Exam" : "Activate Exam"}
-                        arrow
-                      >
-                        <IconButton
-                          aria-label={
-                            ex.active ? "Deactivate Exam" : "Activate Exam"
-                          }
-                          color={ex.active ? "success" : "default"}
-                          size="small"
-                          sx={{
-                            bgcolor: "#c0f1ce",
-                            borderRadius: 2,
-                            p: 0.25,
-                            boxShadow: 1,
-                            ":hover": { bgcolor: "#d1d1f7" },
-                          }}
-                          onClick={() =>
-                            setOpenConfirm({
-                              open: true,
-                              title: `${ex.active ? "Deactivate" : "Activate"} Exam`,
-                              data: ex,
-                              message: `Are you sure you want to ${ex.active ? "deactivate" : "activate"} ${ex.exam_name}?`,
-                              button: `${ex.active ? "Deactivate" : "Activate"} Exam`,
-                              action: () => handleActivate(ex.id, !ex.active),
-                            })
-                          }
-                        >
-                          {" "}
-                          {ex.active ? (
-                            <CheckBox defaultChecked />
-                          ) : (
-                            <Check fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Edit Exam" arrow>
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          sx={{
-                            bgcolor: "#e3e3fa",
-                            borderRadius: 2,
-                            p: 0.25,
-                            boxShadow: 1,
-                            ":hover": { bgcolor: "#d1d1f7" },
-                          }}
-                          onClick={() => handleOpen(ex, index)}
-                          aria-label="Edit Exam"
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete Exam" arrow>
-                        <IconButton
-                          color="error"
-                          size="small"
-                          sx={{
-                            bgcolor: "#e3e3fa",
-                            borderRadius: 2,
-                            p: 0.25,
-                            boxShadow: 1,
-                            ":hover": { bgcolor: "#d1d1f7" },
-                          }}
-                          onClick={() =>
-                            setOpenConfirm({
-                              open: true,
-                              title: "Confirm Exam Deletion",
-                              message: `Are you sure you want to delete ${ex.course_code}?`,
-                              data: ex,
-                              button: "Delete Exam",
-                              action: () => handleDeleteExam(ex.id),
-                            })
-                          }
-                          aria-label="Delete Exam"
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Manage Questions" arrow>
-                        <IconButton
-                          color="secondary"
-                          size="small"
-                          sx={{
-                            bgcolor: "#e3e3fa",
-                            borderRadius: 2,
-                            p: 0.25,
-                            boxShadow: 1,
-                            ":hover": { bgcolor: "#d1d1f7" },
-                          }}
-                          onClick={() =>
-                            setOpenExamQuestionModal({
-                              open: true,
-                              exam: ex,
-                            })
-                          }
-                          aria-label="Manage Questions"
-                        >
-                          <QuestionMark fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
+                  <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
+                    Exam Title
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+                    Departments
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Level
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Duration
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Actions
                   </TableCell>
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          count={exams.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+              </TableHead>
+              <TableBody>
+                {exams
+                  .filter(
+                    (ex) =>
+                      ex.course_code
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                      ex.course_name
+                        .toLowerCase()
+                        .includes(search.toLowerCase()),
+                  )
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((ex, index) => (
+                    <TableRow key={ex.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{ex.course_code}</TableCell>
+                      <TableCell>{ex.course_name}</TableCell>
+                      <TableCell>{ex.departments}</TableCell>
+                      <TableCell>{ex.level}</TableCell>
+                      <TableCell>
+                        {moment(ex.exam_date).format("MMMM Do YYYY")}
+                      </TableCell>
+                      <TableCell sx={{ width: "50%" }}>
+                        {moment(ex.start_time, "HH:mm").format("LT")}
+                      </TableCell>
+                      <TableCell>{ex.duration} mins</TableCell>
+                      <TableCell>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Tooltip
+                            title={
+                              ex.active ? "Deactivate Exam" : "Activate Exam"
+                            }
+                            arrow
+                          >
+                            <IconButton
+                              aria-label={
+                                ex.active ? "Deactivate Exam" : "Activate Exam"
+                              }
+                              color={ex.active ? "success" : "default"}
+                              size="small"
+                              sx={{
+                                bgcolor: "#c0f1ce",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() =>
+                                setOpenConfirm({
+                                  open: true,
+                                  title: `${ex.active ? "Deactivate" : "Activate"} Exam`,
+                                  data: ex,
+                                  message: `Are you sure you want to ${ex.active ? "deactivate" : "activate"} ${ex.exam_name}?`,
+                                  button: `${ex.active ? "Deactivate" : "Activate"} Exam`,
+                                  action: () =>
+                                    handleActivate(ex.id, !ex.active),
+                                })
+                              }
+                            >
+                              {" "}
+                              {ex.active ? (
+                                <CheckBox defaultChecked />
+                              ) : (
+                                <Check fontSize="small" />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit Exam" arrow>
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              sx={{
+                                bgcolor: "#e3e3fa",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() => handleOpen(ex, ex.id)}
+                              aria-label="Edit Exam"
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete Exam" arrow>
+                            <IconButton
+                              color="error"
+                              size="small"
+                              sx={{
+                                bgcolor: "#e3e3fa",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() =>
+                                setOpenConfirm({
+                                  open: true,
+                                  title: "Confirm Exam Deletion",
+                                  message: `Are you sure you want to delete ${ex.course_code}?`,
+                                  data: ex,
+                                  button: "Delete Exam",
+                                  action: () => handleDeleteExam(ex.id),
+                                })
+                              }
+                              aria-label="Delete Exam"
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Manage Questions" arrow>
+                            <IconButton
+                              color="secondary"
+                              size="small"
+                              sx={{
+                                bgcolor: "#e3e3fa",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() =>
+                                setOpenExamQuestionModal({
+                                  open: true,
+                                  exam: ex,
+                                })
+                              }
+                              aria-label="Manage Questions"
+                            >
+                              <QuestionMark fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={exams.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </>
+        )}
+        {tab === 1 && (
+          <>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: "bold", width: "5%" }}>
+                    S/N
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Exam Name
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
+                    Exam Title
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+                    Departments
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Level
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Duration
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {activeExams
+                  .filter(
+                    (ex) =>
+                      ex.course_code
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                      ex.course_name
+                        .toLowerCase()
+                        .includes(search.toLowerCase()),
+                  )
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((ex, index) => (
+                    <TableRow key={ex.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{ex.course_code}</TableCell>
+                      <TableCell>{ex.course_name}</TableCell>
+                      <TableCell>{ex.departments}</TableCell>
+                      <TableCell>{ex.course_level}</TableCell>
+                      <TableCell>
+                        {moment(ex.exam_date).format("MMMM Do YYYY")}
+                      </TableCell>
+                      <TableCell sx={{ width: "50%" }}>
+                        {moment(ex.start_time, "HH:mm").format("LT")}
+                      </TableCell>
+                      <TableCell>{ex.duration} mins</TableCell>
+                      <TableCell>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Tooltip
+                            title={
+                              ex.active ? "Deactivate Exam" : "Activate Exam"
+                            }
+                            arrow
+                          >
+                            <IconButton
+                              aria-label={
+                                ex.active ? "Deactivate Exam" : "Activate Exam"
+                              }
+                              color={ex.active ? "success" : "default"}
+                              size="small"
+                              sx={{
+                                bgcolor: "#c0f1ce",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() =>
+                                setOpenConfirm({
+                                  open: true,
+                                  title: `${ex.active ? "Deactivate" : "Activate"} Exam`,
+                                  data: ex,
+                                  message: `Are you sure you want to ${ex.active ? "deactivate" : "activate"} ${ex.exam_name}?`,
+                                  button: `${ex.active ? "Deactivate" : "Activate"} Exam`,
+                                  action: () =>
+                                    handleActivate(ex.id, !ex.active),
+                                })
+                              }
+                            >
+                              {" "}
+                              {ex.active ? (
+                                <CheckBox defaultChecked />
+                              ) : (
+                                <Check fontSize="small" />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit Exam" arrow>
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              sx={{
+                                bgcolor: "#e3e3fa",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() => handleOpen(ex, ex.id)}
+                              aria-label="Edit Exam"
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Manage Questions" arrow>
+                            <IconButton
+                              color="secondary"
+                              size="small"
+                              sx={{
+                                bgcolor: "#e3e3fa",
+                                borderRadius: 2,
+                                p: 0.25,
+                                boxShadow: 1,
+                                ":hover": { bgcolor: "#d1d1f7" },
+                              }}
+                              onClick={() =>
+                                setOpenExamQuestionModal({
+                                  open: true,
+                                  exam: ex,
+                                })
+                              }
+                              aria-label="Manage Questions"
+                            >
+                              <QuestionMark fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={exams.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </>
+        )}
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>
             {editIndex !== null ? "Edit Exam" : "Add Exam"}
@@ -996,6 +1235,24 @@ export default function AdminExams() {
               <TextField
                 select
                 margin="dense"
+                label="Exam Hall"
+                name="exam_hall"
+                sx={{ width: 200, mr: 2 }}
+                value={newExam.exam_hall}
+                onChange={handleChange}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              >
+                <MenuItem value={1}>Hall 1</MenuItem>
+                <MenuItem value={2}>Hall 2</MenuItem>
+                <MenuItem value={3}>Hall 3</MenuItem>
+                <MenuItem value={4}>Hall 4</MenuItem>
+                <MenuItem value={5}>Hall 5</MenuItem>
+              </TextField>
+              <TextField
+                select
+                margin="dense"
                 label="Server Time"
                 name="server_time"
                 sx={{ width: 150, mr: 2 }}
@@ -1072,7 +1329,12 @@ export default function AdminExams() {
           >
             Manage Questions for Exam: {openExamQuestionModal.exam?.exam_name}
             <Box
-              sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 2,
+                mt: 2,
+              }}
             >
               <Button
                 variant="contained"
@@ -1274,7 +1536,10 @@ export default function AdminExams() {
               onChange={(e) =>
                 setAddQuestionModal((prev) => ({
                   ...prev,
-                  question: { ...prev.question, instructions: e.target.value },
+                  question: {
+                    ...prev.question,
+                    instructions: e.target.value,
+                  },
                 }))
               }
             />
@@ -1694,7 +1959,10 @@ export default function AdminExams() {
               onChange={(e) =>
                 setEditQuestionModal((prev) => ({
                   ...prev,
-                  question: { ...prev.question, instructions: e.target.value },
+                  question: {
+                    ...prev.question,
+                    instructions: e.target.value,
+                  },
                 }))
               }
             />
@@ -1774,21 +2042,22 @@ export default function AdminExams() {
             </Button>
           </DialogActions>
         </Dialog>
-      </Box>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
           onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
     </>
   );
 }

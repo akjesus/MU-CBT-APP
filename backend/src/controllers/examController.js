@@ -22,7 +22,6 @@ exports.getAllExamsWithCourseSession = async (req, res) => {
         WHERE 1=1
       `;
     const params = [];
-
     if (course_id) {
       sql += " AND e.course_id = ?";
       params.push(course_id);
@@ -115,11 +114,11 @@ exports.updateExam = async (req, res) => {
   delete payload.created_at;
   delete payload.updated_at;
   delete payload.departments;
+  delete payload.active;
   Object.keys(payload).forEach((key) => {
     if (
       payload[key] !== undefined &&
       payload[key] !== null &&
-      payload[key] !== 0 &&
       payload[key] !== ""
     ) {
       updateColumns.push(`${key}`);

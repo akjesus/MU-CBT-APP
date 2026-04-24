@@ -8,8 +8,8 @@ class Exam {
                     exams.semester, exams.level, exams.exam_name, 
                     exams.max_score_obtainable, exams.exam_mode, exams.server_time,
                     exams.start_time, exams.duration, exams.active,
-                    exams.exam_date, exams.instruction, exams.display_question_randomly,
-                    exams.created_at, exams.updated_at, GROUP_CONCAT(exam_departments.department_id) AS department_ids,
+                    exams.exam_date, exams.instruction, exams.exam_hall, exams.display_question_randomly,
+                    exams.created_at, exams.updated_at, GROUP_CONCAT(exam_departments.department_id) AS department_id,
                     GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
              FROM exams
              LEFT JOIN courses ON exams.course_id = courses.id
@@ -78,9 +78,9 @@ class Exam {
     const [result] = await db.query(
       `INSERT INTO exams 
       (course_id, session_id, semester, level, exam_name, max_score_obtainable, 
-        exam_mode, start_time, duration,  exam_date, instruction,
+        exam_mode, start_time, duration,  exam_date, instruction, exam_hall,
         server_time, display_question_randomly, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         data.course_id,
         data.session_id,
@@ -93,6 +93,7 @@ class Exam {
         data.duration,
         data.exam_date,
         data.instruction,
+        data.exam_hall,
         data.server_time,
         data.display_question_randomly,
       ],
@@ -103,7 +104,7 @@ class Exam {
     await db.query(
       `UPDATE exams SET course_id = ?, session_id = ?, semester = ?, level = ?, exam_name = ?, 
                              max_score_obtainable = ?, exam_mode = ?, start_time = ?, duration = ?, 
-                             unit_of_time = ?, exam_date = ?, instruction = ?, venue = ?,
+                             unit_of_time = ?, exam_date = ?, instruction = ?, exam_hall = ?,
                              show_max_scores = ?, display_question_randomly = ?, allow_multiple_attempts = ?,              
                              unordered_answering = ?, updated_at = NOW() 
              WHERE id = ?`,
@@ -120,7 +121,7 @@ class Exam {
         data.unit_of_time,
         data.exam_date,
         data.instruction,
-        data.venue,
+        data.exam_hall,
         data.display_question_randomly,
         data.allow_multiple_attempts,
         data.unordered_answering,
@@ -132,7 +133,6 @@ class Exam {
     if (columns.length === 0) {
       return { message: "No data to update" };
     }
-    // Remove 'id' and 'department_id' from the columns and values arrays if they exist
     const filteredColumns = columns.filter(
       (col) => col !== "id" && col !== "department_id" && col !== "departments",
     );
@@ -148,10 +148,8 @@ class Exam {
     newValues.push(parseInt(id));
 
     const sql = `UPDATE exams SET ${query} WHERE id = ?`;
-
     try {
       const [results] = await db.query(sql, newValues);
-      console.log(`Updated row with id ${id}`);
     } catch (err) {
       console.error(err);
     }
@@ -159,11 +157,23 @@ class Exam {
 
   static async getAllActiveExams() {
     const [rows] = await db.query(
-      `SELECT exams.id, courses.name AS course_name, courses.level as course_level, 
-        exams.exam_name, exams.start_time, exams.duration, exams.unit_of_time, exams.active
-            FROM exams
-            JOIN courses ON exams.course_id = courses.id
-            WHERE exams.active = 1`,
+      `SELECT exams.id as id, exams.course_id as course_id, courses.name AS course_name, courses.code AS course_code, 
+                    exams.session_id, sessions.name AS session_name, levels.name AS course_level,
+                    exams.semester, exams.level, exams.exam_name, exam.exam_hall,
+                    exams.max_score_obtainable, exams.exam_mode, exams.server_time,
+                    exams.start_time, exams.duration, exams.active,
+                    exams.exam_date, exams.instruction, exams.exam_hall, exams.display_question_randomly,
+                    exams.created_at, exams.updated_at, GROUP_CONCAT(exam_departments.department_id) AS department_ids,
+                    GROUP_CONCAT(DISTINCT departments.name ORDER BY departments.name SEPARATOR ', ') AS departments
+             FROM exams
+             LEFT JOIN courses ON exams.course_id = courses.id
+             LEFT JOIN levels ON courses.level_id = levels.id
+             LEFT JOIN sessions ON exams.session_id = sessions.id
+             LEFT JOIN exam_departments ON exams.id = exam_departments.exam_id
+             LEFT JOIN departments ON exam_departments.department_id = departments.id
+             WHERE exams.active = 1
+             GROUP BY exams.id, courses.name, sessions.name
+             ORDER BY exams.created_at DESC`,
     );
     return rows;
   }

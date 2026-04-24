@@ -17,14 +17,23 @@ import {
   Alert,
   ToggleButton,
   ToggleButtonGroup,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
-import { getExamsForCourses, getResults } from "../../api/results";
+import {
+  getExamsForCourses,
+  getResults,
+  deleteResult,
+} from "../../api/results";
 import { getSessions, getCourses } from "../../api/faculties";
 import TablePagination from "@mui/material/TablePagination";
 import { saveAs } from "file-saver";
 
 export default function AdminResults() {
   const [sessions, setSessions] = useState([]);
+  const [fetchedCourses, setFetchedCourses] = useState([]);
   const [courses, setCourses] = useState([]);
   const [exams, setExams] = useState([]);
   const [results, setResults] = useState([]);
@@ -36,10 +45,39 @@ export default function AdminResults() {
     message: "",
     severity: "success",
   });
+  const showSnackbar = (message, severity) => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [departmentSortOrder, setDepartmentSortOrder] = useState("asc");
-  const [userRole, setUserRole] = useState("viewer"); // Default role
+  const [userRole, setUserRole] = useState("viewer");
+  const [openConfirm, setOpenConfirm] = useState({
+    open: false,
+    data: null,
+    message: "Are you sure you want to delete this result?",
+  });
+  const handleCloseConfirm = () => {
+    setOpenConfirm({
+      open: false,
+      data: null,
+      message: "",
+    });
+  };
+
+  const handleDeleteResult = async (result) => {
+    try {
+      const res = await deleteResult(result.result_id);
+      if (res.data.success) {
+        showSnackbar("Result deleted successfully!", "success");
+        handleFetchResults();
+      }
+    } catch (error) {
+      showSnackbar("There was an error", "error");
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -53,7 +91,7 @@ export default function AdminResults() {
     const fetchCourses = async () => {
       try {
         const res = await getCourses();
-        setCourses(res.data.courses);
+        setFetchedCourses(res.data.courses);
       } catch (error) {
         console.error("Failed to fetch courses", error);
       }
@@ -77,12 +115,14 @@ export default function AdminResults() {
   const handleSessionChange = async (event) => {
     const sessionId = event.target.value;
     setSelectedSession(sessionId);
-    setExams([]);
+    setSelectedExam("");
+    setCourses([])
+    setSelectedCourse("");
 
     try {
       const res = await getExamsForCourses(sessionId);
       const courseIds = res.data.exams.map((exam) => exam.course_id);
-      const filteredCourses = courses.filter((course) =>
+      const filteredCourses = fetchedCourses.filter((course) =>
         courseIds.includes(course.id),
       );
       setCourses(filteredCourses);
@@ -164,9 +204,6 @@ export default function AdminResults() {
     }
   };
 
-  const handleDeleteResult = (resultId) => {
-    console.log(`Deleting result: ${resultId}`);
-  };
   return (
     <Box p={{ xs: 1, sm: 3 }} sx={{ maxWidth: 900, mx: "auto" }}>
       <Typography
@@ -185,6 +222,7 @@ export default function AdminResults() {
         <FormControl fullWidth>
           <InputLabel>Session</InputLabel>
           <Select value={selectedSession} onChange={handleSessionChange}>
+            <MenuItem value=""> Select Session</MenuItem>
             {sessions.map((session) => (
               <MenuItem key={session.id} value={session.id}>
                 {session.name}
@@ -196,12 +234,11 @@ export default function AdminResults() {
         <FormControl fullWidth>
           <InputLabel>Course</InputLabel>
           <Select value={selectedCourse} onChange={handleCourseChange}>
-            {courses &&
-              courses.map((course) => (
-                <MenuItem key={course.id} value={course.id}>
-                  {course.name}
-                </MenuItem>
-              ))}
+            {courses.map((course) => (
+              <MenuItem key={course.id} value={course.id}>
+                {course.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <FormControl fullWidth>
@@ -217,6 +254,7 @@ export default function AdminResults() {
         </FormControl>
 
         <Button
+          disabled={!selectedExam}
           variant="contained"
           sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
           onClick={handleFetchResults}
@@ -343,13 +381,19 @@ export default function AdminResults() {
                   <TableCell>{result.score}</TableCell>
                   <TableCell>{result.max_score_obtainable}</TableCell>
                   <TableCell>
-                    {userRole === "admin" ? (
+                    {userRole === "admin" || userRole === "superadmin" ? (
                       <>
                         <Button
                           variant="contained"
                           color="secondary"
                           size="small"
-                          onClick={() => handleDeleteResult(result.id)}
+                          onClick={() =>
+                            setOpenConfirm({
+                              ...openConfirm,
+                              open: true,
+                              data: result,
+                            })
+                          }
                           sx={{ ml: 1 }}
                         >
                           Delete
@@ -382,7 +426,34 @@ export default function AdminResults() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-
+      <Dialog
+        open={openConfirm.open}
+        onClose={() => {
+          handleCloseConfirm();
+        }}
+      >
+        <DialogTitle>
+          <Typography>Confirm Result Delete</Typography>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to delete this result?
+            </Typography>
+            <DialogActions>
+              <Button onClick={() => handleCloseConfirm()}>Cancel</Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  handleDeleteResult(openConfirm.data);
+                  handleCloseConfirm();
+                }}
+              >
+                Delete Result
+              </Button>
+            </DialogActions>
+          </DialogContent>
+        </DialogTitle>
+      </Dialog>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

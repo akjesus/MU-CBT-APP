@@ -105,4 +105,14 @@ exports.getResultsByExam = async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   };
-  
+
+  exports.deleteResult = async(req, res)=> {
+     const { id } = req.params;
+     try {
+      const deleted = await db.query(`delete from results where id = ?`, [id]);
+
+        return res.status(200).json({success: true, message: "Result Deleted"})
+     } catch (error) {
+      return res.status(500).json({ success: false,error: error.message });
+     }
+  }
