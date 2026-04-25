@@ -149,7 +149,6 @@ export default function FacultiesPage() {
       console.log(error);
     }
   };
- 
 
   // Department  Section
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +209,6 @@ export default function FacultiesPage() {
   };
 
   const handleEditDepartment = (department) => {
-
     setEditingDept(department);
     setValue("name", department.name);
     setValue("school", department.faculty_id);
@@ -316,15 +314,15 @@ export default function FacultiesPage() {
     }
   };
 
-   const fetchSessions = async () => {
-     try {
-       const sesRes = await getSessions();
-       setSessions(sesRes.data.sessions);
-       showSnackbar("Sesssions fetched!", "success");
-     } catch (error) {
-       console.log(error);
-     }
-   };
+  const fetchSessions = async () => {
+    try {
+      const sesRes = await getSessions();
+      setSessions(sesRes.data.sessions);
+      showSnackbar("Sesssions fetched!", "success");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Faculty Section
@@ -360,7 +358,7 @@ export default function FacultiesPage() {
         const res = await getFaculties();
         setFaculties(res.data.faculties);
       } else {
-        await addFaculty  (data);
+        await addFaculty(data);
         reset();
         showSnackbar("Faculty added successfully!");
         setOpenFacultyDialog(false);
@@ -612,7 +610,10 @@ export default function FacultiesPage() {
                 {editingFaculty ? "Edit Faculty" : "Add Faculty"}
               </DialogTitle>
               <DialogContent>
-                <form id="faculty-form" onSubmit={handleSubmit(onFacultySubmit)}>
+                <form
+                  id="faculty-form"
+                  onSubmit={handleSubmit(onFacultySubmit)}
+                >
                   <TextField
                     fullWidth
                     label="Faculty Name"
@@ -636,7 +637,7 @@ export default function FacultiesPage() {
                   variant="contained"
                   color="primary"
                 >
-                  {editingFaculty ? "Update" : "Add"}
+                  {editingFaculty ? "Update Faculty" : "Add Faculty"}
                 </Button>
               </DialogActions>
             </Dialog>

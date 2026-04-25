@@ -21,8 +21,8 @@ class ResultProcessing {
         // Store result in database
         await db.query(
             `INSERT INTO results (student_id, exam_id, score, responses, status, start_time, submitted_time, 
-                                  active_duration, created_at, updated_at) 
-             VALUES (?, ?, ?, ?, 'completed', NOW(), NOW(), TIMESTAMPDIFF(MINUTE, NOW(), NOW()), NOW(), NOW())`,
+                                  active_duration, deleted, created_at, updated_at) 
+             VALUES (?, ?, ?, ?, 'completed', NOW(), NOW(), TIMESTAMPDIFF(MINUTE, NOW(), NOW()), 0, NOW(), NOW())`,
             [studentId, examId, totalScore, JSON.stringify(responses)]
         );
 
@@ -36,7 +36,7 @@ class ResultProcessing {
              FROM results r
              JOIN exams e ON r.exam_id = e.id
              JOIN courses c ON e.course_id = c.id
-             WHERE r.student_id = ?`,
+             WHERE r.student_id = ? AND r.deleted = 0`,
             [studentId]
         );
         return results;
@@ -48,7 +48,7 @@ class ResultProcessing {
                     r.start_time, r.submitted_time, r.active_duration, r.remark, r.comment
              FROM results r
              JOIN students s ON r.student_id = s.id
-             WHERE r.exam_id = ?`,
+             WHERE r.exam_id = ? AND r.deleted = 0`,
             [examId]
         );
         return results;
@@ -62,7 +62,7 @@ class ResultProcessing {
              JOIN students s ON r.student_id = s.id
              JOIN exams e ON r.exam_id = e.id
              JOIN courses c ON e.course_id = c.id
-             WHERE s.department_id = ?`,
+             WHERE s.department_id = ? AND r.deleted = 0`,
             [departmentId]
         );
         return results;

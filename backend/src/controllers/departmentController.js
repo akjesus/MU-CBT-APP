@@ -31,7 +31,7 @@ exports.createDepartment = async (req, res) => {
 
 exports.updateDepartment = async (req, res) => {
     try {
-        const faculty_id = req.body.faculty
+        const {faculty_id} = req.body
         const { name } = req.body;
         await Department.update(req.params.id, faculty_id, name);
         res.json({ message: "Department updated" });

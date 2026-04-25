@@ -16,6 +16,7 @@ exports.getResults = async (req, res) => {
       JOIN students s ON r.student_id = s.id
       JOIN exams e ON r.exam_id = e.id
       WHERE 1=1
+      AND r.deleted = 0
     `;
     const params = [];
 
@@ -68,7 +69,7 @@ exports.getResultsByExam = async (req, res) => {
   
       let sql = `
         SELECT 
-          r.id AS result_id,
+          r.id AS id,
           r.score,
           s.first_name,
           s.last_name,
@@ -84,6 +85,7 @@ exports.getResultsByExam = async (req, res) => {
         JOIN departments d ON s.department_id = d.id
         JOIN exams e ON r.exam_id = e.id
         WHERE r.exam_id = ?
+        AND r.deleted = 0
       `;
   
       let params = [exam_id];
@@ -98,21 +100,27 @@ exports.getResultsByExam = async (req, res) => {
       sql += " ORDER BY d.name ASC, s.last_name ASC";
   
       const [rows] = await db.query(sql, params);
-  
-      res.status(200).json({success: true, results: rows});
+      const [examDetails] = await db.query(`SELECT exam_name, exam_date, exam_hall FROM exams WHERE id = ?`, [exam_id]);
+      res.status(200).json({ success: true, examDetails: examDetails[0], results: rows });
+      
     } catch (err) {
       console.error("Get Results Error:", err);
       res.status(500).json({ error: err.message });
     }
   };
+  
 
   exports.deleteResult = async(req, res)=> {
      const { id } = req.params;
      try {
-      const deleted = await db.query(`delete from results where id = ?`, [id]);
+      const deleted = await db.query(`
+        update results set deleted = 1, 
+        deleted_by = ?,
+        deleted_at = NOW() where id = ?`, [req.user.id, id]);
 
         return res.status(200).json({success: true, message: "Result Deleted"})
      } catch (error) {
+      console.log("Delete Result Error:", error);
       return res.status(500).json({ success: false,error: error.message });
      }
   }

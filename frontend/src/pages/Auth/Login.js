@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import backgroundImage from "../../assets/bg-large.jpg"; 
+import backgroundImage from "../../assets/bg-large.jpg";
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 export default function Login() {
@@ -52,10 +52,13 @@ export default function Login() {
         localStorage.setItem("role", res.data.user.role);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         showSnackbar("Logged in successfully!", "success");
-        console.log("User role:", res.data.user.role);
 
         // Redirect based on role
-        if (res.data.user.role === "admin" || res.data.user.role === "staff") {
+        if (
+          res.data.user.role === "superadmin" ||
+          res.data.user.role === "admin" ||
+          res.data.user.role === "staff"
+        ) {
           setTimeout(() => {
             navigate("/admin/dashboard");
           }, 1500);
@@ -86,8 +89,7 @@ export default function Login() {
     <>
       <Box
         sx={{
-          backgroundImage:
-            "url('" + backgroundImage + "')",
+          backgroundImage: "url('" + backgroundImage + "')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           minHeight: "100vh",

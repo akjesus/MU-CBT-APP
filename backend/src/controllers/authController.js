@@ -37,7 +37,7 @@ exports.adminLogin = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ id: admin.id, role: "Admin" }, SECRET_KEY, {
+    const token = jwt.sign({ id: admin.id, role: "Admin" }, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
 
@@ -143,7 +143,7 @@ exports.verifyToken = (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized or logged out" });
   }
 
-  jwt.verify(token, "your_secret_key", (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ error: "Invalid token" });
     }

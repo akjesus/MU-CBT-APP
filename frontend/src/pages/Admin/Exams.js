@@ -89,7 +89,7 @@ export default function AdminExams() {
     max_score_obtainable: 70,
     display_question_randomly: 0,
     instruction: "Answer all questions",
-    exam_hall: 1,
+    exam_hall: 0,
     server_time: 0,
   });
   const [page, setPage] = useState(0);
@@ -291,7 +291,7 @@ export default function AdminExams() {
         max_score_obtainable: 70,
         display_question_randomly: 0,
         instruction: "Answer all questions",
-        exam_hall: 1,
+        exam_hall: 0,
         server_time: 0,
       });
     }
@@ -1244,6 +1244,7 @@ export default function AdminExams() {
                   shrink: true,
                 }}
               >
+                <MenuItem value={0}>Select Hall</MenuItem>
                 <MenuItem value={1}>Hall 1</MenuItem>
                 <MenuItem value={2}>Hall 2</MenuItem>
                 <MenuItem value={3}>Hall 3</MenuItem>
@@ -1277,7 +1278,8 @@ export default function AdminExams() {
                 !newExam.semester ||
                 !newExam.exam_mode ||
                 !newExam.session_id ||
-                !newExam.duration
+                !newExam.duration ||
+                !newExam.exam_hall
               }
               variant="contained"
               sx={{ bgcolor: "#2C2C78" }}

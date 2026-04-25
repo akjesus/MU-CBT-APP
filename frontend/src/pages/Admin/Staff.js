@@ -33,9 +33,9 @@ export default function StaffSettings() {
     message: "",
     severity: "success",
   });
-  function showSnackbar(message, severity) {
+  const  showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
-  }
+  };
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -323,7 +323,7 @@ export default function StaffSettings() {
                         <Visibility fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    {userRole === "admin" && (
+                    {userRole === "admin" || userRole === "superadmin" && (
                       <>
                         <Tooltip title="Edit" arrow>
                           <IconButton

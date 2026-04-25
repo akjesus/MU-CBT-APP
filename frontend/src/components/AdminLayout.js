@@ -30,7 +30,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 const drawerWidth = 240;
 
 const getMenuItems = (role) => {
-  if (role === "admin" || role === "staff") {
+  if (role === "superadmin" || role === "admin" || role === "staff") {
     return [
       { text: "Dashboard", icon: <Dashboard />, path: "/admin/dashboard" },
       { text: "Students", icon: <People />, path: "/admin/students" },

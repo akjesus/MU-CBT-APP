@@ -13,6 +13,8 @@ import {
   TableRow,
   CircularProgress,
   Tab,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 
@@ -21,6 +23,19 @@ const Monitoring = () => {
   const [selectedExam, setSelectedExam] = useState(null);
   const [students, setStudents] = useState([]);
   const [examDetails, setExamDetails] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showSnackbar = (message, severity) => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const countdownIntervalRef = useRef(null);
   const refetchIntervalRef = useRef(null);
@@ -45,7 +60,12 @@ const Monitoring = () => {
         setStudents((prevStudents) =>
           prevStudents.map((student) => ({
             ...student,
-            time_left: student.time_left > 0 ? student.time_left - 1 : 0,
+            time_left:
+              student.status === "submitted"
+                ? student.time_left
+                : student.time_left > 0
+                  ? student.time_left - 1
+                  : 0,
           })),
         );
       }, 1000);
@@ -95,10 +115,15 @@ const Monitoring = () => {
     setSelectedExam(exam);
     try {
       const response = await getStudentsForExam(exam.id);
+      if (response.status === 204) {
+        showSnackbar("No students logged in for this exam", "info");
+        return;
+      }
       if (!response.data.success) {
         setStudents([]);
         return;
       }
+      showSnackbar("Logged in Students fetched successfully", "success");
       setStudents(response.data.students);
       setExamDetails(exam || []);
     } catch (error) {
@@ -214,10 +239,31 @@ const Monitoring = () => {
                   </TableCell>
                 </TableRow>
               ))}
+              {students.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={3} align="center">
+                    No students logged in
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </Box>
       )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

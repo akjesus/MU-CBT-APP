@@ -30,13 +30,16 @@ import {
 import { getSessions, getCourses } from "../../api/faculties";
 import TablePagination from "@mui/material/TablePagination";
 import { saveAs } from "file-saver";
-
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { set } from "react-hook-form";
 export default function AdminResults() {
   const [sessions, setSessions] = useState([]);
   const [fetchedCourses, setFetchedCourses] = useState([]);
   const [courses, setCourses] = useState([]);
   const [exams, setExams] = useState([]);
   const [results, setResults] = useState([]);
+  const [examDetails, setExamDetails] = useState([]);
   const [selectedSession, setSelectedSession] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedExam, setSelectedExam] = useState("");
@@ -68,7 +71,7 @@ export default function AdminResults() {
 
   const handleDeleteResult = async (result) => {
     try {
-      const res = await deleteResult(result.result_id);
+      const res = await deleteResult(result.id);
       if (res.data.success) {
         showSnackbar("Result deleted successfully!", "success");
         handleFetchResults();
@@ -116,7 +119,8 @@ export default function AdminResults() {
     const sessionId = event.target.value;
     setSelectedSession(sessionId);
     setSelectedExam("");
-    setCourses([])
+    setCourses([]);
+    setResults([]);
     setSelectedCourse("");
 
     try {
@@ -133,6 +137,8 @@ export default function AdminResults() {
 
   const handleCourseChange = async (event) => {
     const courseId = event.target.value;
+    setSelectedExam("");
+    setResults([]);
     setSelectedCourse(courseId);
     try {
       const res = await getExamsForCourses(selectedSession, courseId);
@@ -146,6 +152,7 @@ export default function AdminResults() {
     try {
       const res = await getResults(selectedExam);
       setResults(res.data.results);
+      setExamDetails(res.data.examDetails);
     } catch (error) {
       console.error("Failed to fetch results", error);
     }
@@ -166,6 +173,19 @@ export default function AdminResults() {
     setPage(0);
   };
   const exportToCSV = () => {
+    const csvHeaders = [
+      ["Exam Name", "Exam Date", "Exam Hall", "", "", ""],
+      [
+        examDetails.exam_name,
+        new Date(examDetails.exam_date).toLocaleDateString(),
+        `Hall${examDetails.exam_hall}`,
+        "",
+        "",
+        "",
+      ],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+    ];
     const csvContent = [
       [
         "Student Name",
@@ -187,8 +207,53 @@ export default function AdminResults() {
       .map((row) => row.join(","))
       .join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const fullCSV =
+      csvHeaders.map((row) => row.join(",")).join("\n") + "\n" + csvContent;
+
+    const blob = new Blob([fullCSV], {
+      type: "text/csv;charset=utf-8;",
+    });
     saveAs(blob, `${(results[0]?.exam_name).replace(/\s+/g, "_")}_results.csv`);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Exam Results", 15, 20);
+    doc.setFontSize(12);
+    doc.text(`Exam Name: ${examDetails.exam_name}`, 15, 30);
+    doc.text(
+      `Exam Date: ${new Date(examDetails.exam_date).toLocaleDateString()}`,
+      15,
+      35,
+    );
+    doc.text(`Exam Hall:  Hall ${examDetails.exam_hall}`, 15, 40);
+
+    const tableData = results.map((result) => [
+      `${result.first_name} ${result.last_name}`,
+      result.registration_number,
+      result.department_name,
+      result.level_name,
+      result.score,
+      result.max_score_obtainable,
+    ]);
+    autoTable(doc, {
+      head: [
+        [
+          "Student Name",
+          "Registration Number",
+          "Department",
+          "Level",
+          "Score",
+          "Max Score",
+        ],
+      ],
+      body: tableData,
+      startY: 50,
+    });
+
+    // Save the PDF
+    doc.save(`${examDetails.exam_name.replace(/\s+/g, "_")}_results.pdf`);
   };
   const handleDepartmentSort = (event, newOrder) => {
     if (newOrder) {
@@ -218,8 +283,19 @@ export default function AdminResults() {
         View Results
       </Typography>
 
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <FormControl fullWidth>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: 2,
+          mb: 2,
+          alignItems: { xs: "stretch", sm: "center" },
+        }}
+      >
+        <FormControl
+          sx={{ minWidth: 220, width: { xs: "60%", sm: 220 } }}
+          size="small"
+        >
           <InputLabel>Session</InputLabel>
           <Select value={selectedSession} onChange={handleSessionChange}>
             <MenuItem value=""> Select Session</MenuItem>
@@ -231,9 +307,13 @@ export default function AdminResults() {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth>
+        <FormControl
+          sx={{ minWidth: 220, width: { xs: "100%", sm: 220 } }}
+          size="small"
+        >
           <InputLabel>Course</InputLabel>
           <Select value={selectedCourse} onChange={handleCourseChange}>
+            <MenuItem value="">Select Course</MenuItem>
             {courses.map((course) => (
               <MenuItem key={course.id} value={course.id}>
                 {course.name}
@@ -241,9 +321,14 @@ export default function AdminResults() {
             ))}
           </Select>
         </FormControl>
-        <FormControl fullWidth>
+        <FormControl
+        disabled={!exams.length}
+          sx={{ minWidth: 220, width: { xs: "100%", sm: 220 } }}
+          size="small"
+        >
           <InputLabel>Exams</InputLabel>
           <Select value={selectedExam} onChange={handleExamChange}>
+            <MenuItem value="">Select Exams</MenuItem>
             {exams &&
               exams.map((exam) => (
                 <MenuItem key={exam.id} value={exam.id}>
@@ -255,21 +340,33 @@ export default function AdminResults() {
 
         <Button
           disabled={!selectedExam}
-          variant="contained"
-          sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
+          sx={{
+            color: "#fff",
+            bgcolor: "#2C2C78",
+            width: { xs: "100%", sm: "auto" },
+            mt: { xs: 1, sm: 0 },
+          }}
           onClick={handleFetchResults}
         >
-          Load Results
+          Get Results
         </Button>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Box sx={{ display: "flex", mb: 2, mt: 0, gap: 2 }}>
         <Button
+          disabled={results.length === 0}
           variant="contained"
           sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
           onClick={exportToCSV}
         >
           Export to CSV
+        </Button>
+        <Button
+          disabled={results.length === 0}
+          variant="outlined"
+          onClick={exportToPDF}
+        >
+          Export to PDF
         </Button>
       </Box>
 
@@ -311,7 +408,16 @@ export default function AdminResults() {
                   fontSize: { xs: 14, sm: 18 },
                 }}
               >
-                <ToggleButtonGroup
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#2C2C78",
+                    fontSize: { xs: 14, sm: 18 },
+                  }}
+                >
+                  Department
+                </TableCell>
+                {/* <ToggleButtonGroup
                   value={departmentSortOrder}
                   exclusive
                   onChange={handleDepartmentSort}
@@ -324,7 +430,7 @@ export default function AdminResults() {
                   <ToggleButton value="desc" aria-label="sort descending">
                     Desc
                   </ToggleButton>
-                </ToggleButtonGroup>
+                </ToggleButtonGroup> */}
               </TableCell>
               <TableCell
                 sx={{
@@ -353,17 +459,20 @@ export default function AdminResults() {
               >
                 Max Score
               </TableCell>
-              <TableCell>
-                <Typography
-                  sx={{
-                    fontWeight: "bold",
-                    color: "#2C2C78",
-                    fontSize: { xs: 14, sm: 18 },
-                  }}
-                >
-                  Actions
-                </Typography>
-              </TableCell>
+              {userRole === "admin" ||
+                (userRole === "superadmin" && (
+                  <TableCell>
+                    <Typography
+                      sx={{
+                        fontWeight: "bold",
+                        color: "#2C2C78",
+                        fontSize: { xs: 14, sm: 18 },
+                      }}
+                    >
+                      Actions
+                    </Typography>
+                  </TableCell>
+                ))}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -381,29 +490,26 @@ export default function AdminResults() {
                   <TableCell>{result.score}</TableCell>
                   <TableCell>{result.max_score_obtainable}</TableCell>
                   <TableCell>
-                    {userRole === "admin" || userRole === "superadmin" ? (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          size="small"
-                          onClick={() =>
-                            setOpenConfirm({
-                              ...openConfirm,
-                              open: true,
-                              data: result,
-                            })
-                          }
-                          sx={{ ml: 1 }}
-                        >
-                          Delete
-                        </Button>
-                      </>
-                    ) : (
-                      <Typography variant="body2" color="textSecondary">
-                        No Actions Available
-                      </Typography>
-                    )}
+                    {userRole === "admin" ||
+                      (userRole === "superadmin" && (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            size="small"
+                            onClick={() =>
+                              setOpenConfirm({
+                                ...openConfirm,
+                                open: true,
+                                data: result,
+                              })
+                            }
+                            sx={{ ml: 1 }}
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      ))}
                   </TableCell>
                 </TableRow>
               ))}
