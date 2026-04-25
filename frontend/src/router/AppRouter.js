@@ -7,6 +7,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminDashboard from "../pages/Admin/Dashboard";
 import AdminStudents from "../pages/Admin/Students";
 import AdminExams from "../pages/Admin/Exams";
+import AdminMonitoring from "../pages/Admin/Monitoring"
 import AdminFaculties from "../pages/Admin/Faculties";
 import StaffSettings from "../pages/Admin/Staff";
 import AdminLayout from "../components/AdminLayout"
@@ -20,66 +21,64 @@ import StudentLayout from "../components/StudentLayout";
 
 const AppRouter = () => {
   return (
-  <BrowserRouter>
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} />
-
-      {/* Admin Routes (protected + wrapped in AdminLayout) */}
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route
-        path="/admin"
-        element={
-          <ProtectedRoute roles={["admin", "superadmin", "staff"]}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
+          path="/admin"
+          element={
+            <ProtectedRoute roles={["admin", "superadmin", "staff"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="staff" element={<StaffSettings />} />
+        </Route>
 
-        <Route path="staff" element={<StaffSettings />} />
-      </Route>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={["admin", "superadmin", "staff"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="students" element={<AdminStudents />} />
+          <Route path="exams" element={<AdminExams />} />
+          <Route path="monitoring" element={<AdminMonitoring />} />
+          <Route path="faculties" element={<AdminFaculties />} />
+          <Route path="results" element={<AdminResults />} />
+          <Route path="staff" element={<StaffSettings />} />
+        </Route>
 
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute roles={["admin", "superadmin", "staff"]}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="students" element={<AdminStudents />} />
-        <Route path="exams" element={<AdminExams />} />
-        <Route path="faculties" element={<AdminFaculties />} />
-        <Route path="results" element={<AdminResults />} />
-        <Route path="staff" element={<StaffSettings />} />
-      </Route>
+        {/* Student Routes (protected + wrapped in StudentLayout) */}
+        <Route
+          path="/student"
+          element={
+            <ProtectedRoute roles={["student"]}>
+              <StudentLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="dashboard" element={<StudentDashboard />} />
+        </Route>
 
-      {/* Student Routes (protected + wrapped in StudentLayout) */}
-      <Route
-        path="/student"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <StudentLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="dashboard" element={<StudentDashboard />} />
-      </Route>
-
-      {/* Student Exam Route (protected but no layout - fullscreen mode) */}
-      <Route
-        path="/student/exam/:exam_id"
-        element={
-          <ProtectedRoute roles={["student"]}>
-            <StudentExam />
-          </ProtectedRoute>
-        }
-      />
-      {/* Catch-all route for 404 */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
-  </BrowserRouter>
-);
+        {/* Student Exam Route (protected but no layout - fullscreen mode) */}
+        <Route
+          path="/student/exam/:exam_id"
+          element={
+            <ProtectedRoute roles={["student"]}>
+              <StudentExam />
+            </ProtectedRoute>
+          }
+        />
+        {/* Catch-all route for 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 export default AppRouter;

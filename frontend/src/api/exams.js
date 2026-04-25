@@ -232,3 +232,16 @@ export const getExamSession = (exam_id, matriculation_number) => {
     },
   );
 };
+
+export const getStudentsForExam = (id) => {
+  const token = localStorage.getItem("token");
+  return axios.get(
+    `${BASE_URL}/exam-monitoring/${id}/students`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};

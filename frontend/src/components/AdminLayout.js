@@ -23,6 +23,7 @@ import {
   ChevronLeft,
   ChevronRight,
   PeopleOutline,
+  BookOnline,
 } from "@mui/icons-material";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -34,6 +35,11 @@ const getMenuItems = (role) => {
       { text: "Dashboard", icon: <Dashboard />, path: "/admin/dashboard" },
       { text: "Students", icon: <People />, path: "/admin/students" },
       { text: "Exams", icon: <Book />, path: "/admin/exams" },
+      {
+        text: "Monitor Exams",
+        icon: <BookOnline />,
+        path: "/admin/monitoring",
+      },
       { text: "Faculties", icon: <School />, path: "/admin/faculties" },
       { text: "Results", icon: <BarChart />, path: "/admin/results" },
       { text: "Staff", icon: <PeopleOutline />, path: "/admin/staff" },

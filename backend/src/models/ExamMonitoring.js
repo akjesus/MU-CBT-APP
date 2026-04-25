@@ -52,6 +52,17 @@ class ExamMonitoring {
     );
     return rows[0];
   }
+  static async getStudents(id) {
+    const [rows] = await db.query(
+      `SELECT ex.id, s.first_name, s.last_name, s.registration_number, 
+        ex.time_left, ex.responses, ex.status 
+      from exam_monitoring ex
+      join students s on ex.matriculation_number = s.registration_number
+      where ex.exam_id = ?`,
+      [id],
+    );
+    return rows;
+  }
 }
 
 module.exports = ExamMonitoring;

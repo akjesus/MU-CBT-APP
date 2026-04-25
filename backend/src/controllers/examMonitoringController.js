@@ -79,11 +79,29 @@ exports.getExamSession = async (req, res) => {
       exam_id,
     );
     if (!session) {
-      return res.status(204).json({ success: false,message: "No active exam session found" });
+      return res
+        .status(204)
+        .json({ success: false, message: "No active exam session found" });
     }
     res.status(200).json({ success: true, session });
   } catch (error) {
     console.error("Error fetching exam session:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.getStudents = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const students = await ExamMonitoring.getStudents(parseInt(id));
+    if (students.length === 0) {
+      return res
+        .status(204)
+        .json({ success: false, message: "No students found for this exam" });
+    }
+    res.status(200).json({ success: true, students });
+  } catch (error) {
+    console.error("Error fetching students for exam:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

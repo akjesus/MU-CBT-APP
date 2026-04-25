@@ -178,7 +178,7 @@ export default function AdminExams() {
         setExams(exams.data.exams || []);
       } else {
         const res =  await getActiveExams();
-        setActiveExams(res.data || []);
+        setActiveExams(res.data.exams || []);
       }
       showSnackbar(
         `Exam ${active ? "Activated" : "Deactivated"} Successfully!`,
@@ -603,7 +603,7 @@ export default function AdminExams() {
       const res = getActiveExams();
       res
         .then((response) => {
-          setActiveExams(response.data);
+          setActiveExams(response.data.exams);
         })
         .catch((error) => {
           console.log("Error fetching active exams:", error);

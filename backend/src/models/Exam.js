@@ -159,7 +159,7 @@ class Exam {
     const [rows] = await db.query(
       `SELECT exams.id as id, exams.course_id as course_id, courses.name AS course_name, courses.code AS course_code, 
                     exams.session_id, sessions.name AS session_name, levels.name AS course_level,
-                    exams.semester, exams.level, exams.exam_name, exam.exam_hall,
+                    exams.semester, exams.level, exams.exam_name,
                     exams.max_score_obtainable, exams.exam_mode, exams.server_time,
                     exams.start_time, exams.duration, exams.active,
                     exams.exam_date, exams.instruction, exams.exam_hall, exams.display_question_randomly,

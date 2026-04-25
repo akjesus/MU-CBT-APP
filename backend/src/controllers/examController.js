@@ -35,7 +35,7 @@ exports.getAllExamsWithCourseSession = async (req, res) => {
     // Optionally order by start_time or exam_name, etc.
     sql += " ORDER BY e.start_time DESC";
     const [rows] = await db.query(sql, params);
-    res.status(200).json({success: true, exams: rows});
+    res.status(200).json({ success: true, exams: rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -62,8 +62,7 @@ exports.getQuestions = async (req, res) => {
 };
 
 exports.createExam = async (req, res) => {
-
-  const {department_id} = req.body.exam;
+  const { department_id } = req.body.exam;
   try {
     const id = await Exam.create(req.body.exam);
     for (const departmentId of department_id) {
@@ -152,9 +151,25 @@ exports.deleteExam = async (req, res) => {
 exports.getAllActiveExams = async (req, res) => {
   try {
     const exams = await Exam.getAllActiveExams();
-    res.json(exams);
+    res.status(200).json({ success: true, exams});
   } catch (err) {
-    console.log(err.message);
+    console.error(err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getActiveStudentsForExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sql = `
+      SELECT s.* FROM students s
+      JOIN exam_taking et ON s.id = et.student_id
+      WHERE et.exam_id = ? AND et.is_active = 1
+    `;
+    const [rows] = await db.query(sql, [exam_id]);
+    res.status(200).json({ success: true, students: rows });
+  } catch (err) {
+    console.error(err.message);
     res.status(500).json({ error: err.message });
   }
 };
