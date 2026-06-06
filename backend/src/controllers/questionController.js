@@ -16,7 +16,7 @@ exports.getAllQuestions = async (req, res) => {
     }
 
     const [questions] = await db.query(sql, params);
-    res.json(questions);
+    res.status(200).json({sucess: true, questions});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -24,14 +24,12 @@ exports.getAllQuestions = async (req, res) => {
 
 exports.getAllQuestionsForCourse = async (req, res) => {
   const { course_id } = req.params; // Get course_id from query params
-  console.log(course_id);
-
   try {
     const [questions] = await db.query(
       "SELECT * FROM questions WHERE course_id = ?",
       [course_id],
     );
-    res.json(questions);
+    res.status(200).json({ sucess: true, questions });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

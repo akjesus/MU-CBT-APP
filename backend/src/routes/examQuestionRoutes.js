@@ -5,7 +5,6 @@ const upload = multer();
 const examQuestionController = require("../controllers/examQuestionController");
 const { auth } = require("../controllers/authController");
 
-// Apply authentication middleware to all routes in this router
 router.use(auth);
 router.delete(
   "/remove/:exam_id",

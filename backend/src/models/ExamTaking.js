@@ -57,7 +57,7 @@ class ExamTaking {
 
     static async hasAttemptedExam(studentId, examId) {
         const [rows] = await db.query(
-            `SELECT id FROM results WHERE student_id = ? AND exam_id = ?`,
+            `SELECT id FROM results WHERE student_id = ? AND exam_id = ? AND deleted = 0`,
             [studentId, examId]
         );
         return rows.length > 0;

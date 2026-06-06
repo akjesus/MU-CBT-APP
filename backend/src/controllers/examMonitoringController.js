@@ -12,10 +12,10 @@ exports.getActiveExamSessions = async (req, res) => {
 };
 
 exports.updateExamSession = async (req, res) => {
-  const { matriculation_number, exam_id, responses, time_left } = req.body;
+  const { student_id, exam_id, responses, time_left } = req.body;
   try {
     await ExamMonitoring.updateExamSession(
-      matriculation_number,
+      student_id,
       exam_id,
       responses,
       time_left,
@@ -30,10 +30,10 @@ exports.updateExamSession = async (req, res) => {
 };
 
 exports.createExamMonitoringSession = async (req, res) => {
-  const { matriculation_number, exam_id, responses, time_left } = req.body;
+  const { student_id, exam_id, responses, time_left } = req.body;
   try {
     const existingSessions = await ExamMonitoring.getExamSession(
-      matriculation_number,
+      student_id,
       exam_id,
     );
 
@@ -45,7 +45,7 @@ exports.createExamMonitoringSession = async (req, res) => {
     }
 
     const sessionId = await ExamMonitoring.createExamMonitoringSession(
-      matriculation_number,
+      student_id,
       exam_id,
       responses,
       time_left,
@@ -61,9 +61,9 @@ exports.createExamMonitoringSession = async (req, res) => {
 };
 
 exports.endExamSession = async (req, res) => {
-  const { matriculation_number, exam_id } = req.body;
+  const { student_id, exam_id } = req.body;
   try {
-    await ExamMonitoring.endExamSession(matriculation_number, exam_id);
+    await ExamMonitoring.endExamSession(student_id, exam_id);
     res.json({ message: "Exam session ended successfully" });
   } catch (error) {
     console.error("Error ending exam session:", error);
@@ -72,10 +72,10 @@ exports.endExamSession = async (req, res) => {
 };
 
 exports.getExamSession = async (req, res) => {
-  const { exam_id, matriculation_number } = req.body;
+  const { student_id, exam_id } = req.query;
   try {
     const session = await ExamMonitoring.getExamSession(
-      matriculation_number,
+      student_id,
       exam_id,
     );
     if (!session) {
@@ -103,5 +103,16 @@ exports.getStudents = async (req, res) => {
   } catch (error) {
     console.error("Error fetching students for exam:", error);
     res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.markAttendance = async (req, res) => {
+  const { exam_id, student_id, present } = req.body;
+  try {
+    await ExamMonitoring.markAttendance(exam_id, student_id, present);
+    res.json({ message: "Attendance marked successfully" });
+  } catch (error) {
+    console.error("Error marking attendance:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -3,61 +3,62 @@ const db = require("../config/database");
 class ExamMonitoring {
   static async getActiveExamSessions(exam_id) {
     const [rows] = await db.query(
-      `SELECT em.id, em.exam_id, e.exam_name, em.matriculation_number, s.first_name, s.last_name,
-              em.responses, em.time_left,  em.created_at
+      `SELECT em.id, em.exam_id, e.exam_name, em.student_id, s.first_name, s.last_name,
+              em.responses, em.responses_count, em.time_left,  em.created_at
        FROM exam_monitoring em
        JOIN exams e ON em.exam_id = e.id
-       JOIN students s ON em.matriculation_number = s.matriculation_number
+       JOIN students s ON em.student_id = s.id
        WHERE em.exam_id = ?`,
       [exam_id],
     );
     return rows;
   }
   static async updateExamSession(
-    matriculation_number,
+    student_id,
     exam_id,
     responses,
     time_left,
   ) {
     await db.query(
       `UPDATE exam_monitoring
-       SET responses = ?, time_left = ?, updated_at = NOW()
-       WHERE matriculation_number = ? AND exam_id = ?`,
-      [JSON.stringify(responses), time_left, matriculation_number, exam_id],
+       SET responses = ?, responses_count = ?, time_left = ?, updated_at = NOW()
+       WHERE student_id = ? AND exam_id = ?`,
+      [JSON.stringify(responses), Object.keys(responses).length, time_left, student_id, exam_id],
     );
   }
 
-  static async createExamMonitoringSession(matriculation_number, exam_id, responses, time_left ) {
+  static async createExamMonitoringSession(student_id, exam_id, responses, time_left ) {
     const [result] = await db.query(
-      `INSERT INTO exam_monitoring (matriculation_number, exam_id, responses, time_left, status, created_at, updated_at)
+      `INSERT INTO exam_monitoring (student_id, exam_id, responses, responses_count, time_left, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, 'in_progress', NOW(), NOW())`,
-      [matriculation_number, exam_id, JSON.stringify(responses), time_left],
+      [student_id, exam_id, JSON.stringify(responses), Object.keys(responses).length, time_left],
     );
     return result.insertId;
   }
 
-  static async endExamSession(matriculation_number, exam_id) {
+  static async endExamSession(student_id, exam_id) {
     await db.query(
       `UPDATE exam_monitoring
-       SET status = 'submitted', updated_at = NOW()
-       WHERE matriculation_number = ? AND exam_id = ?`,
-      [matriculation_number, exam_id],
+       SET status = 'submitted', updated_at = NOW(), 
+       time_left = 0, responses = NULL
+       WHERE student_id = ? AND exam_id = ?`,
+      [student_id, exam_id],
     );
   }
-  static async getExamSession(matriculation_number, exam_id) {
-    const [rows] = await db.query(
+  static async getExamSession(student_id, exam_id) {
+     const [rows] = await db.query(
       `SELECT * FROM exam_monitoring
-       WHERE matriculation_number = ? AND exam_id = ? `,
-      [matriculation_number, exam_id],
+       WHERE student_id = ? AND exam_id = ? `,
+      [student_id, exam_id],
     );
     return rows[0];
   }
   static async getStudents(id) {
     const [rows] = await db.query(
       `SELECT ex.id, s.first_name, s.last_name, s.registration_number, 
-        ex.time_left, ex.responses, ex.status 
+        ex.time_left, ex.responses_count, ex.status 
       from exam_monitoring ex
-      join students s on ex.matriculation_number = s.registration_number
+      join students s on ex.student_id = s.id
       where ex.exam_id = ?`,
       [id],
     );

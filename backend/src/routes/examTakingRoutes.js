@@ -6,6 +6,7 @@ router.get("/:exam_id/student/:student_id/eligibility", examTakingController.che
 router.get("/:exam_id/questions", examTakingController.getExamQuestions);
 router.post("/:exam_id/student/:student_id/submit", examTakingController.submitExam);
 router.post("/:exam_id/bulk-submit", examTakingController.submitBulkExam);
+router.post("/:examId/end", examTakingController.endExam);
 
 module.exports = router;
 

@@ -10,5 +10,5 @@ router.get("/:id/students", examMonitoringController.getStudents);
 router.put("/update", examMonitoringController.updateExamSession);
 router.post("/create", examMonitoringController.createExamMonitoringSession);
 router.post("/end", examMonitoringController.endExamSession);
-router.post("/session", examMonitoringController.getExamSession);
+router.get("/session", examMonitoringController.getExamSession);
 module.exports = router;
