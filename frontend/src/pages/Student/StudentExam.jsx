@@ -45,7 +45,7 @@ import parse from "html-react-parser";
 
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 const user = JSON.parse(localStorage.getItem("user"));
-const examEndedRef = useRef(false);
+
 
 export default function StudentExam() {
   const { exam_id } = useParams();
@@ -72,7 +72,7 @@ export default function StudentExam() {
     message: "",
     severity: "success",
   });
-
+const examEndedRef = useRef(false);
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
