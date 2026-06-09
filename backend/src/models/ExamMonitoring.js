@@ -29,9 +29,11 @@ class ExamMonitoring {
 
   static async createExamMonitoringSession(student_id, exam_id, responses, time_left ) {
     const [result] = await db.query(
-      `INSERT INTO exam_monitoring (student_id, exam_id, responses, responses_count, time_left, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, 'in_progress', NOW(), NOW())`,
-      [student_id, exam_id, JSON.stringify(responses), Object.keys(responses).length, time_left],
+      `INSERT INTO exam_monitoring 
+      (student_id, exam_id, responses, responses_count, 
+      time_left, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'in_progress', NOW(), NOW())`,
+      [student_id, exam_id, JSON.stringify(responses), 0, time_left],
     );
     return result.insertId;
   }

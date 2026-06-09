@@ -8,7 +8,7 @@ exports.getAllStudents = async (req, res) => {
   try {
     const [students] = await db.query(
       `SELECT students.id, students.registration_number, students.first_name, students.last_name,
-                    students.email, students.username, students.photo, students.department_id, departments.name AS department_name, 
+                    students.email, students.other_names, students.photo, students.department_id, departments.name AS department_name, 
                     students.level_id, levels.name AS level_name, faculties.name AS faculty_name
              FROM students
              JOIN levels ON students.level_id = levels.id
@@ -18,6 +18,7 @@ exports.getAllStudents = async (req, res) => {
 
     res.json(students);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -27,7 +28,7 @@ exports.getStudentById = async (req, res) => {
     const studentId = req.params.id;
     const [students] = await db.query(
       `SELECT students.id, students.registration_number, students.first_name, students.last_name,
-                    students.email, students.username, students.photo, students.department_id, departments.name AS department_name, 
+                    students.email, students.other_names, students.photo, students.department_id, departments.name AS department_name, 
                     students.level_id, levels.name AS level_name, faculties.name AS faculty_name
              FROM students
              JOIN levels ON students.level_id = levels.id
@@ -49,15 +50,14 @@ exports.getStudentById = async (req, res) => {
 exports.createStudent = async (req, res) => {
   try {
     const {
+      faculty_id,
       department_id,
       level_id,
       registration_number,
       first_name,
       last_name,
       email,
-      username,
-      password,
-      photo,
+      other_names,
     } = req.body;
     if (
       !department_id ||
@@ -66,8 +66,7 @@ exports.createStudent = async (req, res) => {
       !first_name ||
       !last_name ||
       !email ||
-      !username ||
-      !password
+      !faculty_id
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -78,9 +77,8 @@ exports.createStudent = async (req, res) => {
       first_name,
       last_name,
       email,
-      username,
-      password,
-      photo,
+      other_names,
+      faculty_id,
     );
     res.status(201).json({ message: "Student created", student });
   } catch (err) {
@@ -98,7 +96,7 @@ exports.updateStudent = async (req, res) => {
       first_name,
       last_name,
       email,
-      username,
+      other_names,
       password,
       photo,
     } = req.body;
@@ -110,7 +108,7 @@ exports.updateStudent = async (req, res) => {
       first_name,
       last_name,
       email,
-      username,
+      other_names,
       password,
       photo,
     );
@@ -131,9 +129,9 @@ exports.deleteStudent = async (req, res) => {
 
 exports.studentLogin = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    // const student = await Student.getByUsername(username);
-    const student = await Student.getByRegNumberOrEmail(username);
+    const { other_names, password } = req.body;
+    // const student = await Student.getByother_names(other_names);
+    const student = await Student.getByRegNumberOrEmail(other_names);
     if (!student)
       return res.status(401).json({ error: "Invalid Email/Matric Number" });
 
@@ -146,7 +144,7 @@ exports.studentLogin = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: student.id, username: student.username },
+      { id: student.id, other_names: student.other_names },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
@@ -163,7 +161,7 @@ exports.getStudentsByDepartmentAndLevel = async (req, res) => {
       departmentId,
       levelId,
     );
-    res.status(200).json({success: true, students});
+    res.status(200).json({ success: true, students });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -172,7 +170,7 @@ exports.getStudentsByDepartmentAndLevel = async (req, res) => {
 exports.bulkUploadStudents = async (req, res) => {
   try {
     // Check if file is present
-    if (!req.file ) {
+    if (!req.file) {
       console.log("No file uploaded");
       return res.status(400).json({ error: "CSV file is required" });
     }
@@ -180,7 +178,7 @@ exports.bulkUploadStudents = async (req, res) => {
     const csvFile = req.file;
     const bufferStream = new stream.PassThrough();
     bufferStream.end(csvFile.buffer);
-    const studentsToImsert = []; 
+    const studentsToImsert = [];
     bufferStream
       .pipe(csvParser())
       .on("data", (row) => {
@@ -191,7 +189,7 @@ exports.bulkUploadStudents = async (req, res) => {
           first_name,
           last_name,
           email,
-          username,
+          other_names,
         } = row;
 
         // We'll store this row data
@@ -202,7 +200,7 @@ exports.bulkUploadStudents = async (req, res) => {
           first_name,
           last_name,
           email,
-          username,
+          other_names,
           password: registration_number, // default password is reg number
         });
       })
@@ -219,27 +217,30 @@ exports.bulkUploadStudents = async (req, res) => {
         for (const qRow of studentsToImsert) {
           // Insert new question
 
-            const [insertRes] = await db.query(
-              `INSERT INTO students 
-               (department_id, level_id, registration_number, first_name, last_name, email, username,
+          const [insertRes] = await db.query(
+            `INSERT INTO students 
+               (department_id, level_id, registration_number, first_name, last_name, email, other_names,
                 password, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-              [
-                qRow.department_id,
-                qRow.level_id,
-                qRow.registration_number,
-                qRow.first_name,
-                qRow.last_name,
-                qRow.email,
-                qRow.username,
-                qRow.password,
-              ]
-            );
-            insertedCount++;
+            [
+              qRow.department_id,
+              qRow.level_id,
+              qRow.registration_number,
+              qRow.first_name,
+              qRow.last_name,
+              qRow.email,
+              qRow.other_names,
+              qRow.password,
+            ],
+          );
+          insertedCount++;
         }
-        res.status(201).json({ success: true,
-          message: `${insertedCount} students successfully uploaded`,
-        });
+        res
+          .status(201)
+          .json({
+            success: true,
+            message: `${insertedCount} students successfully uploaded`,
+          });
       });
   } catch (err) {
     res.status(500).json({ error: err.message });

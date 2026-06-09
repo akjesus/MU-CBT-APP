@@ -1,5 +1,5 @@
 const ExamTaking = require("../models/ExamTaking");
-const {signAttendance} = require ("./attendanceController");
+const { signAttendance } = require("./attendanceController");
 const db = require("../config/database");
 
 exports.checkEligibility = async (req, res) => {
@@ -155,8 +155,8 @@ exports.submitBulkExam = async (req, res) => {
       );
     }
 
-    return true
-    } catch (err) {
+    return true;
+  } catch (err) {
     console.error(err);
     console.log;
     res.status(500).json({ error: err.message });
@@ -189,20 +189,24 @@ exports.endExam = async (req, res) => {
     );
     for (const student of students) {
       await calculateResult(examId, student.student_id, student.responses);
-      await signAttendance(student.student_id, examId);
-    }
-
-    await connection.query(
-      `
+      await db.query(
+        `UPDATE exam_attendance
+          SET status = ?, stop_time = NOW()
+          WHERE student_id = ? AND exam_id = ?`,
+        ["submitted", student.student_id, examId],
+      );
+      await connection.query(
+        `
             UPDATE exam_monitoring
             SET
             status='submitted',
             time_left=0, responses=NULL, updated_at=NOW()
             WHERE exam_id=?
+            AND student_id = ?
             `,
-      [examId],
-    );
-
+        [examId, student.student_id],
+      );
+    }
     await connection.commit();
     return res.json({
       success: true,
@@ -210,7 +214,7 @@ exports.endExam = async (req, res) => {
     });
   } catch (error) {
     await connection.rollback();
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -224,7 +228,7 @@ const calculateResult = async (exam_id, student_id, responses) => {
   try {
     const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
     if (hasAttempted) {
-      return 
+      return;
     }
 
     const [questions] = await db.query(

@@ -749,22 +749,11 @@ const examEndedRef = useRef(false);
                             !isAnsweredQuestion && !isCurrentQuestion
                               ? "inherit"
                               : undefined,
-                          border:
-                            isMarkedQuestion && !isCurrentQuestion
-                              ? "2px solid #ff9800"
-                              : undefined,
                         }}
                       >
                         {isAnsweredQuestion &&
                         !isCurrentQuestion &&
-                        isMarkedQuestion ? (
-                          <Stack>
-                            <CheckCircle
-                              sx={{ fontSize: "28px" }}
-                              color="success"
-                            />
-                          </Stack>
-                        ) : isAnsweredQuestion && !isCurrentQuestion ? (
+                        isAnsweredQuestion && !isCurrentQuestion ? (
                           <Stack>
                             <CheckCircle
                               sx={{ fontSize: "28px" }}

@@ -49,17 +49,14 @@ export default function AdminStudents() {
   const [openEdit, setOpenEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [newStudent, setNewStudent] = useState({
-    matric: "",
-    faculty: "",
-    department: "",
-    level: "",
+    registration_number: "",
     email: "",
-    username: "",
-    facultyId: "",
-    departmentId: "",
+    faculty_id: "",
+    department_id: "",
     first_name: "",
     last_name: "",
-    levelId: "",
+    other_names: "",
+    level_id: "",
   });
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState("");
@@ -111,13 +108,13 @@ export default function AdminStudents() {
   const handleResetPassword = async (student) => {
     if (
       window.confirm(
-        `Are you sure you want to reset the password for ${student.name || student.matric}?`,
+        `Are you sure you want to reset the password for ${student.name || student.registration_number}?`,
       )
     ) {
       try {
         await resetStudentPassword(student.id);
         showSnackbar(
-          `Password reset for ${student.name || student.matric}`,
+          `Password reset for ${student.name || student.registration_number}`,
           "success",
         );
       } catch (err) {
@@ -167,12 +164,10 @@ export default function AdminStudents() {
         setStudents(res.data.students);
       }
     } catch (error) {
-      console.log(error);
-      showSnackbar(error.response?.data?.message || error, "error");
+      showSnackbar(error.response?.data?.error || "An error occured", "error");
     }
   };
   const handleOpenEdit = (student, index) => {
-    console.log(student);
     setNewStudent(student);
     setEditIndex(index);
     setOpenEdit(true);
@@ -181,14 +176,12 @@ export default function AdminStudents() {
     setNewStudent({
       first_name: "",
       last_name: "",
-      matric: "",
-      faculty: "",
-      department: "",
-      level: "",
+      registration_number: "",
+      faculty_id: "",
+      department_id: "",
+      level_id: "",
       email: "",
-      username: "",
-      facultyId: "",
-      departmentId: "",
+      other_names: "",
     });
     setEditIndex(null);
     setOpen(true);
@@ -201,11 +194,18 @@ export default function AdminStudents() {
   const handleChange = (e) =>
     setNewStudent({ ...newStudent, [e.target.name]: e.target.value });
   const handleLevelChange = (event) => {
-    setNewStudent({ ...newStudent, levelId: event.target.value });
+    setNewStudent({ ...newStudent, level_id: event.target.value });
   };
 
   const handleDepartmentChange = (event) => {
-    setNewStudent({ ...newStudent, departmentId: event.target.value });
+    setNewStudent({ ...newStudent, department_id: event.target.value });
+  };
+  const handleFacultyChange = (event) => {
+    setNewStudent({
+      ...newStudent,
+      faculty_id: event.target.value,
+      department_id: "",
+    });
   };
   const handleSaveStudent = async () => {
     try {
@@ -215,6 +215,7 @@ export default function AdminStudents() {
         setTimeout(() => {
           handleClose();
         }, 2500);
+        handleFetchStudents()
         return;
       } else {
         showSnackbar("Failed to add student", "error");
@@ -223,8 +224,6 @@ export default function AdminStudents() {
       console.log(error);
       showSnackbar(error.response?.data?.message || error.message, "error");
     }
-
-    handleClose();
   };
 
   const handleDelete = async (student, index) => {
@@ -235,6 +234,7 @@ export default function AdminStudents() {
         if (res.status === 200) {
           showSnackbar("Student deleted successfully", "success");
           setStudents(updated);
+          handleFetchStudents()
         } else {
           showSnackbar("Failed to delete student", "error");
         }
@@ -252,6 +252,7 @@ export default function AdminStudents() {
         showSnackbar("Student updated successfully", "success");
         handleClose();
         setStudents([...students, newStudent]);
+        handleFetchStudents()
       } else {
         showSnackbar("Failed to update student", "error");
       }
@@ -270,6 +271,8 @@ export default function AdminStudents() {
     (s) =>
       s.first_name.toLowerCase().includes(search.toLowerCase()) ||
       s.last_name.toLowerCase().includes(search.toLowerCase()) ||
+      s.other_names.toLowerCase().includes(search.toLowerCase()) ||
+      s.registration_number.toLowerCase().includes(search.toLowerCase()) ||
       s.email.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -462,7 +465,8 @@ export default function AdminStudents() {
                           {index + 1}
                         </TableCell>
                         <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
-                          {student.first_name} {student.last_name}
+                          {student.last_name} {student.first_name}{" "}
+                          {student.other_names}
                         </TableCell>
                         <TableCell sx={{ fontSize: { xs: 13, sm: 15 } }}>
                           {student.registration_number}
@@ -596,10 +600,10 @@ export default function AdminStudents() {
                   />
                   <TextField
                     margin="dense"
-                    label="Username"
-                    name="username"
+                    label="Other Names"
+                    name="other_names"
                     fullWidth
-                    value={newStudent.username}
+                    value={newStudent.other_names}
                     onChange={handleChange}
                     size="small"
                   />
@@ -616,9 +620,9 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Faculty</InputLabel>
                       <Select
-                        name="faculty"
-                        value={newStudent.faculty}
-                        onChange={handleChange}
+                        name="faculty_id"
+                        value={newStudent.faculty_id}
+                        onChange={handleFacultyChange}
                         label="Faculty"
                       >
                         {faculties.map((f) => (
@@ -636,13 +640,13 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Department</InputLabel>
                       <Select
-                        name="department"
-                        value={newStudent.departmentId}
+                        name="department_id"
+                        value={newStudent.department_id}
                         onChange={handleDepartmentChange}
                         label="Department"
                       >
                         {departments
-                          .filter((d) => d.faculty_id === newStudent.facultyId)
+                          .filter((d) => d.faculty_id === newStudent.faculty_id)
                           .map((d) => (
                             <MenuItem key={d.id} value={d.id}>
                               {d.name}
@@ -664,8 +668,8 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Level</InputLabel>
                       <Select
-                        name="level"
-                        value={newStudent.levelId}
+                        name="level_id"
+                        value={newStudent.level_id}
                         onChange={handleLevelChange}
                         label="Level"
                       >
@@ -679,10 +683,10 @@ export default function AdminStudents() {
                     <TextField
                       margin="dense"
                       label="Matric NO"
-                      name="matric"
+                      name="registration_number"
                       type="text"
                       fullWidth
-                      value={newStudent.matric}
+                      value={newStudent.registration_number}
                       onChange={handleChange}
                       sx={{ flex: 1 }}
                       size="small"
@@ -828,6 +832,16 @@ export default function AdminStudents() {
                       sx={{ flex: 1 }}
                       size="small"
                     />
+                    <TextField
+                      margin="dense"
+                      label="Other Names"
+                      name="other_names"
+                      fullWidth
+                      value={newStudent.other_names}
+                      onChange={handleChange}
+                      sx={{ flex: 1 }}
+                      size="small"
+                    />
                   </Box>
                   <TextField
                     margin="dense"
@@ -836,15 +850,6 @@ export default function AdminStudents() {
                     type="email"
                     fullWidth
                     value={newStudent.email}
-                    onChange={handleChange}
-                    size="small"
-                  />
-                  <TextField
-                    margin="dense"
-                    label="Username"
-                    name="username"
-                    fullWidth
-                    value={newStudent.username}
                     onChange={handleChange}
                     size="small"
                   />
@@ -861,9 +866,9 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Faculty</InputLabel>
                       <Select
-                        name="faculty"
-                        value={newStudent.faculty}
-                        onChange={handleChange}
+                        name="faculty_id"
+                        value={newStudent.faculty_id}
+                        onChange={handleFacultyChange}
                         label="Faculty"
                       >
                         {faculties.map((f) => (
@@ -881,18 +886,13 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Department</InputLabel>
                       <Select
-                        name="department"
-                        value={newStudent.department}
+                        name="department_id"
+                        value={newStudent.department_id}
                         onChange={handleChange}
                         label="Department"
                       >
                         {departments
-                          .filter(
-                            (d) =>
-                              d.faculty_id ===
-                              faculties.find((f) => f.name === newStudent.faculty)
-                                ?.id,
-                          )
+                          .filter((d) => d.faculty_id === newStudent.faculty_id)
                           .map((d) => (
                             <MenuItem key={d.id} value={d.id}>
                               {d.name}
@@ -914,8 +914,8 @@ export default function AdminStudents() {
                     >
                       <InputLabel>Level</InputLabel>
                       <Select
-                        name="level"
-                        value={newStudent.level}
+                        name="level_id"
+                        value={newStudent.level_id}
                         onChange={handleChange}
                         label="Level"
                       >
@@ -929,10 +929,10 @@ export default function AdminStudents() {
                     <TextField
                       margin="dense"
                       label="Matric NO"
-                      name="matric"
+                      name="registration_number"
                       type="text"
                       fullWidth
-                      value={newStudent.matric}
+                      value={newStudent.registration_number}
                       onChange={handleChange}
                       sx={{ flex: 1 }}
                       size="small"

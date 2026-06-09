@@ -12,9 +12,9 @@ class Student {
     return rows[0];
   }
 
-  static async getByUsername(username) {
+  static async getByother_names(other_names) {
     const [rows] = await db.query(`SELECT * FROM students WHERE email = ?`, [
-      username,
+      other_names,
     ]);
     return rows[0];
   }
@@ -34,23 +34,23 @@ class Student {
     first_name,
     last_name,
     email,
-    username,
-    password,
-    photo,
+    other_names,
   ) {
-    //const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(registration_number, 10);
     const [result] = await db.query(
-      "INSERT INTO students (department_id, level_id, registration_number, first_name, last_name, email, username, password, photo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+      `INSERT INTO students (department_id, level_id, registration_number, 
+      first_name, last_name, other_names, email, password,  
+      created_at, updated_at) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?,  NOW(), NOW())`,
       [
         department_id,
         level_id,
         registration_number,
         first_name,
         last_name,
+        other_names,
         email,
-        username,
-        registration_number,
-        photo,
+        hashedPassword,
       ],
     );
     return result.insertId;
@@ -64,7 +64,7 @@ class Student {
     first_name,
     last_name,
     email,
-    username,
+    other_names,
     password,
     photo,
   ) {
@@ -77,7 +77,7 @@ class Student {
               first_name = ?,
               last_name = ?,
               email = ?,
-              username = ?,
+              other_names = ?,
               photo = ?,
               updated_at = NOW()
         `;
@@ -90,7 +90,7 @@ class Student {
       first_name,
       last_name,
       email,
-      username,
+      other_names,
       photo,
     ];
 
@@ -118,8 +118,8 @@ class Student {
   static async getByDepartmentAndLevel(departmentId, levelId) {
     const [rows] = await db.query(
       `SELECT students.id, students.registration_number, students.first_name, students.last_name,
-                    students.email, students.username, students.photo, students.department_id, departments.name AS department_name, 
-                    students.level_id, levels.name AS level_name, faculties.name AS faculty_name
+                    students.email, students.other_names, students.photo, students.department_id, departments.name AS department_name, 
+                    students.level_id, levels.name AS level_name, faculties.name AS faculty_name, faculties.id AS faculty_id
              FROM students  
                 JOIN levels ON students.level_id = levels.id
                 JOIN departments ON students.department_id = departments.id
