@@ -21,7 +21,6 @@ exports.getAttendance = async (req, res) => {
   } 
 };
 
-
 exports.markAttendance =  async(req, res)=> {
   try {
     const { student_id, exam_id } = req.body; 

@@ -3,7 +3,7 @@ const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const db = require("../config/database");
-let blacklistedTokens = new Set(); // Store invalid tokens (only works for in-memory)
+let blacklistedTokens = new Set();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION ; 
@@ -11,7 +11,6 @@ const JWT_EXPIRATION = process.env.JWT_EXPIRATION ;
 exports.adminLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
-
     if (!username || !password) {
       return res
         .status(400)
@@ -19,7 +18,6 @@ exports.adminLogin = async (req, res) => {
     }
 
     const admin = await Admin.findByUsername(username);
-
     if (!admin) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -51,7 +49,6 @@ exports.adminLogin = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    
     if (!username || !password) {
         return res
           .status(400)

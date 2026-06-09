@@ -23,7 +23,7 @@ class ExamMonitoring {
       `UPDATE exam_monitoring
        SET responses = ?, responses_count = ?, time_left = ?, updated_at = NOW()
        WHERE student_id = ? AND exam_id = ?`,
-      [JSON.stringify(responses), Object.keys(responses).length, time_left, student_id, exam_id],
+      [JSON.stringify(responses), responses.length, time_left, student_id, exam_id],
     );
   }
 
