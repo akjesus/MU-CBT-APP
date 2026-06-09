@@ -97,9 +97,8 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     showSnackbar("Logging out...", "info");
-
+    localStorage.clear();
     setTimeout(() => {
-      localStorage.clear();
       navigate("/");
     }, 1000);
   };
@@ -319,7 +318,7 @@ export default function AdminLayout() {
           }}
         >
           <Toolbar />
-            <Outlet />
+          <Outlet />
         </Box>
       </Box>
 

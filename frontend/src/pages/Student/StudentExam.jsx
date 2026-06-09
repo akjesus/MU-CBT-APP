@@ -51,8 +51,6 @@ export default function StudentExam() {
   const { exam_id } = useParams();
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
-
-  // Storage keys
   const responsesKey = `exam_${exam_id}_responses`;
   const timeLeftKey = `exam_${exam_id}_timeLeft`;
 
@@ -112,6 +110,7 @@ const examEndedRef = useRef(false);
   };
 
   const [isEligible, setIsEligible] = useState(false);
+
   useEffect(() => {
     const fetchExamData = async () => {
       try {
@@ -201,7 +200,6 @@ const examEndedRef = useRef(false);
   // Timer effect
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0) return;
-
     const timer = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
@@ -266,7 +264,6 @@ const examEndedRef = useRef(false);
       console.log("Submit already in progress");
       return;
     }
-
     if (!user || !user.id) {
       showSnackbar("User not authenticated. Please log in again.", "error");
       return;
@@ -374,7 +371,6 @@ const examEndedRef = useRef(false);
         if (examEnded) {
            examEndedRef.current = true;
            clearInterval(intervalId);
-           await updateExamSession();
           localStorage.removeItem(responsesKey);
           localStorage.removeItem(timeLeftKey);
           signAttendance(exam_id, user.id);
