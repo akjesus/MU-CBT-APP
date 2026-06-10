@@ -58,6 +58,7 @@ import { Editor } from "@tinymce/tinymce-react";
 
 export default function AdminExams() {
   const editorRef = useRef(null);
+  const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
   const log = () => {
     if (editorRef.current) {
       console.log(editorRef.current.getContent());
@@ -2148,7 +2149,7 @@ export default function AdminExams() {
             <Box sx={{ mt: 2 }}>
               {editQuestionModal.question?.file && (
                 <img
-                  src={`http://localhost:5000/${editQuestionModal.question.file}`}
+                  src={`${BASE_URL.replace("/api", "")}/${editQuestionModal.question.file}`}
                   alt="Question"
                   style={{ maxWidth: "100%", marginBottom: "10px" }}
                 />
