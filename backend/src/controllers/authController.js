@@ -68,6 +68,7 @@ exports.login = async (req, res) => {
           students.password as password, 
           students.first_name as first_name,
           students.last_name as last_name,
+          students.other_names as other_names,
           students.email as email,
           students.role as role,
           students.registration_number as matriculation_number,

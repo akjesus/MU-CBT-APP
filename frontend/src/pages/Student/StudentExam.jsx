@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   Container,
   Grid,
@@ -46,7 +47,6 @@ import parse from "html-react-parser";
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL;
 const user = JSON.parse(localStorage.getItem("user"));
 
-
 export default function StudentExam() {
   const { exam_id } = useParams();
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ export default function StudentExam() {
     message: "",
     severity: "success",
   });
-const examEndedRef = useRef(false);
+  const examEndedRef = useRef(false);
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
@@ -286,7 +286,12 @@ const examEndedRef = useRef(false);
       });
       const submitRes = await submitExam(user.id, exam_id, formattedResponses);
       console.log("Submit response:", submitRes.data);
-      showSnackbar(`Exam submitted successfully!`, "success");
+      await Swal.fire({
+        icon: "success",
+        title: "Exam submitted successfully",
+        text: "Your responses were sumbitted and graded successfully",
+        timer: 1000,
+      });
       localStorage.setItem(
         "examResult",
         JSON.stringify({
@@ -300,7 +305,7 @@ const examEndedRef = useRef(false);
       localStorage.removeItem(timeLeftKey);
       signAttendance(exam_id, user.id);
       endExamSession();
-      setTimeout(() => navigate("/student/dashboard"), 2000);
+      setTimeout(() => navigate("/student/dashboard"), 1000);
     } catch (error) {
       showSnackbar(
         "Error submitting exam: " +
@@ -369,15 +374,32 @@ const examEndedRef = useRef(false);
     const checker = async () => {
       try {
         if (examEnded) {
-           examEndedRef.current = true;
-           clearInterval(intervalId);
+          examEndedRef.current = true;
+          clearInterval(intervalId);
           localStorage.removeItem(responsesKey);
           localStorage.removeItem(timeLeftKey);
           signAttendance(exam_id, user.id);
-          showSnackbar(
-            "Exam has been ended by the administrator. Your answers have been submitted.",
-            "info",
-          );
+          await Swal.fire({
+            showClass: {
+              popup: `
+                      animate__animated
+                      animate__fadeInUp
+                      animate__faster
+                    `,
+            },
+            hideClass: {
+              popup: `
+                    animate__animated
+                    animate__fadeOutDown
+                    animate__faster
+                  `,
+            },
+            icon: "info",
+            title: "Exam Emded Automatically",
+            text: "Exam has been ended by the administrator. Your answers have been submitted",
+            timer: 1000,
+          });
+
           setTimeout(() => navigate("/student/dashboard"), 2000);
         }
       } catch (err) {
@@ -464,7 +486,7 @@ const examEndedRef = useRef(false);
             }}
           >
             <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-              {user?.first_name} {user?.other_names} {user?.last_name}
+              {user?.last_name} {user?.first_name} {user?.other_names}
             </Typography>
             <Typography variant="body2" sx={{ color: "gray" }}>
               Matric No: {user?.matriculation_number}
@@ -749,7 +771,8 @@ const examEndedRef = useRef(false);
                       >
                         {isAnsweredQuestion &&
                         !isCurrentQuestion &&
-                        isAnsweredQuestion && !isCurrentQuestion ? (
+                        isAnsweredQuestion &&
+                        !isCurrentQuestion ? (
                           <Stack>
                             <CheckCircle
                               sx={{ fontSize: "28px" }}

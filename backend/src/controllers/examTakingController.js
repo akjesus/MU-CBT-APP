@@ -171,7 +171,7 @@ exports.endExam = async (req, res) => {
     await connection.query(
       `
             UPDATE exams
-            SET status='completed'
+            SET status='completed', active = 0
             WHERE id=?
             `,
       [examId],

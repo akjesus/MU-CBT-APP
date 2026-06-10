@@ -65,7 +65,7 @@ exports.getResultsByStudent = async (req, res) => {
 exports.getResultsByExam = async (req, res) => {
     try {
       const { exam_id } = req.params;
-      const { department_id } = req.query; // e.g. /exam/123?department_id=5
+      const { department_id } = req.query;
   
       let sql = `
         SELECT 
@@ -78,7 +78,9 @@ exports.getResultsByExam = async (req, res) => {
           l.name AS level_name,
           d.name AS department_name,
           e.exam_name,
-          e.max_score_obtainable
+          e.max_score_obtainable,
+          e.id as exam_id,
+          s.id as student_id
         FROM results r
         JOIN students s ON r.student_id = s.id
         JOIN levels l ON s.level_id = l.id
@@ -112,11 +114,24 @@ exports.getResultsByExam = async (req, res) => {
 
   exports.deleteResult = async(req, res)=> {
      const { id } = req.params;
+     const {student_id, exam_id} = req.query
      try {
       const deleted = await db.query(`
         update results set deleted = 1, 
         deleted_by = ?,
         deleted_at = NOW() where id = ?`, [req.user.id, id]);
+
+        await db.query(`DELETE from exam_attendance 
+          WHERE student_id = ?
+          AND exam_id = ?
+          `, [student_id, exam_id])
+          await db.query(
+            `DELETE from exam_monitoring 
+          WHERE student_id = ?
+          AND exam_id = ?
+          `,
+            [student_id, exam_id],
+          );
 
         return res.status(200).json({success: true, message: "Result Deleted"})
      } catch (error) {

@@ -71,7 +71,7 @@ export default function AdminResults() {
 
   const handleDeleteResult = async (result) => {
     try {
-      const res = await deleteResult(result.id);
+      const res = await deleteResult(result);
       if (res.data.success) {
         showSnackbar("Result deleted successfully!", "success");
         handleFetchResults();
@@ -316,13 +316,13 @@ export default function AdminResults() {
             <MenuItem value="">Select Course</MenuItem>
             {courses.map((course) => (
               <MenuItem key={course.id} value={course.id}>
-                {course.name}
+                {course.code} - {course.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
         <FormControl
-        disabled={!exams.length}
+          disabled={!exams.length}
           sx={{ minWidth: 220, width: { xs: "100%", sm: 220 } }}
           size="small"
         >
@@ -497,13 +497,13 @@ export default function AdminResults() {
                             variant="contained"
                             color="error"
                             size="small"
-                            onClick={() =>
+                            onClick={() =>{
                               setOpenConfirm({
                                 ...openConfirm,
                                 open: true,
                                 data: result,
                               })
-                            }
+                            }}
                             sx={{ ml: 1 }}
                           >
                             Delete

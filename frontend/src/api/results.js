@@ -24,12 +24,16 @@ export const getExamsForCourses = (session_id, course_id) => {
   });
 };
 
-export const deleteResult = (id) => {
+export const deleteResult = (result) => {
   const token = localStorage.getItem("token");
-  return api.delete(`/result/${id}`, {
+  return api.delete(`/result/${result.id}`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+    },
+    params: {
+      student_id: result.student_id,
+      exam_id: result.exam_id,
     },
   });
 };

@@ -16,6 +16,10 @@ import {
   DialogContent,
   Alert,
   Snackbar,
+  FormControl,
+  MenuItem,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -213,7 +217,7 @@ export default function StaffSettings() {
         >
           Manage Staff
         </Typography>
-        {userRole === "admin" && (
+        {(userRole === "admin" || userRole === "superadmin") && (
           <Button
             variant="contained"
             sx={{ mb: 2, bgcolor: "#2C2C78" }}
@@ -233,6 +237,7 @@ export default function StaffSettings() {
           <DialogContent>
             <Box display="flex" flexDirection="column" gap={2} mt={1}>
               <TextField
+                sx={{ mt: 1 }}
                 label="First Name"
                 value={newStaff.first_name}
                 fullWidth
@@ -242,6 +247,7 @@ export default function StaffSettings() {
               />
 
               <TextField
+                sx={{ mt: 1 }}
                 label="Last Name"
                 value={newStaff.last_name}
                 fullWidth
@@ -253,11 +259,13 @@ export default function StaffSettings() {
                 label="Username"
                 value={newStaff.username}
                 fullWidth
+                sx={{ mt: 1 }}
                 onChange={(e) =>
                   setNewStaff({ ...newStaff, username: e.target.value })
                 }
               />
               <TextField
+                sx={{ mt: 1 }}
                 label="Email"
                 value={newStaff.email}
                 fullWidth
@@ -265,20 +273,23 @@ export default function StaffSettings() {
                   setNewStaff({ ...newStaff, email: e.target.value })
                 }
               />
-              <TextField
-                label="Role"
-                select
-                value={newStaff.role}
-                fullWidth
-                onChange={(e) =>
-                  setNewStaff({ ...newStaff, role: e.target.value })
-                }
-                SelectProps={{ native: true }}
-              >
-                <option value="">Select Role</option>
-                <option value="staff">Staff</option>
-                <option value="admin">Admin</option>
-              </TextField>
+              <FormControl fullWidth sx={{ mt: 2 }}>
+                <InputLabel>Role</InputLabel>
+                <Select
+                  sx={{ mt: 1 }}
+                  label="Role"
+                  value={newStaff.role || ""}
+                  onChange={(e) =>
+                    setNewStaff({
+                      ...newStaff,
+                      role: e.target.value,
+                    })
+                  }
+                >
+                  <MenuItem value="staff">Staff</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           </DialogContent>
           <DialogActions>
@@ -323,34 +334,35 @@ export default function StaffSettings() {
                         <Visibility fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    {userRole === "admin" || userRole === "superadmin" && (
-                      <>
-                        <Tooltip title="Edit" arrow>
-                          <IconButton
-                            color="secondary"
-                            onClick={() => handleEdit(s)}
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete" arrow>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleDelete(s)}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Reset Password" arrow>
-                          <IconButton
-                            color="info"
-                            onClick={() => handleResetPassword(s)}
-                          >
-                            <LockReset fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
+                    {userRole === "admin" ||
+                      (userRole === "superadmin" && (
+                        <>
+                          <Tooltip title="Edit" arrow>
+                            <IconButton
+                              color="secondary"
+                              onClick={() => handleEdit(s)}
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete" arrow>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleDelete(s)}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Reset Password" arrow>
+                            <IconButton
+                              color="info"
+                              onClick={() => handleResetPassword(s)}
+                            >
+                              <LockReset fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      ))}
                   </Box>
                 </TableCell>
               </TableRow>
@@ -375,8 +387,9 @@ export default function StaffSettings() {
           </DialogTitle>
           <DialogContent>
             {selectedStaff && (
-              <Box display="flex" flexDirection="column" gap={2} mt={1}>
+              <Box display="flex" flexDirection="column" gap={2} mt={2}>
                 <TextField
+                  sx={{ mt: 2 }}
                   label="First Name"
                   value={selectedStaff.first_name || ""}
                   fullWidth
@@ -390,6 +403,7 @@ export default function StaffSettings() {
                   }}
                 />
                 <TextField
+                  sx={{ mt: 2 }}
                   label="Last Name"
                   value={selectedStaff.last_name || ""}
                   fullWidth
@@ -403,6 +417,7 @@ export default function StaffSettings() {
                   }}
                 />
                 <TextField
+                  sx={{ mt: 2 }}
                   label="Username"
                   value={selectedStaff.username || ""}
                   fullWidth
@@ -416,6 +431,7 @@ export default function StaffSettings() {
                   }}
                 />
                 <TextField
+                  sx={{ mt: 2 }}
                   label="Email"
                   value={selectedStaff.email || ""}
                   fullWidth
@@ -430,6 +446,7 @@ export default function StaffSettings() {
                 />
                 {modalMode === "edit" ? (
                   <TextField
+                    sx={{ mt: 2 }}
                     label="Role"
                     select
                     value={selectedStaff.role || ""}
@@ -448,6 +465,7 @@ export default function StaffSettings() {
                   </TextField>
                 ) : (
                   <TextField
+                    sx={{ mt: 2 }}
                     label="Role"
                     value={selectedStaff.role || ""}
                     fullWidth
