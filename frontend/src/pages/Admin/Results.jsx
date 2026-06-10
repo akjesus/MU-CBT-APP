@@ -151,6 +151,9 @@ export default function AdminResults() {
   const handleFetchResults = async () => {
     try {
       const res = await getResults(selectedExam);
+      if(res.data.results.length === 0){
+        showSnackbar("No results found for this exam", "info");
+      }
       setResults(res.data.results);
       setExamDetails(res.data.examDetails);
     } catch (error) {

@@ -117,10 +117,14 @@ const StudentDashboard = () => {
            </Typography>
 
            <Typography sx={{ opacity: 0.9, mt: 1 }}>
-             {userDetails.first_name} {userDetails.last_name}
+             {userDetails.last_name} {userDetails.first_name}{" "}
+             {userDetails.other_names}
            </Typography>
 
-           <Typography color="text.secondary"> You have {eligibleExams.length} Available Exam(s)</Typography>
+           <Typography color="text.secondary">
+             {" "}
+             You have {eligibleExams.length} Available Exam(s)
+           </Typography>
          </CardContent>
        </Card>
 
@@ -140,8 +144,8 @@ const StudentDashboard = () => {
            <Grid container spacing={3}>
              <Grid item xs={12} md={6}>
                <Typography>
-                 <strong>Name:</strong> {userDetails.first_name}{" "}
-                 {userDetails.last_name}
+                 <strong>Name:</strong> {userDetails.last_name}{" "}
+                 {userDetails.first_name} {userDetails.other_names}
                </Typography>
 
                <Typography mt={1}>
@@ -167,70 +171,77 @@ const StudentDashboard = () => {
          </CardContent>
        </Card>
 
-       {/* ELIGIBLE EXAMS */}
-       <Typography variant="h5" fontWeight={700} mb={2} color="#2C2C78">
-         Available Examinations
-       </Typography>
-
        {eligibleExams.length > 0 ? (
-         <Grid container spacing={3}>
-           {eligibleExams.map((exam, index) => (
-             <Grid item xs={12} md={6} lg={4} key={index}>
-               <Card
-                 sx={{
-                   borderRadius: 5,
-                   height: "100%",
-                   transition: ".3s",
-                   boxShadow: 3,
+         <>
+           <Typography variant="h5" fontWeight={700} mb={2} color="#2C2C78">
+             Available Examinations
+           </Typography>
+           <Grid container spacing={3}>
+             {eligibleExams.map((exam, index) => (
+               <Grid item xs={12} md={6} lg={4} key={index}>
+                 <Card
+                   sx={{
+                     borderRadius: 5,
+                     height: "100%",
+                     transition: ".3s",
+                     boxShadow: 3,
 
-                   "&:hover": {
-                     transform: "translateY(-6px)",
-                     boxShadow: 8,
-                   },
-                 }}
-               >
-                 <CardContent>
-                   <Typography variant="h6" fontWeight={700} gutterBottom>
-                     {exam.exam_name}
-                   </Typography>
-
-                   <Typography variant="body1" color="primary" fontWeight={600}>
-                     {exam.course_name}
-                   </Typography>
-
-                   <Box mt={1}>
-                     <Typography variant="body2" >
-                       📅 {moment(exam.exam_date).format("DD MMM YYYY") || "N/A"}
+                     "&:hover": {
+                       transform: "translateY(-6px)",
+                       boxShadow: 8,
+                     },
+                   }}
+                 >
+                   <CardContent>
+                     <Typography variant="h6" fontWeight={700} gutterBottom>
+                       {exam.exam_name}
                      </Typography>
 
-                     <Typography variant="body2">
-                       ⏰ {moment(exam.start_time, "HH:mm").format("hh:mm A") || "N/A"}
+                     <Typography
+                       variant="body1"
+                       color="primary"
+                       fontWeight={600}
+                     >
+                       {exam.course_name}
                      </Typography>
-                   </Box>
 
-                   <Button
-                     fullWidth
-                     variant="contained"
-                     startIcon={<PlayArrow />}
-                     sx={{
-                       mt: 3,
-                       borderRadius: 3,
-                       py: 1.2,
-                       bgcolor: "#2C2C78",
+                     <Box mt={1}>
+                       <Typography variant="body2">
+                         📅{" "}
+                         {moment(exam.exam_date).format("DD MMM YYYY") || "N/A"}
+                       </Typography>
 
-                       "&:hover": {
-                         bgcolor: "#4338CA",
-                       },
-                     }}
-                     onClick={() => handleTakeExamClick(exam.exam_id)}
-                   >
-                     Start Exam
-                   </Button>
-                 </CardContent>
-               </Card>
-             </Grid>
-           ))}
-         </Grid>
+                       <Typography variant="body2">
+                         ⏰{" "}
+                         {moment(exam.start_time, "HH:mm").format("hh:mm A") ||
+                           "N/A"}
+                       </Typography>
+                     </Box>
+
+                     <Button
+                       fullWidth
+                       variant="contained"
+                       startIcon={<PlayArrow />}
+                       sx={{
+                         mt: 3,
+                         borderRadius: 3,
+                         py: 1.2,
+                         bgcolor: "#2C2C78",
+
+                         "&:hover": {
+                           bgcolor: "#4338CA",
+                         },
+                       }}
+                       onClick={() => handleTakeExamClick(exam.exam_id)}
+                     >
+                       Start Exam
+                     </Button>
+                   </CardContent>
+                 </Card>
+               </Grid>
+             ))}
+           </Grid>
+         </>
        ) : (
          <Card
            sx={{

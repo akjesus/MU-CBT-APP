@@ -229,6 +229,7 @@ export default function FacultiesPage() {
         const res = await getCourses();
         setCourses(res.data.courses);
       } else {
+        console.log(data);
         await createCourse(data);
         reset();
         showSnackbar("Course added successfully!");
@@ -248,7 +249,6 @@ export default function FacultiesPage() {
     setValue("name", course.name);
     setValue("credit", course.credit_load);
     setValue("code", course.code);
-    //loop through semesters and set the correct value to the form
     setValue("semester", course.semester_id);
     setValue("level", course.level_id);
     setValue("department", course.department_name);
@@ -941,10 +941,10 @@ export default function FacultiesPage() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {deptPaginated.length === 0 && (
+                  {coursePaginated.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={2} align="center">
-                        No departments found
+                        No courses found
                       </TableCell>
                     </TableRow>
                   )}
@@ -1065,7 +1065,7 @@ export default function FacultiesPage() {
                   variant="contained"
                   color="primary"
                 >
-                  {editingCourse ? "Update" : "Add"}
+                  {editingCourse ? "Update Course" : "Add Course"}
                 </Button>
               </DialogActions>
             </Dialog>

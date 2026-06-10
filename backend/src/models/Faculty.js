@@ -2,7 +2,7 @@ const db = require("../config/database");
 
 class Faculty {
     static async getAll() {
-        const [rows] = await db.query("SELECT * FROM faculties");
+        const [rows] = await db.query("SELECT * FROM faculties order by 2");
         return rows;
     }
 
