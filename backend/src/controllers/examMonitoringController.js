@@ -12,12 +12,14 @@ exports.getActiveExamSessions = async (req, res) => {
 };
 
 exports.updateExamSession = async (req, res) => {
-  const { student_id, exam_id, responses, time_left } = req.body;
+  const { student_id, exam_id, responses, responses_count, time_left } =
+    req.body;
   try {
     await ExamMonitoring.updateExamSession(
       student_id,
       exam_id,
       responses,
+      responses_count,
       time_left,
     );
     res
@@ -30,7 +32,7 @@ exports.updateExamSession = async (req, res) => {
 };
 
 exports.createExamMonitoringSession = async (req, res) => {
-  const { student_id, exam_id, responses, time_left } = req.body;
+  const { student_id, exam_id, responses, responses_count, time_left } = req.body;
   try {
     const existingSessions = await ExamMonitoring.getExamSession(
       student_id,
@@ -48,6 +50,7 @@ exports.createExamMonitoringSession = async (req, res) => {
       student_id,
       exam_id,
       responses,
+      responses_count,
       time_left,
     );
     res.json({

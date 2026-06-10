@@ -52,7 +52,6 @@ export default function Login() {
         localStorage.setItem("user", JSON.stringify(res.data.user));
         showSnackbar("Logged in successfully!", "success");
 
-        // Redirect based on role
         if (
           res.data.user.role === "superadmin" ||
           res.data.user.role === "admin" ||

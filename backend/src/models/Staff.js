@@ -31,27 +31,19 @@ class Staff {
   static async update(
     id,
     role,
-    department_id,
     first_name,
     last_name,
     email,
     username,
-    photo,
-    phone,
-    address,
   ) {
     await db.query(
-      "UPDATE staff SET role = ?, department_id = ?, first_name = ?, last_name = ?, email = ?, username = ?, photo = ?, phone = ?, address = ?, updated_at = NOW() WHERE id = ?",
+      "UPDATE staff SET role = ?, first_name = ?, last_name = ?, email = ?, username = ?, updated_at = NOW() WHERE id = ?",
       [
         role,
-        department_id,
         first_name,
         last_name,
         email,
         username,
-        photo,
-        phone,
-        address,
         id,
       ],
     );

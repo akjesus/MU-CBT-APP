@@ -36,15 +36,12 @@ exports.getExamQuestions = async (req, res) => {
 exports.submitExam = async (req, res) => {
   try {
     const { exam_id, student_id } = req.params;
-
-    // Check if student has already attempted
     const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
     if (hasAttempted) {
       return res
         .status(403)
         .json({ error: "You have already taken this exam." });
     }
-
     const { responses } = req.body;
     if (!responses) {
       return res.status(400).json({ error: "No responses provided." });
@@ -69,7 +66,6 @@ exports.submitExam = async (req, res) => {
     let totalScore = 0;
     questions.forEach((q) => {
       const userAnswer = responses[q.question_id];
-      // Convert score_obtainable to a real number
       const questionScore = parseFloat(q.score_obtainable) || 0;
 
       if (userAnswer && userAnswer === q.correct_option) {
@@ -188,6 +184,13 @@ exports.endExam = async (req, res) => {
       [examId],
     );
     for (const student of students) {
+      const hasAttempted = await ExamTaking.hasAttemptedExam(
+        student.student_id,
+        examId,
+      );
+      if (hasAttempted) {
+        continue;
+      }
       await calculateResult(examId, student.student_id, student.responses);
       await db.query(
         `UPDATE exam_attendance

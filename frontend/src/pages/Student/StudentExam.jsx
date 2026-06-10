@@ -167,8 +167,8 @@ export default function StudentExam() {
             student_id: user.id,
             exam_id: exam_id,
             responses: JSON.parse(localStorage.getItem(responsesKey)) || {},
+            responses_count: 0,
             time_left: examData.duration * 60,
-            answered_questions: `0 / ${questionsRes.data.length}`,
           };
           await createExamMonitoringSession(activeData);
           console.log("Exam Session created on exam start!");
@@ -323,8 +323,8 @@ export default function StudentExam() {
         student_id: user.id,
         exam_id: exam_id,
         responses: JSON.parse(localStorage.getItem(responsesKey)),
+        responses_count: `${Object.keys(JSON.parse(localStorage.getItem(responsesKey)) || {}).length}`,
         time_left: localStorage.getItem(timeLeftKey),
-        answered_questions: `${Object.keys(JSON.parse(localStorage.getItem(responsesKey)) || {}).length} / ${questions.length}`,
       };
       await updateExamMonitoringSession(activeData);
       console.log("Exam Session updated!");

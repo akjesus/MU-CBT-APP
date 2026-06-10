@@ -52,6 +52,7 @@ const Monitoring = () => {
     const fetchExams = async () => {
       try {
         const response = await getActiveExams();
+        console.log("Active Exams:", response.data.exams);
         setExams(response.data.exams);
       } catch (error) {
         console.error("Error fetching exams:", error);

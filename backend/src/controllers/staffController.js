@@ -42,30 +42,23 @@ exports.updateStaff = async (req, res) => {
   try {
     const {
       role,
-      department_id,
       first_name,
       last_name,
       email,
       username,
-      photo,
-      phone,
-      address,
     } = req.body;
     await Staff.update(
       req.params.id,
       role,
-      department_id,
       first_name,
       last_name,
       email,
       username,
-      photo,
-      phone,
-      address,
     );
     const staff = await Staff.getAll();
     res.status(200).json({ success: true, staff });
   } catch (err) {
+    console.log("Error updating staff:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 };

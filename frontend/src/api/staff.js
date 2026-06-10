@@ -55,7 +55,6 @@ export const createStaff = (data) => {
 };
 
 export const updateStaff = (data, id) => {
-  console.log(data);
   const token = localStorage.getItem("token");
   return api.put(
     `/staff/${id}`,
@@ -75,4 +74,3 @@ export const updateStaff = (data, id) => {
   );
 };
 
-// Placeholder for future view, edit, delete APIs

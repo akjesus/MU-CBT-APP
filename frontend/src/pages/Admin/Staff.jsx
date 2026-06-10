@@ -329,16 +329,21 @@ export default function StaffSettings() {
                       alignItems: "center",
                     }}
                   >
-                    <Tooltip title="View" arrow>
-                      <IconButton color="primary" onClick={() => handleView(s)}>
-                        <Visibility fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
                     {userRole === "admin" ||
                       (userRole === "superadmin" && (
                         <>
+                          <Tooltip title="View" arrow>
+                            <IconButton
+                              disabled={s.role === "superadmin"}
+                              color="primary"
+                              onClick={() => handleView(s)}
+                            >
+                              <Visibility fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                           <Tooltip title="Edit" arrow>
                             <IconButton
+                              disabled={s.role === "superadmin"}
                               color="secondary"
                               onClick={() => handleEdit(s)}
                             >
@@ -349,12 +354,14 @@ export default function StaffSettings() {
                             <IconButton
                               color="error"
                               onClick={() => handleDelete(s)}
+                              disabled={s.role === "superadmin"}
                             >
                               <Delete fontSize="small" />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Reset Password" arrow>
                             <IconButton
+                              disabled={s.role === "superadmin"}
                               color="info"
                               onClick={() => handleResetPassword(s)}
                             >
@@ -445,24 +452,23 @@ export default function StaffSettings() {
                   }}
                 />
                 {modalMode === "edit" ? (
-                  <TextField
-                    sx={{ mt: 2 }}
-                    label="Role"
-                    select
-                    value={selectedStaff.role || ""}
-                    fullWidth
-                    onChange={(e) =>
-                      setSelectedStaff({
-                        ...selectedStaff,
-                        role: e.target.value,
-                      })
-                    }
-                    SelectProps={{ native: true }}
-                  >
-                    <option value="">Select Role</option>
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                  </TextField>
+                  <FormControl fullWidth sx={{ mt: 2 }}>
+                    <InputLabel>Role</InputLabel>
+                    <Select
+                      sx={{ mt: 1 }}
+                      label="Role"
+                      value={selectedStaff.role || ""}
+                      onChange={(e) =>
+                        setSelectedStaff({
+                          ...selectedStaff,
+                          role: e.target.value,
+                        })
+                      }
+                    >
+                      <MenuItem value="staff">Staff</MenuItem>
+                      <MenuItem value="admin">Admin</MenuItem>
+                    </Select>
+                  </FormControl>
                 ) : (
                   <TextField
                     sx={{ mt: 2 }}
