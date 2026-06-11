@@ -218,6 +218,8 @@ export default function AdminExams() {
         getDepartments(),
         getSessions(),
       ]);
+      console.log(examRes)
+      console.log(courseRes)
       setExams(examRes.data.exams);
       setCourses(courseRes.data.courses || []);
       setDepartments(deptRes.data.departments || []);

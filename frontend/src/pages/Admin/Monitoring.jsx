@@ -144,7 +144,9 @@ const Monitoring = () => {
 
   const handleEndExam = async (exam) => {
     try {
+
       await endExam(exam.id);
+      setStudents([])
       showSnackbar("Exam ended successfully", "success");
       const examsResponse = await getActiveExams();
       setExams(examsResponse.data.exams);

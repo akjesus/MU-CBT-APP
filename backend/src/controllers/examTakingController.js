@@ -81,14 +81,15 @@ exports.submitExam = async (req, res) => {
 
     await db.query(
       `
-      UPDATE exam_monitoring
-      SET time_left = 0, updated_at = NOW(), responses = NULL
-      WHERE student_id = ? AND exam_id = ?`,
+            UPDATE exam_monitoring
+            SET status='submitted',
+            time_left=0, responses=NULL, updated_at=NOW()
+            WHERE exam_id=?
+            AND student_id = ?`,
       [student_id, exam_id],
     );
     res.json({
       message: "Exam submitted and auto-graded successfully!",
-      finalScore: totalScore,
     });
   } catch (err) {
     console.error(err);
