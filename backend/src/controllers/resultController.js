@@ -65,6 +65,7 @@ exports.getResultsByStudent = async (req, res) => {
 exports.getResultsByExam = async (req, res) => {
     try {
       const { exam_id } = req.params;
+      const {department_id} = req.query;
       let sql = `
         SELECT 
           r.id AS id,
@@ -86,19 +87,15 @@ exports.getResultsByExam = async (req, res) => {
         JOIN exams e ON r.exam_id = e.id
         WHERE r.exam_id = ?
         AND r.deleted = 0
-        ORDER BY d.name ASC, s.registration_number ASC
       `;
   
       let params = [exam_id];
-  
-      // If department_id is present, add it to the WHERE clause
       if (department_id) {
         sql += " AND s.department_id = ?";
         params.push(department_id);
       }
   
-      // Sort by department name first, then last name
-      sql += " ORDER BY d.name ASC, s.last_name ASC";
+      sql += "ORDER BY d.name ASC, s.registration_number ASC";
   
       const [rows] = await db.query(sql, params);
       const [examDetails] = await db.query(`SELECT exam_name, exam_date, exam_hall FROM exams WHERE id = ?`, [exam_id]);
