@@ -34,6 +34,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { set } from "react-hook-form";
 export default function AdminResults() {
+  const userRole = localStorage.getItem("role");
   const [sessions, setSessions] = useState([]);
   const [fetchedCourses, setFetchedCourses] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -55,7 +56,6 @@ export default function AdminResults() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [departmentSortOrder, setDepartmentSortOrder] = useState("asc");
-  const [userRole, setUserRole] = useState("viewer");
   const [openConfirm, setOpenConfirm] = useState({
     open: false,
     data: null,
@@ -103,17 +103,6 @@ export default function AdminResults() {
     fetchSessions();
   }, []);
 
-  useEffect(() => {
-    const fetchUserRole = () => {
-      try {
-        const role = localStorage.getItem("role");
-        setUserRole(role);
-      } catch (error) {
-        console.error("Failed to fetch user role", error);
-      }
-    };
-    fetchUserRole();
-  }, []);
 
   const handleSessionChange = async (event) => {
     const sessionId = event.target.value;

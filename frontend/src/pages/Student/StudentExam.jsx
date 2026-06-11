@@ -605,7 +605,7 @@ export default function StudentExam() {
                   alignItems: "center",
                 }}
               >
-                Question {currentQuestionIndex + 1}:
+                Question {`${currentQuestionIndex + 1}:  `}  
                 {renderQuestion(currentQuestion)}
               </Typography>
 
@@ -741,7 +741,6 @@ export default function StudentExam() {
                   sx={{
                     display: "flex",
                     flexWrap: "wrap",
-                    justifyContent: "space-between",
                     width: "100%",
                   }}
                 >

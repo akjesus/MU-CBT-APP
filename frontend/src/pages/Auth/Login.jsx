@@ -59,16 +59,16 @@ export default function Login() {
         ) {
           setTimeout(() => {
             navigate("/admin/dashboard");
-          }, 1500);
+          }, 1000);
         } else if (res.data.user.role === "student") {
           setTimeout(() => {
             navigate("/student/dashboard");
-          }, 1500);
+          }, 1000);
         } else {
           showSnackbar(res.data.message, "error");
           setTimeout(() => {
             navigate("/");
-          }, 1500);
+          }, 1000);
         }
         setLoading(false);
       }
@@ -80,6 +80,7 @@ export default function Login() {
         showSnackbar("Server Unreachable!", "error");
       }
       setLoading(false);
+      console.log(err)
     }
   };
 
