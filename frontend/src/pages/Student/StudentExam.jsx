@@ -108,7 +108,7 @@ export default function StudentExam() {
 
     return true;
   };
-
+ ;
   const [isEligible, setIsEligible] = useState(false);
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function StudentExam() {
           setIsEligible(true);
           const examRes = await getExamById(exam_id);
           const examData = examRes.data;
-          setExamInfo(examData);
+          setExamInfo(examRes.data);
           markAttendance(exam_id, user.id);
           const session = await getExamSession(user.id, exam_id);
           if (session.data.success) {
@@ -171,11 +171,10 @@ export default function StudentExam() {
             time_left: examData.duration * 60,
           };
           await createExamMonitoringSession(activeData);
-          console.log("Exam Session created on exam start!");
         }
       } catch (error) {
         showSnackbar("Error loading exam: " + error.message, "error");
-        setTimeout(() => navigate("/student/dashboard"), 3000);
+        setTimeout(() => navigate("/student/dashboard"), 1000);
       } finally {
         setLoading(false);
       }
@@ -261,7 +260,6 @@ export default function StudentExam() {
   // Handle submit exam
   const handleSubmitExam = async () => {
     if (submitting) {
-      console.log("Submit already in progress");
       return;
     }
     if (!user || !user.id) {
@@ -271,13 +269,6 @@ export default function StudentExam() {
 
     try {
       setSubmitting(true);
-      console.log("Submitting exam", {
-        exam_id,
-        studentId: user.id,
-        responses,
-      });
-
-      // Format responses as object with question_id: option
       const formattedResponses = {};
       questions.forEach((q) => {
         if (responses[q.question_id]) {
@@ -285,27 +276,19 @@ export default function StudentExam() {
         }
       });
       const submitRes = await submitExam(user.id, exam_id, formattedResponses);
-      console.log("Submit response:", submitRes.data);
       await Swal.fire({
         icon: "success",
         title: "Exam submitted successfully",
         text: "Your responses were sumbitted and graded successfully",
         timer: 1000,
       });
-      localStorage.setItem(
-        "examResult",
-        JSON.stringify({
-          examName: examInfo?.exam_name,
-          courseName: examInfo?.course_name,
-          timestamp: new Date().toISOString(),
-        }),
-      );
-      // Clear saved data
+
       localStorage.removeItem(responsesKey);
       localStorage.removeItem(timeLeftKey);
       signAttendance(exam_id, user.id);
       endExamSession();
-      setTimeout(() => navigate("/student/dashboard"), 1000);
+      localStorage.clear();
+      setTimeout(() => navigate("/student/dashboard"), 1500);
     } catch (error) {
       showSnackbar(
         "Error submitting exam: " +
@@ -327,7 +310,6 @@ export default function StudentExam() {
         time_left: localStorage.getItem(timeLeftKey),
       };
       await updateExamMonitoringSession(activeData);
-      console.log("Exam Session updated!");
       return true;
     } catch (error) {
       console.error("Error updating exam session:", error);
@@ -342,7 +324,6 @@ export default function StudentExam() {
         matriculation_number: user.matriculation_number,
         exam_id: exam_id,
       });
-      console.log("Exam Session ended!");
     } catch (error) {
       console.error("Error ending exam session:", error);
     }
@@ -355,7 +336,6 @@ export default function StudentExam() {
         setExamEnded(true);
         return;
       }
-      console.log(res.data.session.status);
     } catch (error) {
       console.error("Error checking exam status:", error);
       return false;
@@ -378,29 +358,16 @@ export default function StudentExam() {
           clearInterval(intervalId);
           localStorage.removeItem(responsesKey);
           localStorage.removeItem(timeLeftKey);
+          localStorage.clear();
           signAttendance(exam_id, user.id);
           await Swal.fire({
-            showClass: {
-              popup: `
-                      animate__animated
-                      animate__fadeInUp
-                      animate__faster
-                    `,
-            },
-            hideClass: {
-              popup: `
-                    animate__animated
-                    animate__fadeOutDown
-                    animate__faster
-                  `,
-            },
             icon: "info",
-            title: "Exam Emded Automatically",
+            title: "Exam Ended Automatically",
             text: "Exam has been ended by the administrator. Your answers have been submitted",
             timer: 1000,
           });
 
-          setTimeout(() => navigate("/student/dashboard"), 2000);
+          setTimeout(() => navigate("/student/dashboard"), 1000);
         }
       } catch (err) {
         console.log("Status check failed", err);
@@ -423,7 +390,7 @@ export default function StudentExam() {
     );
   }
   if (!isEligible) {
-    setTimeout(() => navigate("/student/dashboard"), 3000);
+    setTimeout(() => navigate("/student/dashboard"), 1000);
     return (
       <Container sx={{ mt: 4, textAlign: "center" }}>
         <Typography variant="h6">You have already taken this exam!</Typography>
@@ -605,7 +572,7 @@ export default function StudentExam() {
                   alignItems: "center",
                 }}
               >
-                Question {`${currentQuestionIndex + 1}:  `}  
+                Question {`${currentQuestionIndex + 1}:  `}
                 {renderQuestion(currentQuestion)}
               </Typography>
 

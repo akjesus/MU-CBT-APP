@@ -72,6 +72,7 @@ exports.getResultsByExam = async (req, res) => {
           r.score,
           s.first_name,
           s.last_name,
+          s.other_names,
           s.registration_number,
           s.level_id,
           l.name AS level_name,

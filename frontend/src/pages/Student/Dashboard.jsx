@@ -46,8 +46,17 @@ const StudentDashboard = () => {
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+    setSnackbar({ ...snackbar, open: false });  
   };
+
+ const keyToDelete = Object.keys(localStorage).find((key) =>
+   key.startsWith("exam"),
+ );
+
+ if (keyToDelete) {
+  console.log("Deleting localStorage key:", keyToDelete);
+   localStorage.removeItem(keyToDelete);
+ }
 
   const handleTakeExamClick = (exam_id) => {
     setConfirmDialog({ open: true, exam_id });

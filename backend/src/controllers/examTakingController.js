@@ -162,6 +162,9 @@ exports.submitBulkExam = async (req, res) => {
 
 exports.endExam = async (req, res) => {
   const { examId } = req.params;
+  if(!examId) {
+    return res.status(400).json({ error: "Exam ID is required." });
+  }
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -275,7 +278,6 @@ const calculateResult = async (exam_id, student_id, responses) => {
       [student_id, exam_id],
     );
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.log(err);
   }
 };

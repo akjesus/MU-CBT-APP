@@ -474,7 +474,7 @@ export default function AdminResults() {
                 <TableRow key={result.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    {result.first_name} {result.last_name}
+                    {result.last_name} {result.first_name} {result.other_names}
                   </TableCell>
                   <TableCell>{result.registration_number}</TableCell>
                   <TableCell>{result.department_name}</TableCell>
@@ -489,12 +489,12 @@ export default function AdminResults() {
                             variant="contained"
                             color="error"
                             size="small"
-                            onClick={() =>{
+                            onClick={() => {
                               setOpenConfirm({
                                 ...openConfirm,
                                 open: true,
                                 data: result,
-                              })
+                              });
                             }}
                             sx={{ ml: 1 }}
                           >

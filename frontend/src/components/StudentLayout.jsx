@@ -43,8 +43,9 @@ const StudentLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.clear();
     setTimeout(() => { showSnackbar("Logged Out!", "info")}, 1000);
-    setTimeout(() => { navigate("/login")}, 2500);
+    setTimeout(() => { navigate("/login")}, 1000);
     
   };
 
