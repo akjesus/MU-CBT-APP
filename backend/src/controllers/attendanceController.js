@@ -27,6 +27,28 @@ exports.getAttendance = async (req, res) => {
   }
 };
 
+
+exports.getTodaysAttendance = async (req, res) => {
+  try {
+    const [attendanceRecords] = await db.query(
+      `SELECT CONCAT(s.first_name, ' ', s.last_name) AS student_name, 
+            s.registration_number AS registration_number,
+            departments.name AS department,
+            exams.exam_name AS exam_name, ea.status,  exam_id,
+            ip_address, login_timestamp, stop_time
+            FROM exam_attendance ea
+            JOIN students s ON ea.student_id = s.id
+            JOIN departments ON s.department_id = departments.id
+            JOIN exams ON ea.exam_id = exams.id
+            WHERE 1=1
+            AND DATE(exams.exam_date) = CURDATE()`,);
+    res.status(200).json({ success: true, attendanceRecords });
+  } catch (err) {
+    console.error("Get Attendance Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.markAttendance = async (req, res) => {
   try {
     const { student_id, exam_id } = req.body;

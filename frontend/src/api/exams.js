@@ -259,6 +259,18 @@ export const getAttendance = (attendanceField) => {
     },
   );
 };
+export const getTodaysAttendance = () => {
+  const token = localStorage.getItem("token");
+  return api.get(
+    `/attendance/today`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
 
 export const signAttendance = (exam_id, student_id) => {
   const token = localStorage.getItem("token");

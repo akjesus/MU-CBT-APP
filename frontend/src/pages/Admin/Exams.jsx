@@ -16,6 +16,7 @@ import {
   bulkUploadQuestions,
   deleteAllQuestionsFromExam,
   getAttendance,
+  getTodaysAttendance,
 } from "../../api/exams";
 import moment from "moment";
 
@@ -84,7 +85,7 @@ export default function AdminExams() {
     exam_id: "",
     session_id: "",
     semester: "",
-    date: "",
+    date: new Date().toISOString().split("T")[0],
   });
 
   const [newExam, setNewExam] = useState({
@@ -203,7 +204,6 @@ export default function AdminExams() {
         "success",
       );
     } catch (error) {
-      console.log(error.response.data);
       showSnackbar(
         error.response.data.message || "There was an error",
         "error",
@@ -227,8 +227,6 @@ export default function AdminExams() {
         getDepartments(),
         getSessions(),
       ]);
-      console.log(examRes);
-      console.log(courseRes);
       setExams(examRes.data.exams);
       setCourses(courseRes.data.courses || []);
       setDepartments(deptRes.data.departments || []);
@@ -545,7 +543,6 @@ export default function AdminExams() {
     } catch (error) {
       console.log(error);
       showSnackbar(error.response.data.error, "error");
-      console.log(error);
     }
   };
   const handleAddTheoryQuestion = async (exam, question) => {
@@ -633,6 +630,10 @@ export default function AdminExams() {
         .catch((error) => {
           console.log("Error fetching active exams:", error);
         });
+    } else if (tab === 2) {
+      getTodaysAttendance().then((response) => {
+        setAttendance(response.data.attendanceRecords);
+      });
     }
   }, [fetchData, tab]);
 
@@ -649,7 +650,6 @@ export default function AdminExams() {
     try {
       const res = await getAttendance(attendanceField);
       if (res.data.success) {
-        console.log(res.data)
         setAttendance(res.data.attendanceRecords || []);
         setFilterModal(false);
       }
@@ -1256,7 +1256,7 @@ export default function AdminExams() {
                 InputLabelProps={{
                   shrink: true,
                 }}
-              />
+              ></TextField>
             </Box>
           </DialogContent>
           <DialogActions>
