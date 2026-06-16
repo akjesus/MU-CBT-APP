@@ -73,11 +73,20 @@ export default function AdminExams() {
     severity: "success",
   });
   const [search, setSearch] = useState("");
+  const [searchAttendance, setSearchAttendance] = useState("");
+  const [filterModal, setFilterModal] = useState(false);
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [attendanceField, setAttendanceField] = useState({
+    exam_id: "",
+    session_id: "",
+    semester: "",
+    date: "",
+  });
+
   const [newExam, setNewExam] = useState({
     course_id: "",
     exam_name: "",
@@ -218,8 +227,8 @@ export default function AdminExams() {
         getDepartments(),
         getSessions(),
       ]);
-      console.log(examRes)
-      console.log(courseRes)
+      console.log(examRes);
+      console.log(courseRes);
       setExams(examRes.data.exams);
       setCourses(courseRes.data.courses || []);
       setDepartments(deptRes.data.departments || []);
@@ -624,18 +633,31 @@ export default function AdminExams() {
         .catch((error) => {
           console.log("Error fetching active exams:", error);
         });
-    } else {
-      const res = getAttendance();
-      res
-        .then((response) => {
-          setAttendance(response.data);
-          console.log(response);
-        })
-        .catch((error) => {
-          console.log("Error fetching attendance data:", error);
-        });
     }
   }, [fetchData, tab]);
+
+  const handleFilterAttendance = async () => {
+    if (
+      !attendanceField.exam_id ||
+      !attendanceField.session_id ||
+      !attendanceField.semester ||
+      !attendanceField.date
+    ) {
+      showSnackbar("Please fill in all attendance fields", "error");
+      return;
+    }
+    try {
+      const res = await getAttendance(attendanceField);
+      if (res.data.success) {
+        console.log(res.data)
+        setAttendance(res.data.attendanceRecords || []);
+        setFilterModal(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <Box
@@ -1046,7 +1068,17 @@ export default function AdminExams() {
                 alignItems: "center",
                 mb: 2,
               }}
-            ></Box>
+            >
+              <TextField
+                placeholder="Search for Student"
+                value={searchAttendance}
+                onChange={(e) => setSearchAttendance(e.target.value)}
+                sx={{ width: "50%" }}
+              />
+              <Button variant="contained" onClick={() => setFilterModal(true)}>
+                Filter Attendance
+              </Button>
+            </Box>
             <Table>
               <TableHead>
                 <TableRow>
@@ -1085,10 +1117,13 @@ export default function AdminExams() {
                     (at) =>
                       at.student_name
                         .toLowerCase()
-                        .includes(search.toLowerCase()) ||
+                        .includes(searchAttendance.toLowerCase()) ||
+                      at.exam_name
+                        .toLowerCase()
+                        .includes(searchAttendance.toLowerCase()) ||
                       at.registration_number
                         .toLowerCase()
-                        .includes(search.toLowerCase()),
+                        .includes(searchAttendance.toLowerCase()),
                   )
                   .slice(
                     atPage * atRowsPerPage,
@@ -1103,10 +1138,14 @@ export default function AdminExams() {
                       <TableCell>{at.exam_name}</TableCell>
                       <TableCell>{at.ip_address}</TableCell>
                       <TableCell>
-                        {moment(at.login_timestamp, "HH:mm").format("LT")}
+                        {at.login_timestamp
+                          ? moment(at.login_timestamp).format("LT")
+                          : "N/A"}
                       </TableCell>
                       <TableCell sx={{ width: "50%" }}>
-                        {moment(at.stop_time, "HH:mm").format("LT")}
+                        {at.stop_time
+                          ? moment(at.stop_time).format("LT")
+                          : "N/A"}
                       </TableCell>
                       <TableCell>{at.status}</TableCell>
                     </TableRow>
@@ -1123,6 +1162,114 @@ export default function AdminExams() {
             />
           </>
         )}
+        <Dialog
+          open={filterModal}
+          onClose={() => setFilterModal(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>Filter Attendance</DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 1, mb: 1 }}>
+              <TextField
+                select
+                margin="dense"
+                label="Session"
+                name="session_id"
+                sx={{ width: 140 }}
+                value={attendanceField.session_id}
+                onChange={(event) => {
+                  setAttendanceField({
+                    ...attendanceField,
+                    session_id: event.target.value,
+                  });
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              >
+                {sessions.map((sess) => (
+                  <MenuItem key={sess.id} value={sess.id}>
+                    {sess.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                margin="dense"
+                label="Semester"
+                name="semester"
+                sx={{ width: 160 }}
+                value={attendanceField.semester}
+                onChange={(event) => {
+                  setAttendanceField({
+                    ...attendanceField,
+                    semester: event.target.value,
+                  });
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              >
+                <MenuItem value="First">First Semester</MenuItem>
+                <MenuItem value="Second">Second Semester</MenuItem>
+                <MenuItem value="Mid Term">Mid Term</MenuItem>
+                <MenuItem value="Comprehensive">Comprehensive</MenuItem>
+                <MenuItem value="Summer">Summer</MenuItem>
+              </TextField>
+              <TextField
+                select
+                margin="dense"
+                label="Exam"
+                name="exam_id"
+                sx={{ width: 300 }}
+                value={attendanceField.exam_id}
+                onChange={(event) => {
+                  setAttendanceField({
+                    ...attendanceField,
+                    exam_id: event.target.value,
+                  });
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              >
+                {exams.map((ex) => (
+                  <MenuItem key={ex.id} value={ex.id}>
+                    {ex.course_code} - {ex.course_name}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                type="date"
+                margin="dense"
+                label="Exam Date"
+                name="date"
+                sx={{ width: 185, mr: 2 }}
+                value={attendanceField.date}
+                onChange={(event) => {
+                  setAttendanceField({
+                    ...attendanceField,
+                    date: event.target.value,
+                  });
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setFilterModal(false)}>Cancel</Button>
+            <Button
+              variant="contained"
+              sx={{ bgcolor: "#2C2C78" }}
+              onClick={handleFilterAttendance}
+            >
+              Filter
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>
             {editIndex !== null ? "Edit Exam" : "Add Exam"}
@@ -1182,6 +1329,24 @@ export default function AdminExams() {
                 <MenuItem value="400 Level">400 Level</MenuItem>
                 <MenuItem value="500 Level">500 Level</MenuItem>
                 <MenuItem value="600 Level">600 Level</MenuItem>
+              </TextField>
+              <TextField
+                select
+                margin="dense"
+                label="Semester"
+                name="semester"
+                sx={{ width: 200 }}
+                value={newExam.semester}
+                onChange={handleChange}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              >
+                <MenuItem value="First">First Semester</MenuItem>
+                <MenuItem value="Second">Second Semester</MenuItem>
+                <MenuItem value="Mid Term">Mid Term</MenuItem>
+                <MenuItem value="Comprehensive">Comprehensive</MenuItem>
+                <MenuItem value="Summer">Summer</MenuItem>
               </TextField>
             </Box>
             <Box sx={{ display: "flex", flexDirection: "row", gap: 1, mb: 1 }}>

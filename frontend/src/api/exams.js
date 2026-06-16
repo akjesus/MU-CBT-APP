@@ -244,14 +244,20 @@ export const markAttendance = (exam_id, student_id) => {
     },
   );
 };
-export const getAttendance = () => {
+export const getAttendance = (attendanceField) => {
   const token = localStorage.getItem("token");
-  return api.get(`/attendance`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  return api.get(
+    `/attendance`,
+    {
+      params: attendanceField,
     },
-  });
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 };
 
 export const signAttendance = (exam_id, student_id) => {
