@@ -2363,9 +2363,8 @@ export default function AdminExams() {
             <Typography variant="body2" color="textSecondary" gutterBottom>
               Please upload the template CSV file with questions!.
             </Typography>
-            <Button variant="contained" component="label" color="primary">
-              Select CSV
-              <input
+            <Button variant="contained" component="label" color="success">
+                <input
                 type="file"
                 accept=".csv"
                 onChange={(e) => {
@@ -2379,7 +2378,7 @@ export default function AdminExams() {
             <Button
               disabled={!file}
               variant="contained"
-              color="primary"
+              color="success"
               onClick={() => {
                 handleBulkUploadQuestions(file);
               }}
