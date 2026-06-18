@@ -60,6 +60,7 @@ const getMenuItems = (role) => {
         icon: <BookOnline />,
         path: "/admin/monitoring",
       },
+      { text: "Results", icon: <BarChart />, path: "/admin/results" },
       { text: "Faculties", icon: <School />, path: "/admin/faculties" },
     ];
   }
@@ -144,7 +145,7 @@ export default function AdminLayout() {
             color: "rgba(255,255,255,0.8)",
           }}
         >
-          {user.first_name}
+          {user?.first_name}
         </Typography>
       </Box>
 

@@ -160,7 +160,6 @@ export default function AdminStudents() {
         showSnackbar("No students found for the selected criteria", "info");
         setStudents([]);
       } else {
-        showSnackbar(`Students retrieved`, "success");
         setStudents(res.data.students);
       }
     } catch (error) {
@@ -212,11 +211,7 @@ export default function AdminStudents() {
       const res = await createStudent(newStudent);
       if (res.status === 201) {
         showSnackbar("Student added successfully", "success");
-        setTimeout(() => {
-          handleClose();
-        }, 2500);
-        handleFetchStudents()
-        return;
+        handleClose();
       } else {
         showSnackbar("Failed to add student", "error");
       }
@@ -234,7 +229,7 @@ export default function AdminStudents() {
         if (res.status === 200) {
           showSnackbar("Student deleted successfully", "success");
           setStudents(updated);
-          handleFetchStudents()
+          handleFetchStudents();
         } else {
           showSnackbar("Failed to delete student", "error");
         }
@@ -252,7 +247,7 @@ export default function AdminStudents() {
         showSnackbar("Student updated successfully", "success");
         handleClose();
         setStudents([...students, newStudent]);
-        handleFetchStudents()
+        handleFetchStudents();
       } else {
         showSnackbar("Failed to update student", "error");
       }

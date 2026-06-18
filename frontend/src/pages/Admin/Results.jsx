@@ -21,6 +21,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  TextField,
 } from "@mui/material";
 import {
   getExamsForCourses,
@@ -40,6 +41,7 @@ export default function AdminResults() {
   const [courses, setCourses] = useState([]);
   const [exams, setExams] = useState([]);
   const [results, setResults] = useState([]);
+  const [search, setSearch] = useState("");
   const [examDetails, setExamDetails] = useState([]);
   const [selectedSession, setSelectedSession] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -103,7 +105,6 @@ export default function AdminResults() {
     fetchSessions();
   }, []);
 
-
   const handleSessionChange = async (event) => {
     const sessionId = event.target.value;
     setSelectedSession(sessionId);
@@ -140,7 +141,7 @@ export default function AdminResults() {
   const handleFetchResults = async () => {
     try {
       const res = await getResults(selectedExam);
-      if(res.data.results.length === 0){
+      if (res.data.results.length === 0) {
         showSnackbar("No results found for this exam", "info");
       }
       setResults(res.data.results);
@@ -261,6 +262,14 @@ export default function AdminResults() {
     }
   };
 
+  const filteredresults = results.filter(
+    (r) =>
+      r.first_name.toLowerCase().includes(search.toLowerCase()) ||
+      r.last_name.toLowerCase().includes(search.toLowerCase()) ||
+      r.other_names.toLowerCase().includes(search.toLowerCase()) ||
+      r.registration_number.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
     <Box p={{ xs: 1, sm: 3 }} sx={{ maxWidth: 900, mx: "auto" }}>
       <Typography
@@ -360,6 +369,13 @@ export default function AdminResults() {
         >
           Export to PDF
         </Button>
+        <TextField
+          label="Search Results"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          size="small"
+          sx={{ width: { xs: "100%", sm: 300 } }}
+        />
       </Box>
 
       <Paper>
@@ -409,20 +425,6 @@ export default function AdminResults() {
                 >
                   Department
                 </TableCell>
-                {/* <ToggleButtonGroup
-                  value={departmentSortOrder}
-                  exclusive
-                  onChange={handleDepartmentSort}
-                  aria-label="department sort order"
-                  size="small"
-                >
-                  <ToggleButton value="asc" aria-label="sort ascending">
-                    Asc
-                  </ToggleButton>
-                  <ToggleButton value="desc" aria-label="sort descending">
-                    Desc
-                  </ToggleButton>
-                </ToggleButtonGroup> */}
               </TableCell>
               <TableCell
                 sx={{
@@ -468,7 +470,7 @@ export default function AdminResults() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {results
+            {filteredresults
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((result, index) => (
                 <TableRow key={result.id}>

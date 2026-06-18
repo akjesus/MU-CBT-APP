@@ -50,7 +50,6 @@ exports.getStudentById = async (req, res) => {
 exports.createStudent = async (req, res) => {
   try {
     const {
-      faculty_id,
       department_id,
       level_id,
       registration_number,
@@ -65,8 +64,7 @@ exports.createStudent = async (req, res) => {
       !registration_number ||
       !first_name ||
       !last_name ||
-      !email ||
-      !faculty_id
+      !email
     ) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -78,7 +76,6 @@ exports.createStudent = async (req, res) => {
       last_name,
       email,
       other_names,
-      faculty_id,
     );
     res.status(201).json({ message: "Student created", student });
   } catch (err) {
@@ -235,12 +232,10 @@ exports.bulkUploadStudents = async (req, res) => {
           );
           insertedCount++;
         }
-        res
-          .status(201)
-          .json({
-            success: true,
-            message: `${insertedCount} students successfully uploaded`,
-          });
+        res.status(201).json({
+          success: true,
+          message: `${insertedCount} students successfully uploaded`,
+        });
       });
   } catch (err) {
     res.status(500).json({ error: err.message });
