@@ -241,3 +241,18 @@ exports.bulkUploadStudents = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.resetStudentPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await Student.getById(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    const reset = await Student.resetPassword(id, student.registration_number);
+    console.log(id);
+    return res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

@@ -51,7 +51,6 @@ export default function AdminStudents() {
   const [newStudent, setNewStudent] = useState({
     registration_number: "",
     email: "",
-    faculty_id: "",
     department_id: "",
     first_name: "",
     last_name: "",
@@ -62,10 +61,17 @@ export default function AdminStudents() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [selectedFaculty, setSelectedFaculty] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [studentsFetched, setStudentsFetched] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState("");
+  const [openConfirm, setOpenConfirm] = useState({
+    open: false,
+    title: "",
+    data: null,
+    message: "",
+    button: "",
+    action: null,
+  });
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -92,6 +98,14 @@ export default function AdminStudents() {
     setUploading(false);
   };
 
+  const handleCloseConfirm = () => {
+    setOpenConfirm({
+      open: false,
+      title: "",
+      data: null,
+      message: "",
+    });
+  };
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
@@ -106,15 +120,10 @@ export default function AdminStudents() {
   };
 
   const handleResetPassword = async (student) => {
-    if (
-      window.confirm(
-        `Are you sure you want to reset the password for ${student.name || student.registration_number}?`,
-      )
-    ) {
       try {
         await resetStudentPassword(student.id);
         showSnackbar(
-          `Password reset for ${student.name || student.registration_number}`,
+          `Password reset for ${student.first_name} ${student.last_name} (${student.registration_number})`,
           "success",
         );
       } catch (err) {
@@ -124,19 +133,16 @@ export default function AdminStudents() {
           "error",
         );
       }
-    }
+
   };
-  // Fetch faculties & departments
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const facultiesRes = await getFaculties();
       const departmentsRes = await getDepartments();
       const levelsRes = await getLevels();
-      setFaculties(facultiesRes.data.faculties);
       setDepartments(departmentsRes.data.departments);
       setLevels(levelsRes.data.levels);
     } catch (error) {
@@ -147,7 +153,7 @@ export default function AdminStudents() {
     }
   };
   const handleFetchStudents = async () => {
-    if (!selectedFaculty || !selectedDepartment || !selectedLevel) {
+    if (!selectedDepartment || !selectedLevel) {
       showSnackbar("All fields required!", "error");
       return;
     }
@@ -176,7 +182,6 @@ export default function AdminStudents() {
       first_name: "",
       last_name: "",
       registration_number: "",
-      faculty_id: "",
       department_id: "",
       level_id: "",
       email: "",
@@ -199,13 +204,7 @@ export default function AdminStudents() {
   const handleDepartmentChange = (event) => {
     setNewStudent({ ...newStudent, department_id: event.target.value });
   };
-  const handleFacultyChange = (event) => {
-    setNewStudent({
-      ...newStudent,
-      faculty_id: event.target.value,
-      department_id: "",
-    });
-  };
+
   const handleSaveStudent = async () => {
     try {
       const res = await createStudent(newStudent);
@@ -222,7 +221,6 @@ export default function AdminStudents() {
   };
 
   const handleDelete = async (student, index) => {
-    if (window.confirm(`Are you sure you want to delete ${student.name}?`)) {
       const updated = students.filter((_, i) => i !== index);
       try {
         const res = await deleteStudent(student.id);
@@ -237,7 +235,6 @@ export default function AdminStudents() {
         console.log(error);
         showSnackbar(error.response?.data?.message || error.message, "error");
       }
-    }
   };
 
   const handleEditSaveStudent = async () => {
@@ -332,31 +329,6 @@ export default function AdminStudents() {
                 sx={{ minWidth: 220, width: { xs: "100%", sm: 220 } }}
                 size="small"
               >
-                <InputLabel>Faculty</InputLabel>
-                <Select
-                  value={selectedFaculty}
-                  label="Faculty"
-                  onChange={(e) => {
-                    setSelectedFaculty(e.target.value);
-                    setSelectedDepartment("");
-                    setSelectedLevel("");
-                    setStudents([]);
-                    setStudentsFetched(false);
-                  }}
-                >
-                  <MenuItem value="">Select Faculty</MenuItem>
-                  {faculties.map((fac) => (
-                    <MenuItem key={fac.id} value={fac.id}>
-                      {fac.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl
-                sx={{ minWidth: 220, width: { xs: "100%", sm: 220 } }}
-                size="small"
-                disabled={!selectedFaculty}
-              >
                 <InputLabel>Department</InputLabel>
                 <Select
                   value={selectedDepartment}
@@ -369,13 +341,11 @@ export default function AdminStudents() {
                   }}
                 >
                   <MenuItem value="">Select Department</MenuItem>
-                  {departments
-                    .filter((dep) => dep.faculty_id === selectedFaculty)
-                    .map((dep) => (
-                      <MenuItem key={dep.id} value={dep.id}>
-                        {dep.name}
-                      </MenuItem>
-                    ))}
+                  {departments.map((dep) => (
+                    <MenuItem key={dep.id} value={dep.id}>
+                      {dep.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl
@@ -408,9 +378,7 @@ export default function AdminStudents() {
                   mt: { xs: 1, sm: 0 },
                 }}
                 onClick={handleFetchStudents}
-                disabled={
-                  !selectedFaculty || !selectedDepartment || !selectedLevel
-                }
+                disabled={!selectedDepartment || !selectedLevel}
               >
                 Get Students
               </Button>
@@ -516,7 +484,16 @@ export default function AdminStudents() {
                                   boxShadow: 1,
                                   ":hover": { bgcolor: "#f9d6d5" },
                                 }}
-                                onClick={() => handleDelete(student, index)}
+                                onClick={() =>
+                                  setOpenConfirm({
+                                    open: true,
+                                    title: `Delete Student?`,
+                                    data: student,
+                                    message: `Are you sure you want to delete ${student.first_name}  ${student.last_name} (${student.registration_number})?`,
+                                    button: "Delete Student",
+                                    action: () => handleDelete(student, index),
+                                  })
+                                }
                                 aria-label="Delete Student"
                               >
                                 <Delete fontSize="small" />
@@ -533,7 +510,17 @@ export default function AdminStudents() {
                                   boxShadow: 1,
                                   ":hover": { bgcolor: "#bbdefb" },
                                 }}
-                                onClick={() => handleResetPassword(student)}
+                                onClick={() =>
+                                  setOpenConfirm({
+                                    open: true,
+                                    title: `Reset Student Password?`,
+                                    data: student,
+                                    message: `Are you sure you want to reset the password for ${student.first_name}  ${student.last_name} (${student.registration_number})?`,
+                                    button: "Reset Password",
+                                    action: () =>
+                                      handleResetPassword(student),
+                                  })
+                                }
                                 aria-label="Reset Password"
                               >
                                 <LockReset fontSize="small" />
@@ -613,26 +600,6 @@ export default function AdminStudents() {
                       sx={{ flex: 1 }}
                       size="small"
                     >
-                      <InputLabel>Faculty</InputLabel>
-                      <Select
-                        name="faculty_id"
-                        value={newStudent.faculty_id}
-                        onChange={handleFacultyChange}
-                        label="Faculty"
-                      >
-                        {faculties.map((f) => (
-                          <MenuItem key={f.id} value={f.id}>
-                            {f.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <FormControl
-                      fullWidth
-                      margin="dense"
-                      sx={{ flex: 1 }}
-                      size="small"
-                    >
                       <InputLabel>Department</InputLabel>
                       <Select
                         name="department_id"
@@ -640,13 +607,11 @@ export default function AdminStudents() {
                         onChange={handleDepartmentChange}
                         label="Department"
                       >
-                        {departments
-                          .filter((d) => d.faculty_id === newStudent.faculty_id)
-                          .map((d) => (
-                            <MenuItem key={d.id} value={d.id}>
-                              {d.name}
-                            </MenuItem>
-                          ))}
+                        {departments.map((d) => (
+                          <MenuItem key={d.id} value={d.id}>
+                            {d.name}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </Box>
@@ -723,6 +688,32 @@ export default function AdminStudents() {
                   },
               }}
             />
+            <Dialog
+              open={openConfirm.open}
+              onClose={() => {
+                handleCloseConfirm();
+              }}
+            >
+              <DialogTitle>
+                <h4>{openConfirm.title}</h4>
+              </DialogTitle>
+              <DialogContent>
+                <Typography>{openConfirm.message}</Typography>
+                <DialogActions>
+                  <Button onClick={() => handleCloseConfirm()}>Cancel</Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => {
+                      openConfirm.action(openConfirm.data.id);
+                      handleCloseConfirm();
+                    }}
+                  >
+                    {openConfirm.button}
+                  </Button>
+                </DialogActions>
+              </DialogContent>
+            </Dialog>
           </>
         )}
 
@@ -859,26 +850,6 @@ export default function AdminStudents() {
                       sx={{ flex: 1 }}
                       size="small"
                     >
-                      <InputLabel>Faculty</InputLabel>
-                      <Select
-                        name="faculty_id"
-                        value={newStudent.faculty_id}
-                        onChange={handleFacultyChange}
-                        label="Faculty"
-                      >
-                        {faculties.map((f) => (
-                          <MenuItem key={f.id} value={f.id}>
-                            {f.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <FormControl
-                      fullWidth
-                      margin="dense"
-                      sx={{ flex: 1 }}
-                      size="small"
-                    >
                       <InputLabel>Department</InputLabel>
                       <Select
                         name="department_id"
@@ -886,13 +857,11 @@ export default function AdminStudents() {
                         onChange={handleChange}
                         label="Department"
                       >
-                        {departments
-                          .filter((d) => d.faculty_id === newStudent.faculty_id)
-                          .map((d) => (
-                            <MenuItem key={d.id} value={d.id}>
-                              {d.name}
-                            </MenuItem>
-                          ))}
+                        {departments.map((d) => (
+                          <MenuItem key={d.id} value={d.id}>
+                            {d.name}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </Box>

@@ -1,5 +1,6 @@
 const Staff = require("../models/Staff");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt")
 
 exports.getAllStaff = async (req, res) => {
   try {
@@ -95,6 +96,7 @@ exports.staffLogin = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 exports.resetPassword = async (req, res) => {
   try {
     const { username } = req.body;
@@ -109,3 +111,20 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.changePassword = async (req, res) => {
+  try {
+    const staffId = req.user.id;
+    const { oldPassword, newPassword } = req.body;
+    const staff = await Staff.getById(staffId);
+    if (!staff) return res.status(404).json({ error: "Staff not found" });
+    const isMatch = await bcrypt.compare(oldPassword, staff.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid old password" });
+    await Staff.updatePassword(staffId, newPassword);
+    res.status(200).json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+

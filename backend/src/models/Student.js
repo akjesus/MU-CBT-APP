@@ -129,5 +129,12 @@ class Student {
     );
     return rows;
   }
+  static async resetPassword(studentId, newPassword) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.query("UPDATE students SET password = ? WHERE id = ?", [
+      hashedPassword,
+      studentId,
+    ]);
+  }
 }
 module.exports = Student;

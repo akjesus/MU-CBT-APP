@@ -34,6 +34,20 @@ export const resetPassword = (staffMember) => {
   );
 };
 
+export const changePassword = (oldPassword, newPassword) => {
+  const token = localStorage.getItem("token");
+  return api.post(
+    `/staff/change-password`,
+    { oldPassword, newPassword },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
+
 export const createStaff = (data) => {
   const token = localStorage.getItem("token");
   return api.post(

@@ -16,7 +16,7 @@ exports.getQuestionsByExam = async (req, res) => {
        FROM exam_questions eq
        JOIN questions q ON eq.question_id = q.id
        WHERE eq.exam_id = ?`,
-      [exam_id]
+      [exam_id],
     );
     res.json(rows);
   } catch (err) {
@@ -40,7 +40,7 @@ exports.addQuestionToExam = async (req, res) => {
     // Check if it already exists
     const [existing] = await db.query(
       `SELECT id FROM exam_questions WHERE exam_id = ? AND question_id = ?`,
-      [exam_id, question_id]
+      [exam_id, question_id],
     );
     if (existing.length > 0) {
       return res
@@ -51,7 +51,7 @@ exports.addQuestionToExam = async (req, res) => {
     // Insert new link
     await db.query(
       `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
-      [exam_id, question_id]
+      [exam_id, question_id],
     );
     res.status(201).json({ message: "Question linked to exam successfully" });
   } catch (err) {
@@ -79,41 +79,62 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       score_obtainable,
       level,
     } = req.body;
-    if(!text || !option_a || !option_b || !option_c || !option_d || !correct_option) {
-      return res.status(400).json({ error: "Missing required question fields" });
+    if (
+      !text ||
+      !option_a ||
+      !option_b ||
+      !option_c ||
+      !option_d ||
+      !correct_option
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Missing required question fields" });
     }
-    const [course] = await db.query(`select course_id from exams where id = ${exam_id}`);
-    const {course_id} = course[0]
+    const [course] = await db.query(
+      `select course_id from exams where id = ${exam_id}`,
+    );
+    const { course_id } = course[0];
     // Handle file upload if present
     let filePath = null;
     if (req.files && req.files.file) {
       const uploadedFile = req.files.file;
       // Save to frontend/public/uploads so it is accessible from the browser
-      const path = require('path');
-      const uploadDir = path.resolve(__dirname, '../../../frontend/public/uploads');
+      const path = require("path");
+      const uploadDir = path.resolve(
+        __dirname,
+        "../../../frontend/public/uploads",
+      );
       try {
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
       } catch (dirErr) {
-        console.error('Error creating upload directory:', uploadDir, dirErr);
-        return res.status(500).json({ error: 'Failed to create upload directory', details: dirErr.message });
+        console.error("Error creating upload directory:", uploadDir, dirErr);
+        return res
+          .status(500)
+          .json({
+            error: "Failed to create upload directory",
+            details: dirErr.message,
+          });
       }
       // Generate unique filename
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const fileExt = uploadedFile.name.split('.').pop();
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const fileExt = uploadedFile.name.split(".").pop();
       const filename = `question_${uniqueSuffix}.${fileExt}`;
       filePath = `uploads/${filename}`; // relative to public
       const fullPath = path.join(uploadDir, filename);
       try {
         fs.writeFileSync(fullPath, uploadedFile.data);
-        console.log('File saved successfully:', fullPath);
+        console.log("File saved successfully:", fullPath);
       } catch (fileErr) {
-        console.error('Error saving file:', fullPath, fileErr);
-        return res.status(500).json({ error: 'Failed to save file', details: fileErr.message });
+        console.error("Error saving file:", fullPath, fileErr);
+        return res
+          .status(500)
+          .json({ error: "Failed to save file", details: fileErr.message });
       }
     } else {
-      console.warn('No file found in req.files:', req.files);
+      console.warn("No file found in req.files:", req.files);
     }
 
     // Insert into `questions` table
@@ -134,7 +155,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         score_obtainable,
         level,
         filePath,
-      ]
+      ],
     );
 
     const newQuestionId = result.insertId;
@@ -142,7 +163,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
     // Link the newly inserted question to the exam
     await db.query(
       `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
-      [exam_id, newQuestionId]
+      [exam_id, newQuestionId],
     );
 
     res.status(201).json({
@@ -151,7 +172,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       file: filePath,
     });
   } catch (err) {
-    console.log(err.message)
+    console.log(err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -166,7 +187,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
 
   function replaceSuperscript(str) {
     return str.replace(/\^(\d+)/g, (match, exponent) =>
-      getSuperscript(exponent)
+      getSuperscript(exponent),
     );
   }
 
@@ -197,14 +218,15 @@ exports.bulkUploadNewQuestions = async (req, res) => {
       return res.status(400).json({ error: "No exam_id in URL" });
     }
     const [courseId] = await db.query(
-      `SELECT course_id FROM exams WHERE id = ?`, [exam_id]
+      `SELECT course_id FROM exams WHERE id = ?`,
+      [exam_id],
     );
     const course_id = courseId[0].course_id;
-    if (!courseId || courseId .length === 0) {
+    if (!courseId || courseId.length === 0) {
       return res.status(404).json({ error: "Exam not found" });
     }
     // Check if file is present
-    if (!req.file ) {
+    if (!req.file) {
       console.log("No file uploaded in request");
       return res.status(400).json({ error: "CSV file is required" });
     }
@@ -236,7 +258,9 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           option_b,
           option_c,
           option_d,
-          correct_option,
+          correct_option: correct_option
+            ? correct_option.trim()
+            : correct_option,
           instructions,
           score_obtainable,
         });
@@ -270,14 +294,14 @@ exports.bulkUploadNewQuestions = async (req, res) => {
                 null,
                 null,
                 null,
-              ]
+              ],
             );
 
             const newQId = insertRes.insertId;
 
             await db.query(
               `INSERT INTO exam_questions (exam_id, question_id) VALUES (?, ?)`,
-              [exam_id, newQId]
+              [exam_id, newQId],
             );
           } catch (err) {
             return res.status(500).json({ error: err.message });
@@ -305,7 +329,7 @@ exports.removeQuestionFromExam = async (req, res) => {
     const { exam_id, question_id } = req.params;
     const [result] = await db.query(
       `DELETE FROM exam_questions WHERE exam_id = ? AND question_id = ?`,
-      [exam_id, question_id]
+      [exam_id, question_id],
     );
 
     if (result.affectedRows === 0) {

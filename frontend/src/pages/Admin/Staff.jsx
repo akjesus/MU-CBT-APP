@@ -7,7 +7,6 @@ import {
   TextField,
   TableCell,
   TableBody,
-  IconButton,
   Tooltip,
   Button,
   Dialog,
@@ -20,6 +19,8 @@ import {
   MenuItem,
   InputLabel,
   Select,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
@@ -28,8 +29,15 @@ import {
   createStaff,
   resetPassword,
   updateStaff,
+  changePassword,
 } from "../../api/staff";
-import { Edit, Delete, Visibility, LockReset } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Visibility,
+  LockReset,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 export default function StaffSettings() {
   const [snackbar, setSnackbar] = useState({
@@ -37,7 +45,7 @@ export default function StaffSettings() {
     message: "",
     severity: "success",
   });
-  const  showSnackbar = (message, severity) => {
+  const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
 
@@ -52,6 +60,16 @@ export default function StaffSettings() {
     role: "",
   });
   const [userRole, setUserRole] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("view"); // 'view' or 'edit'
+  const [selectedStaff, setSelectedStaff] = useState(null);
+  const [staff, setStaff] = useState([]);
+  const [changeOpen, setChangeOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleCreateOpen = () => {
     setCreateModalOpen(true);
     setNewStaff({ first_name: "", last_name: "", email: "", role: "" });
@@ -104,10 +122,7 @@ export default function StaffSettings() {
       }
     }
   };
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("view"); // 'view' or 'edit'
-  const [selectedStaff, setSelectedStaff] = useState(null);
-  const [staff, setStaff] = useState([]);
+
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -124,6 +139,7 @@ export default function StaffSettings() {
     };
     fetchStaff();
   }, []);
+
   useEffect(() => {
     const fetchUserRole = () => {
       try {
@@ -200,6 +216,32 @@ export default function StaffSettings() {
           "error",
         );
       }
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      showSnackbar("New password and confirm password do not match", "error");
+      return;
+    }
+    try {
+      const res = await changePassword(oldPassword, newPassword);
+      if (res.data.success) {
+        showSnackbar("Password changed successfully", "success");
+        setChangeOpen(false);
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        return;
+      } else {
+        showSnackbar(res.data.message || "Failed to change password", "error");
+        return;
+      }
+    } catch (error) {
+      showSnackbar(
+        error.response?.data?.message || "Error changing password",
+        "error",
+      );
     }
   };
 
@@ -299,6 +341,101 @@ export default function StaffSettings() {
             </Button>
           </DialogActions>
         </Dialog>
+        <Button
+          variant="contained"
+          sx={{ mb: 2, ml: 2 }}
+          onClick={() => setChangeOpen(true)}
+        >
+          Change Password
+        </Button>
+        <Dialog
+          open={changeOpen}
+          onClose={() => setChangeOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Change Password</DialogTitle>
+          <DialogContent>
+            <Box display="flex" flexDirection="column" gap={2} mt={1}>
+              <TextField
+                sx={{ color: "success" }}
+                fullWidth
+                margin="normal"
+                type={showPassword ? "text" : "password"}
+                label="Old Password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                required
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              <TextField
+                sx={{ mt: 1 }}
+                label="New Password"
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+              <TextField
+                sx={{ mt: 1 }}
+                label="Confirm Password"
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setChangeOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleChangePassword}>
+              Change
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Staff Table */}
 
         <Table sx={{ minWidth: 320, width: "100%", overflowX: "auto", mb: 2 }}>
           <TableHead>

@@ -63,5 +63,12 @@ class Staff {
       [hashedPassword, id],
     );
   }
+  static async updatePassword(id, newPassword) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.query(
+      "UPDATE staff SET password = ?, updated_at = NOW() WHERE id = ?",
+      [hashedPassword, id],
+    );
+  }
 }
 module.exports = Staff;

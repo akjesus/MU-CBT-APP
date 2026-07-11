@@ -206,7 +206,10 @@ export default function AdminResults() {
     const blob = new Blob([fullCSV], {
       type: "text/csv;charset=utf-8;",
     });
-    saveAs(blob, `${(results[0]?.exam_name).replace(/\s+/g, "_")}_results.csv`);
+    saveAs(
+      blob,
+      `${(results[0]?.exam_name).replace(/\s+/g, "_")}_hall_${examDetails.exam_hall}_results.csv`,
+    );
   };
 
   const exportToPDF = () => {
@@ -246,7 +249,7 @@ export default function AdminResults() {
     });
 
     // Save the PDF
-    doc.save(`${examDetails.exam_name.replace(/\s+/g, "_")}_results.pdf`);
+    doc.save(`${examDetails.exam_name.replace(/\s+/g, "_")}_${examDetails.exam_hall.replace(/\s+/g, "_")}_results.pdf`);
   };
   const handleDepartmentSort = (event, newOrder) => {
     if (newOrder) {

@@ -114,11 +114,9 @@ exports.submitBulkExam = async (req, res) => {
         exam_id,
       );
       if (hasAttempted) {
-        continue; // Skip this student if they have already taken the exam
+        continue;
       }
 
-      // 1) Fetch all relevant questions for this exam from the DB,
-      //    including their correct_option and score_obtainable.
       const [questions] = await db.query(
         `SELECT id AS question_id, correct_option, score_obtainable
          FROM questions
@@ -129,7 +127,7 @@ exports.submitBulkExam = async (req, res) => {
       );
 
       if (!questions || questions.length === 0) {
-        continue; // Skip this student if no questions found
+        continue;
       }
 
       // 2) For each question, check if user response matches the correct_option.
@@ -152,17 +150,18 @@ exports.submitBulkExam = async (req, res) => {
       );
     }
 
-    return true;
+    return res.status(200).json({
+      message: "Bulk exam submissions processed successfully.",
+    });
   } catch (err) {
-    console.error(err);
-    console.log;
-    res.status(500).json({ error: err.message });
+    console.log(err);
+    return res.status(500).json({ error: err.message });
   }
 };
 
 exports.endExam = async (req, res) => {
   const { examId } = req.params;
-  if(!examId) {
+  if (!examId) {
     return res.status(400).json({ error: "Exam ID is required." });
   }
   const connection = await db.getConnection();
@@ -170,9 +169,9 @@ exports.endExam = async (req, res) => {
     await connection.beginTransaction();
     await connection.query(
       `
-            UPDATE exams
-            SET status='completed', active = 0
-            WHERE id=?
+        UPDATE exams
+        SET status='completed', active = 0
+        WHERE id=?
             `,
       [examId],
     );
@@ -180,10 +179,10 @@ exports.endExam = async (req, res) => {
     // active students
     const [students] = await connection.query(
       `
-                SELECT student_id, responses
-                FROM exam_monitoring
-                WHERE exam_id=?
-                AND status='in_progress'
+        SELECT student_id, responses
+        FROM exam_monitoring
+        WHERE exam_id=?
+        AND status='in_progress'
                 `,
       [examId],
     );
@@ -191,12 +190,18 @@ exports.endExam = async (req, res) => {
       const hasAttempted = await ExamTaking.hasAttemptedExam(
         student.student_id,
         examId,
+        connection,
       );
       if (hasAttempted) {
         continue;
       }
-      await calculateResult(examId, student.student_id, student.responses);
-      await db.query(
+      await calculateResult(
+        examId,
+        student.student_id,
+        student.responses,
+        connection,
+      );
+      await connection.query(
         `UPDATE exam_attendance
           SET status = ?, stop_time = NOW()
           WHERE student_id = ? AND exam_id = ?`,
@@ -231,14 +236,23 @@ exports.endExam = async (req, res) => {
   }
 };
 
-const calculateResult = async (exam_id, student_id, responses) => {
+const calculateResult = async (
+  exam_id,
+  student_id,
+  responses,
+  connection = db,
+) => {
   try {
-    const hasAttempted = await ExamTaking.hasAttemptedExam(student_id, exam_id);
+    const hasAttempted = await ExamTaking.hasAttemptedExam(
+      student_id,
+      exam_id,
+      connection,
+    );
     if (hasAttempted) {
       return;
     }
 
-    const [questions] = await db.query(
+    const [questions] = await connection.query(
       `SELECT id AS question_id, correct_option, score_obtainable
          FROM questions
          WHERE id IN (
@@ -248,29 +262,29 @@ const calculateResult = async (exam_id, student_id, responses) => {
     );
 
     if (!questions || questions.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No questions found for this exam." });
+      return;
     }
 
-    // 2) For each question, check if user response matches the correct_option.
+    const normalizedResponses =
+      responses && typeof responses === "object" ? responses : {};
+
     let totalScore = 0;
     questions.forEach((q) => {
-      const userAnswer = responses[q.question_id];
+      const userAnswer = normalizedResponses[q.question_id];
       const questionScore = parseFloat(q.score_obtainable) || 0;
 
       if (userAnswer && userAnswer === q.correct_option) {
         totalScore += questionScore;
       }
     });
-    await db.query(
+    await connection.query(
       `INSERT INTO results (student_id, exam_id, score, responses, status, start_time, submitted_time,
                               active_duration, created_at, updated_at)
          VALUES (?, ?, ?, ?, 'completed', NOW(), NOW(), 0, NOW(), NOW())`,
-      [student_id, exam_id, totalScore, JSON.stringify(responses)],
+      [student_id, exam_id, totalScore, JSON.stringify(normalizedResponses)],
     );
 
-    await db.query(
+    await connection.query(
       `
       UPDATE exam_monitoring
       SET time_left = 0, updated_at = NOW(), responses = NULL
@@ -278,6 +292,6 @@ const calculateResult = async (exam_id, student_id, responses) => {
       [student_id, exam_id],
     );
   } catch (err) {
-    console.log(err);
+    console.error("calculateResult failed:", err);
   }
 };
