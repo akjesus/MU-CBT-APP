@@ -4,61 +4,54 @@ const stream = require("stream");
 const BlockList = require("../models/BlockList");
 
 exports.getBlockList = async (req, res) => {
-    try {
-        const blockList = await BlockList.getAll();
-        res.json(blockList);
-    } catch (err) {
-        console.error("Get Block List Error:", err);
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const blockList = await BlockList.getAll();
+    res.json(blockList);
+  } catch (err) {
+    console.error("Get Block List Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 exports.getBlockListById = async (req, res) => {
-    try {
-        const block = await BlockList.getById(req.params.id);
-        if (!block) {
-            return res.status(404).json({ error: "Block entry not found" });
-        }
-        res.json(block);
-    } catch (err) {
-        console.error("Get Block List By ID Error:", err);
-        res.status(500).json({ error: err.message });
+  try {
+    const block = await BlockList.getById(req.params.id);
+    if (!block) {
+      return res.status(404).json({ error: "Block entry not found" });
     }
+    res.json(block);
+  } catch (err) {
+    console.error("Get Block List By ID Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 exports.addStudentToBlockList = async (req, res) => {
-    try {
-        const {exam_id} = req.params
-        const { registration_number, } = req.body;
-        if(!registration_number) {
-            return res.status(400).json({ error: "Invalid Matric Number"})
-        }
-        const newId = await BlockList.create(registration_number, exam_id, );
-        res.status(201).json({ id: newId, message: "Student added to block list" });
-    } catch (err) {
-        console.error("Add Student To Block List Error:", err);
-        res.status(500).json({ error: err.message });
+  try {
+    const { exam_id } = req.params;
+    const { registration_number } = req.body;
+    if (!registration_number) {
+      return res.status(400).json({ error: "Invalid Matric Number" });
     }
+    const newId = await BlockList.create(registration_number);
+    res.status(201).json({ id: newId, message: "Student added to block list" });
+  } catch (err) {
+    console.error("Add Student To Block List Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
-
 
 exports.bulkUploadBlockList = async (req, res) => {
   try {
-    //get data from form-data, which should include the exam_id and the csv file
-    const { exams } = req.body;
-    if(!exams) {
-      return res.status(400).json({ error: "Exam ID(s) are required" });
+    const csvFile = req.file;
+    if (!csvFile) {
+      return res.status(400).json({ error: "No CSV file uploaded" });
     }
-    const examIds = exams.split(",").map(id => id.trim());  
-    if (!req.files || !req.files.file) {
-      return res.status(400).json({ error: "CSV file is required" });
-    }
-
-    const csvFile = req.files.file;
     const bufferStream = new stream.PassThrough();
-    bufferStream.end(csvFile.data);
+    bufferStream.end(csvFile.buffer);
+    
 
-    const blockList = []; 
+    const blockList = [];
     bufferStream
       .pipe(csvParser())
       .on("data", (row) => {
@@ -72,22 +65,24 @@ exports.bulkUploadBlockList = async (req, res) => {
             .status(400)
             .json({ error: "No valid registration numbers rows found in CSV" });
         }
-        // For each exam ID, add all the registration numbers to the block list with that exam ID
         let insertedCount = 0;
-        for (const examId of examIds) {
-          for (const qRow of blockList) {
-            try {
-              await db.query(
-                `INSERT INTO blocklist 
-                 (registration_number, exam_id, created_at)
-               VALUES (?, ?, NOW())`,
-                [qRow.registration_number, examId]
-              );
-              insertedCount++;
-            } catch (err) {
-              console.log(err.message);
-              return res.status(500).json({ error: err.message });
-            }
+        for (const qRow of blockList) {
+          const existing = await BlockList.getByMatricNo(qRow.registration_number);
+          if (existing) {
+            console.log(`Student with registration number ${qRow.registration_number} already exists in the blocklist.`);
+            continue;
+          }
+          try {
+            await db.query(
+              `INSERT INTO blocklist 
+                 (registration_number, created_at)
+               VALUES (?, NOW())`,
+              [qRow.registration_number],
+            );
+            insertedCount++;
+          } catch (err) {
+            console.log(err.message);
+            return res.status(500).json({ error: err.message });
           }
         }
 
@@ -101,17 +96,16 @@ exports.bulkUploadBlockList = async (req, res) => {
   }
 };
 
-
 exports.removeFromBlockList = async (req, res) => {
-    try { 
-      const block = await BlockList.getById(req.params.id);
-      if (!block) {
-          return res.status(404).json({ error: "Block entry not found" });
-      }
-        await BlockList.delete(req.params.id);
-        res.json({ message: "Student removed from block list" });
-    } catch (err) {
-        console.error("Remove From Block List Error:", err);
-        res.status(500).json({ error: err.message });
+  try {
+    const block = await BlockList.getById(req.params.id);
+    if (!block) {
+      return res.status(404).json({ error: "Block entry not found" });
     }
+    await BlockList.delete(req.params.id);
+    res.json({ message: "Student removed from block list" });
+  } catch (err) {
+    console.error("Remove From Block List Error:", err);
+    res.status(500).json({ error: err.message });
+  }
 };

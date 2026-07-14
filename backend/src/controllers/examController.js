@@ -32,8 +32,7 @@ exports.getAllExamsWithCourseSession = async (req, res) => {
       params.push(session_id);
     }
 
-    // Optionally order by start_time or exam_name, etc.
-    sql += " ORDER BY e.start_time DESC";
+    sql += " ORDER BY e.exam_name DESC";
     const [rows] = await db.query(sql, params);
     res.status(200).json({ success: true, exams: rows });
   } catch (err) {

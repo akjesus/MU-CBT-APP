@@ -244,6 +244,7 @@ export const markAttendance = (exam_id, student_id) => {
     },
   );
 };
+
 export const getAttendance = (attendanceField) => {
   const token = localStorage.getItem("token");
   return api.get(
@@ -259,17 +260,15 @@ export const getAttendance = (attendanceField) => {
     },
   );
 };
+
 export const getTodaysAttendance = () => {
   const token = localStorage.getItem("token");
-  return api.get(
-    `/attendance/today`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  return api.get(`/attendance/today`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-  );
+  });
 };
 
 export const signAttendance = (exam_id, student_id) => {
@@ -289,6 +288,35 @@ export const signAttendance = (exam_id, student_id) => {
 export const endExam = (examId) => {
   const token = localStorage.getItem("token");
   return api.post(`/exam-taking/${examId}/end`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const bulkUploadBlockList = (formData) => {
+  const token = localStorage.getItem("token");
+  return api.post(`/blocklist/bulk-upload`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const removeFromBlockList = (id) => {
+  const token = localStorage.getItem("token");
+  return api.delete(`/blocklist/${id}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export const getBlockList = () => {
+  const token = localStorage.getItem("token");
+  return api.get(`/blocklist`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,

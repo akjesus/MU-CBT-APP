@@ -17,6 +17,9 @@ import {
   deleteAllQuestionsFromExam,
   getAttendance,
   getTodaysAttendance,
+  getBlockList,
+  bulkUploadBlockList,
+  removeFromBlockList,
 } from "../../api/exams";
 import moment from "moment";
 
@@ -75,7 +78,9 @@ export default function AdminExams() {
   });
   const [search, setSearch] = useState("");
   const [searchAttendance, setSearchAttendance] = useState("");
+  const [searchBlocklist, setSearchBlocklist] = useState("");
   const [filterModal, setFilterModal] = useState(false);
+  const [blocklistModal, setBlocklistModal] = useState(false);
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -111,8 +116,10 @@ export default function AdminExams() {
   });
   const [page, setPage] = useState(0);
   const [atPage, setAtPage] = useState(0);
+  const [blPage, setBlPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [atRowsPerPage, setAtRowsPerPage] = useState(10);
+  const [blRowsPerPage, setBlRowsPerPage] = useState(10);
   const [openConfirm, setOpenConfirm] = useState({
     open: false,
     title: "",
@@ -165,6 +172,8 @@ export default function AdminExams() {
 
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
   const [examQuestions, setExamQuestions] = useState([]);
+  const [blocklist, setBlocklist] = useState([]);
+
   const getExamQuestions = async (id) => {
     try {
       const questions = await getQuestionsForExam(id);
@@ -174,6 +183,7 @@ export default function AdminExams() {
       throw error;
     }
   };
+
   useEffect(() => {
     if (openExamQuestionModal.open && openExamQuestionModal.exam) {
       getExamQuestions(openExamQuestionModal.exam.id);
@@ -245,6 +255,17 @@ export default function AdminExams() {
       showSnackbar("Error Fetching Data", "error");
     }
   }, []);
+
+  const fetchBlocklist = useCallback(async () => {
+    try {
+      const res = await getBlockList();
+      setBlocklist(res.data || []);
+    } catch (error) {
+      console.log(error);
+      showSnackbar("Error Fetching Blocklist", "error");
+    }
+  }, []);
+
   const handleSubmitExam = async () => {
     try {
       const payload = {
@@ -323,9 +344,11 @@ export default function AdminExams() {
   const handleChange = (e) => {
     setNewExam({ ...newExam, [e.target.name]: e.target.value });
   };
+
   const handleBulkUpload = (e) => {
     setFile(e.target.files[0]);
   };
+
   const handleSaveExam = async () => {
     if (editIndex) {
       try {
@@ -369,6 +392,7 @@ export default function AdminExams() {
   // Pagination handlers
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeAtPage = (event, newPage) => setAtPage(newPage);
+  const handleChangeBlPage = (event, newPage) => setBlPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -376,6 +400,11 @@ export default function AdminExams() {
   const handleChangeAtRowsPerPage = (event) => {
     setAtRowsPerPage(parseInt(event.target.value, 10));
     setAtPage(0);
+  };
+
+  const handleChangeBlRowsPerPage = (event) => {
+    setBlRowsPerPage(parseInt(event.target.value, 10));
+    setBlPage(0);
   };
   // Function to render exam questions in a table
   const renderExamQuestionsTable = () => {
@@ -634,6 +663,8 @@ export default function AdminExams() {
       getTodaysAttendance().then((response) => {
         setAttendance(response.data.attendanceRecords);
       });
+    } else if (tab === 3) {
+      fetchBlocklist();
     }
   }, [fetchData, tab]);
 
@@ -656,6 +687,60 @@ export default function AdminExams() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleBlockList = async () => {
+    if (!file) {
+      showSnackbar("Please select a CSV file first", "error");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await bulkUploadBlockList(formData);
+      showSnackbar(
+        res.data?.message ||
+          "Students were added to the blocklist successfully",
+        "success",
+      );
+      setBlocklistModal(false);
+      setFile(null);
+      await fetchBlocklist();
+    } catch (error) {
+      console.log(error);
+      showSnackbar(
+        error.response?.data?.error || "Failed to upload blocklist students",
+        "error",
+      );
+    }
+  };
+
+  const confirmRemoveFromBlocklist = (student) => {
+    setOpenConfirm({
+      open: true,
+      title: "Confirm Unblock",
+      data: student,
+      message: `Are you sure you want to remove ${student.student_name} from the blocklist?`,
+      button: "Unblock",
+      action: async (id) => {
+        try {
+          await removeFromBlockList(id);
+          showSnackbar(
+            `${student.student_name} was removed from the blocklist`,
+            "success",
+          );
+          await fetchBlocklist();
+        } catch (error) {
+          console.log(error);
+          showSnackbar(
+            error.response?.data?.error ||
+              "Failed to update student block status",
+            "error",
+          );
+        }
+      },
+    });
   };
 
   return (
@@ -692,6 +777,7 @@ export default function AdminExams() {
             <Tab label="View Exams" />
             <Tab label="Active Exams" />
             <Tab label="Attendance" />
+            <Tab label="Block List" />
           </Tabs>
         </Box>
         {tab === 0 && (
@@ -734,17 +820,11 @@ export default function AdminExams() {
                   <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
                     Departments
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                    Level
-                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Level</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                    Duration
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                    Actions
-                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Duration</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -769,7 +849,7 @@ export default function AdminExams() {
                       <TableCell>
                         {moment(ex.exam_date).format("MMMM Do YYYY")}
                       </TableCell>
-                      <TableCell sx={{ width: "50%" }}>
+                      <TableCell sx={{ width: "15%" }}>
                         {moment(ex.start_time, "HH:mm").format("LT")}
                       </TableCell>
                       <TableCell>{ex.duration} mins</TableCell>
@@ -1162,111 +1242,134 @@ export default function AdminExams() {
             />
           </>
         )}
-        <Dialog
-          open={filterModal}
-          onClose={() => setFilterModal(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Filter Attendance</DialogTitle>
+        {tab === 3 && (
+          <>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <TextField
+                placeholder="Search for Student"
+                value={searchBlocklist}
+                onChange={(e) => setSearchBlocklist(e.target.value)}
+                sx={{ width: "50%" }}
+              />
+              <Button
+                variant="contained"
+                onClick={() => setBlocklistModal(true)}
+              >
+                Block Students
+              </Button>
+            </Box>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: "bold", width: "5%" }}>
+                    S/N
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+                    Student Name
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
+                    Matric Number
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+                    Department
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Level
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Action
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {blocklist
+                  .filter(
+                    (bl) =>
+                      bl.student_name
+                        .toLowerCase()
+                        .includes(searchBlocklist.toLowerCase()) ||
+                      bl.matric_no
+                        .toLowerCase()
+                        .includes(searchBlocklist.toLowerCase()),
+                  )
+                  .slice(
+                    blPage * blRowsPerPage,
+                    blPage * blRowsPerPage + blRowsPerPage,
+                  )
+                  .map((bl, index) => (
+                    <TableRow key={bl.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{bl.student_name}</TableCell>
+                      <TableCell>{bl.matric_no}</TableCell>
+                      <TableCell>{bl.department}</TableCell>
+                      <TableCell>{bl.level}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="error"
+                          onClick={() => confirmRemoveFromBlocklist(bl)}
+                        >
+                          Unblock
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={blocklist.length}
+              page={blPage}
+              onPageChange={handleChangeBlPage}
+              rowsPerPage={blRowsPerPage}
+              onRowsPerPageChange={handleChangeBlRowsPerPage}
+            />
+          </>
+        )}
+        <Dialog open={blocklistModal} onClose={() => setBlocklistModal(false)}>
+          <DialogTitle>Add Student to Blocklist</DialogTitle>
           <DialogContent>
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 1, mb: 1 }}>
-              <TextField
-                select
-                margin="dense"
-                label="Session"
-                name="session_id"
-                sx={{ width: 140 }}
-                value={attendanceField.session_id}
-                onChange={(event) => {
-                  setAttendanceField({
-                    ...attendanceField,
-                    session_id: event.target.value,
-                  });
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 1 }}
+            >
+              <Typography variant="body2" color="textSecondary">
+                Upload a CSV file containing students to add to the blocklist.
+              </Typography>
+              <Button
+                variant="contained"
+                component="label"
+                color="secondary"
+                sx={{ alignSelf: "flex-start" }}
               >
-                {sessions.map((sess) => (
-                  <MenuItem key={sess.id} value={sess.id}>
-                    {sess.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                select
-                margin="dense"
-                label="Semester"
-                name="semester"
-                sx={{ width: 160 }}
-                value={attendanceField.semester}
-                onChange={(event) => {
-                  setAttendanceField({
-                    ...attendanceField,
-                    semester: event.target.value,
-                  });
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              >
-                <MenuItem value="First">First Semester</MenuItem>
-                <MenuItem value="Second">Second Semester</MenuItem>
-                <MenuItem value="Mid Term">Mid Term</MenuItem>
-                <MenuItem value="Comprehensive">Comprehensive</MenuItem>
-                <MenuItem value="Summer">Summer</MenuItem>
-              </TextField>
-              <TextField
-                select
-                margin="dense"
-                label="Exam"
-                name="exam_id"
-                sx={{ width: 300 }}
-                value={attendanceField.exam_id}
-                onChange={(event) => {
-                  setAttendanceField({
-                    ...attendanceField,
-                    exam_id: event.target.value,
-                  });
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              >
-                {exams.map((ex) => (
-                  <MenuItem key={ex.id} value={ex.id}>
-                    {ex.course_code} - {ex.course_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                type="date"
-                margin="dense"
-                label="Exam Date"
-                name="date"
-                sx={{ width: 185, mr: 2 }}
-                value={attendanceField.date}
-                onChange={(event) => {
-                  setAttendanceField({
-                    ...attendanceField,
-                    date: event.target.value,
-                  });
-                }}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              ></TextField>
+                Choose File
+                <input
+                  type="file"
+                  hidden
+                  accept=".csv"
+                  onChange={(e) => handleFileChange(e)}
+                />
+              </Button>
+              <Typography variant="body2" color="textSecondary">
+                {file ? file.name : "No file selected"}
+              </Typography>
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setFilterModal(false)}>Cancel</Button>
+            <Button onClick={() => setBlocklistModal(false)}>Cancel</Button>
             <Button
               variant="contained"
               sx={{ bgcolor: "#2C2C78" }}
-              onClick={handleFilterAttendance}
+              onClick={handleBlockList}
             >
-              Filter
+              Block Students
             </Button>
           </DialogActions>
         </Dialog>
@@ -2364,7 +2467,7 @@ export default function AdminExams() {
               Please upload the template CSV file with questions!.
             </Typography>
             <Button variant="contained" component="label" color="success">
-                <input
+              <input
                 type="file"
                 accept=".csv"
                 onChange={(e) => {

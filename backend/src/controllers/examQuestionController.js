@@ -79,6 +79,9 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       score_obtainable,
       level,
     } = req.body;
+    const normalizedCorrectOption = correct_option
+      ? String(correct_option).trim().toUpperCase()
+      : correct_option;
     if (
       !text ||
       !option_a ||
@@ -111,12 +114,10 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         }
       } catch (dirErr) {
         console.error("Error creating upload directory:", uploadDir, dirErr);
-        return res
-          .status(500)
-          .json({
-            error: "Failed to create upload directory",
-            details: dirErr.message,
-          });
+        return res.status(500).json({
+          error: "Failed to create upload directory",
+          details: dirErr.message,
+        });
       }
       // Generate unique filename
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -150,7 +151,7 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
         option_b,
         option_c,
         option_d,
-        correct_option,
+        normalizedCorrectOption,
         instructions,
         score_obtainable,
         level,
@@ -259,7 +260,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           option_c,
           option_d,
           correct_option: correct_option
-            ? correct_option.trim()
+            ? String(correct_option).trim().toUpperCase()
             : correct_option,
           instructions,
           score_obtainable,

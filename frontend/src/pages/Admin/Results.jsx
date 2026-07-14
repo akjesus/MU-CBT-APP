@@ -93,6 +93,7 @@ export default function AdminResults() {
         console.error("Failed to fetch sessions", error);
       }
     };
+    
     const fetchCourses = async () => {
       try {
         const res = await getCourses();

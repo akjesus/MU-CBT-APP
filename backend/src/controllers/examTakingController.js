@@ -106,9 +106,7 @@ exports.submitBulkExam = async (req, res) => {
       return res.status(400).json({ error: "Invalid request format." });
     }
 
-    // Process each student's responses
     for (const { student_id, responses } of studentResponses) {
-      // Check if student has already attempted
       const hasAttempted = await ExamTaking.hasAttemptedExam(
         student_id,
         exam_id,
@@ -129,12 +127,10 @@ exports.submitBulkExam = async (req, res) => {
       if (!questions || questions.length === 0) {
         continue;
       }
-
-      // 2) For each question, check if user response matches the correct_option.
+      
       let totalScore = 0;
       questions.forEach((q) => {
         const userAnswer = responses[q.question_id];
-        // Convert score_obtainable to a real number
         const questionScore = parseFloat(q.score_obtainable) || 0;
 
         if (userAnswer && userAnswer === q.correct_option) {
