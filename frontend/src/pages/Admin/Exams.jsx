@@ -49,6 +49,7 @@ import {
   FormControlLabel,
   RadioGroup,
   Radio,
+  Checkbox,
 } from "@mui/material";
 import {
   Delete,
@@ -81,6 +82,10 @@ export default function AdminExams() {
   const [searchBlocklist, setSearchBlocklist] = useState("");
   const [filterModal, setFilterModal] = useState(false);
   const [blocklistModal, setBlocklistModal] = useState(false);
+  const [blocklistOptions, setBlocklistOptions] = useState({
+    blockByExam: false,
+    exam_id: "",
+  });
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -491,6 +496,15 @@ export default function AdminExams() {
     setFile(e.target.files[0]);
   };
 
+  const handleBlocklistOptionChange = (event) => {
+    const { name, value, checked, type } = event.target;
+    setBlocklistOptions((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+      ...(name === "blockByExam" && !checked ? { exam_id: "" } : {}),
+    }));
+  };
+
   const handleEditQuestion = async (question) => {
     try {
       const formData = new FormData();
@@ -695,9 +709,21 @@ export default function AdminExams() {
       return;
     }
 
+    if (blocklistOptions.blockByExam && !blocklistOptions.exam_id) {
+      showSnackbar("Please select an exam for exam-specific blocking", "error");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append(
+        "block_type",
+        blocklistOptions.blockByExam ? "exam" : "total",
+      );
+      if (blocklistOptions.blockByExam) {
+        formData.append("exam_id", blocklistOptions.exam_id);
+      }
       const res = await bulkUploadBlockList(formData);
       showSnackbar(
         res.data?.message ||
@@ -706,6 +732,7 @@ export default function AdminExams() {
       );
       setBlocklistModal(false);
       setFile(null);
+      setBlocklistOptions({ blockByExam: false, exam_id: "" });
       await fetchBlocklist();
     } catch (error) {
       console.log(error);
@@ -1240,6 +1267,116 @@ export default function AdminExams() {
               rowsPerPage={atRowsPerPage}
               onRowsPerPageChange={handleChangeAtRowsPerPage}
             />
+            <Dialog
+              open={filterModal}
+              onClose={() => setFilterModal(false)}
+              maxWidth="md"
+              fullWidth
+            >
+              <DialogTitle>Filter Attendance</DialogTitle>
+              <DialogContent>
+                <Box
+                  sx={{ display: "flex", flexDirection: "row", gap: 1, mb: 1 }}
+                >
+                  <TextField
+                    select
+                    margin="dense"
+                    label="Session"
+                    name="session_id"
+                    sx={{ width: 140 }}
+                    value={attendanceField.session_id}
+                    onChange={(event) => {
+                      setAttendanceField({
+                        ...attendanceField,
+                        session_id: event.target.value,
+                      });
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  >
+                    {sessions.map((sess) => (
+                      <MenuItem key={sess.id} value={sess.id}>
+                        {sess.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <TextField
+                    select
+                    margin="dense"
+                    label="Semester"
+                    name="semester"
+                    sx={{ width: 160 }}
+                    value={attendanceField.semester}
+                    onChange={(event) => {
+                      setAttendanceField({
+                        ...attendanceField,
+                        semester: event.target.value,
+                      });
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  >
+                    <MenuItem value="First">First Semester</MenuItem>
+                    <MenuItem value="Second">Second Semester</MenuItem>
+                    <MenuItem value="Mid Term">Mid Term</MenuItem>
+                    <MenuItem value="Comprehensive">Comprehensive</MenuItem>
+                    <MenuItem value="Summer">Summer</MenuItem>
+                  </TextField>
+                  <TextField
+                    select
+                    margin="dense"
+                    label="Exam"
+                    name="exam_id"
+                    sx={{ width: 300 }}
+                    value={attendanceField.exam_id}
+                    onChange={(event) => {
+                      setAttendanceField({
+                        ...attendanceField,
+                        exam_id: event.target.value,
+                      });
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  >
+                    {exams.map((ex) => (
+                      <MenuItem key={ex.id} value={ex.id}>
+                        {ex.course_code} - {ex.course_name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <TextField
+                    type="date"
+                    margin="dense"
+                    label="Exam Date"
+                    name="date"
+                    sx={{ width: 185, mr: 2 }}
+                    value={attendanceField.date}
+                    onChange={(event) => {
+                      setAttendanceField({
+                        ...attendanceField,
+                        date: event.target.value,
+                      });
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  ></TextField>
+                </Box>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setFilterModal(false)}>Cancel</Button>
+                <Button
+                  variant="contained"
+                  sx={{ bgcolor: "#2C2C78" }}
+                  onClick={handleFilterAttendance}
+                >
+                  Filter
+                </Button>
+              </DialogActions>
+            </Dialog>
           </>
         )}
         {tab === 3 && (
@@ -1277,11 +1414,14 @@ export default function AdminExams() {
                   <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
                     Matric Number
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+                  <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
                     Department
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
                     Level
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Exam
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
                     Action
@@ -1310,6 +1450,7 @@ export default function AdminExams() {
                       <TableCell>{bl.matric_no}</TableCell>
                       <TableCell>{bl.department}</TableCell>
                       <TableCell>{bl.level}</TableCell>
+                      <TableCell>{bl.exam}</TableCell>
                       <TableCell>
                         <Button
                           variant="contained"
@@ -1338,11 +1479,41 @@ export default function AdminExams() {
           <DialogTitle>Add Student to Blocklist</DialogTitle>
           <DialogContent>
             <Box
-              sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 1 }}
+              sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 1 }}
             >
               <Typography variant="body2" color="textSecondary">
                 Upload a CSV file containing students to add to the blocklist.
               </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="blockByExam"
+                    checked={blocklistOptions.blockByExam}
+                    onChange={handleBlocklistOptionChange}
+                  />
+                }
+                label="Block Students only for a selected Exam"
+              />
+              {blocklistOptions.blockByExam && (
+                <TextField
+                  select
+                  margin="dense"
+                  label="Select Exam"
+                  name="exam_id"
+                  value={blocklistOptions.exam_id}
+                  onChange={handleBlocklistOptionChange}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                >
+                  <MenuItem value="">Select Exam</MenuItem>
+                  {exams.map((exam) => (
+                    <MenuItem key={exam.id} value={exam.id}>
+                      {exam.course_code} - {exam.course_name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
               <Button
                 variant="contained"
                 component="label"
@@ -1365,6 +1536,10 @@ export default function AdminExams() {
           <DialogActions>
             <Button onClick={() => setBlocklistModal(false)}>Cancel</Button>
             <Button
+              disabled={
+                !file ||
+                (blocklistOptions.blockByExam && !blocklistOptions.exam_id)
+              }
               variant="contained"
               sx={{ bgcolor: "#2C2C78" }}
               onClick={handleBlockList}

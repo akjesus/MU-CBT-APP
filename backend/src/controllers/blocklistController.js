@@ -28,7 +28,6 @@ exports.getBlockListById = async (req, res) => {
 
 exports.addStudentToBlockList = async (req, res) => {
   try {
-    const { exam_id } = req.params;
     const { registration_number } = req.body;
     if (!registration_number) {
       return res.status(400).json({ error: "Invalid Matric Number" });
@@ -43,13 +42,16 @@ exports.addStudentToBlockList = async (req, res) => {
 
 exports.bulkUploadBlockList = async (req, res) => {
   try {
+    let examId = null;
+    if (req.body.exam_id) {
+      examId = req.body.exam_id;
+    }
     const csvFile = req.file;
     if (!csvFile) {
       return res.status(400).json({ error: "No CSV file uploaded" });
     }
     const bufferStream = new stream.PassThrough();
     bufferStream.end(csvFile.buffer);
-    
 
     const blockList = [];
     bufferStream
@@ -67,17 +69,21 @@ exports.bulkUploadBlockList = async (req, res) => {
         }
         let insertedCount = 0;
         for (const qRow of blockList) {
-          const existing = await BlockList.getByMatricNo(qRow.registration_number);
+          const existing = await BlockList.getByMatricNo(
+            qRow.registration_number,
+          );
           if (existing) {
-            console.log(`Student with registration number ${qRow.registration_number} already exists in the blocklist.`);
+            console.log(
+              `Student with registration number ${qRow.registration_number} already exists in the blocklist.`,
+            );
             continue;
           }
           try {
             await db.query(
               `INSERT INTO blocklist 
-                 (registration_number, created_at)
-               VALUES (?, NOW())`,
-              [qRow.registration_number],
+                 (registration_number, exam_id, created_at)
+               VALUES (?, ?, NOW())`,
+              [qRow.registration_number, examId],
             );
             insertedCount++;
           } catch (err) {

@@ -6,11 +6,13 @@ class BlockList {
             SELECT blocklist.id AS id, CONCAT(students.first_name, ' ', students.last_name) AS student_name,
             blocklist.registration_number AS matric_no,
             levels.name AS level,
+            COALESCE(exams.exam_name, 'All Exams') AS exam,
             departments.name AS department
             FROM blocklist 
             JOIN students  ON blocklist.registration_number = students.registration_number    
             JOIN levels ON students.level_id = levels.id
             JOIN departments ON students.department_id = departments.id
+            LEFT JOIN exams ON blocklist.exam_id = exams.id
            `;
 
     const [rows] = await db.query(sql);
@@ -22,14 +24,17 @@ class BlockList {
     return rows[0];
   }
   static async getByMatricNo(registration_number) {
-    const [rows] = await db.query("SELECT * FROM blocklist WHERE registration_number = ?", [registration_number]);
+    const [rows] = await db.query(
+      "SELECT * FROM blocklist WHERE registration_number = ?",
+      [registration_number],
+    );
     return rows[0];
   }
 
-  static async create(registration_number) {
+  static async create(registration_number, exam_id = null) {
     const [result] = await db.query(
-      "INSERT INTO blocklist (registration_number) VALUES (?)",
-      [registration_number],
+      "INSERT INTO blocklist (registration_number, exam_id) VALUES (?, ?)",
+      [registration_number, exam_id],
     );
     return result.insertId;
   }
@@ -45,10 +50,10 @@ class BlockList {
     await db.query("DELETE FROM blocklist WHERE id = ?", [id]);
   }
 
-  static async toggleBlock(registration_number) {
+  static async toggleBlock(registration_number, exam_id = null) {
     const [rows] = await db.query(
-      "SELECT * FROM blocklist WHERE registration_number = ?",
-      [registration_number],
+      "SELECT * FROM blocklist WHERE registration_number = ? AND exam_id = ?",
+      [registration_number, exam_id],
     );
 
     if (rows.length > 0) {
