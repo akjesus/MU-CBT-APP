@@ -149,6 +149,7 @@ export default function AdminExams() {
   const [addTheoryQuestionModal, setAddTheoryQuestionModal] = useState({
     open: false,
     question: "",
+    instructions: "",
     title: "Add Theory Question",
     button: "Save Theory Question",
     action: (question) => {
@@ -594,9 +595,10 @@ export default function AdminExams() {
       if (file) {
         formData.append("file", file);
       }
+      const instructions = addTheoryQuestionModal.instructions ?? "";
       formData.append("course_id", exam.course_id);
-      formData.append("text", addTheoryQuestionModal.question);
-      formData.append("instructions", addTheoryQuestionModal.instructions);
+      formData.append("text", addTheoryQuestionModal.question ?? "");
+      formData.append("instructions", instructions);
       formData.append("question_type", "Theory");
       const res = await addQuestionsToExam(exam.id, formData);
       console.log(res.data);
@@ -607,6 +609,7 @@ export default function AdminExams() {
           ...addTheoryQuestionModal,
           open: false,
           question: "",
+          instructions: "",
         });
         setFile(null);
       }
@@ -1986,7 +1989,8 @@ export default function AdminExams() {
                 onClick={() =>
                   setAddTheoryQuestionModal({
                     open: true,
-                    question: null,
+                    question: "",
+                    instructions: "",
                     title: "Add New Theory Question",
                     button: "Save Theory Question",
                   })
@@ -2233,7 +2237,7 @@ export default function AdminExams() {
               tinymceScriptSrc="/tinymce/tinymce.min.js"
               licenseKey="gpl"
               onInit={(_evt, editor) => (editorRef.current = editor)}
-              initialValue="Type or Paste Theory question here ..."
+              initialValue=""
               init={{
                 height: 300,
                 menubar: true,

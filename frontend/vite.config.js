@@ -5,6 +5,6 @@ const port = process.env.VITE_APP_PORT;
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 8000,
+    port: 3001,
   },
 });

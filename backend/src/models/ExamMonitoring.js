@@ -76,7 +76,7 @@ class ExamMonitoring {
   }
   static async getStudents(id) {
     const [rows] = await db.query(
-      `SELECT ex.id, s.first_name, s.last_name, s.registration_number, 
+      `SELECT ex.id, s.first_name, s.last_name, s.other_names, s.registration_number, 
         ex.time_left, ex.responses_count, ex.status 
       from exam_monitoring ex
       join students s on ex.student_id = s.id

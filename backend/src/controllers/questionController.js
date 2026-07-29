@@ -59,7 +59,7 @@ exports.createQuestionAndAddtoExam = async (req, res) => {
       option_d,
       correct_option,
       score_obtainable,
-      instructions,
+      instructions ,
       question_type,
     } = req.body;
     let questionType = question_type || "Objective";
@@ -115,7 +115,7 @@ exports.createQuestionAndAddtoExam = async (req, res) => {
         option_d,
         correct_option,
         score_obtainable,
-        instructions,
+        instructions || null,
         questionType,
         user_id,
         file,

@@ -259,13 +259,12 @@ const Monitoring = () => {
               {students.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>
-                    {student.first_name} {student.last_name}
+                    {student.last_name} {student.first_name}{" "}
+                    {student.other_names}
                   </TableCell>
                   <TableCell>{student.registration_number}</TableCell>
                   <TableCell>{formatTime(student.time_left)}</TableCell>
-                  <TableCell>
-                    {student.responses_count }
-                  </TableCell>
+                  <TableCell>{student.responses_count}</TableCell>
                   <TableCell>
                     <Button
                       variant="contained"

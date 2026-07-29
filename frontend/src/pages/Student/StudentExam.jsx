@@ -108,7 +108,6 @@ export default function StudentExam() {
 
     return true;
   };
- ;
   const [isEligible, setIsEligible] = useState(false);
 
   useEffect(() => {
@@ -504,42 +503,47 @@ export default function StudentExam() {
               </Stack>
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              maxWidth: 500,
-              mx: "auto",
-              mb: 1,
-            }}
-          >
-            <Typography variant="body2">
-              Answered: {Object.keys(responses).length} of {questions.length}
-            </Typography>
-            <Typography variant="body2">
-              {Math.round(progress)}% Complete
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <LinearProgress
-              variant="determinate"
-              color="success"
-              value={progress}
-              sx={{
-                flex: 1,
-                maxWidth: 500,
-                mx: "auto",
-                height: 10,
-                borderRadius: 5,
-              }}
-            />
-          </Box>
+          {currentQuestion.question_type === "Objective" && (
+            <>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  maxWidth: 500,
+                  mx: "auto",
+                  mb: 1,
+                }}
+              >
+                <Typography variant="body2">
+                  Answered: {Object.keys(responses).length} of{" "}
+                  {questions.length}
+                </Typography>
+                <Typography variant="body2">
+                  {Math.round(progress)}% Complete
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <LinearProgress
+                  variant="determinate"
+                  color="success"
+                  value={progress}
+                  sx={{
+                    flex: 1,
+                    maxWidth: 500,
+                    mx: "auto",
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+              </Box>
+            </>
+          )}
           <Card
             sx={{
               backgroundColor: "#fafafa",

@@ -9,13 +9,19 @@ const fs = require("fs");
 exports.getQuestionsByExam = async (req, res) => {
   try {
     const { exam_id } = req.params;
+    const [randomRows] = await db.query(
+      `SELECT display_question_randomly FROM exams WHERE id = ?`,
+      [exam_id],
+    );
+    const shouldRandomize =
+      randomRows?.[0]?.display_question_randomly === 1;
     const [rows] = await db.query(
       `SELECT q.id AS question_id, q.course_id, q.text, q.option_a, q.option_b, q.option_c,
               q.option_d, q.correct_option, q.instructions, q.difficulty_level, q.question_type, q.score_obtainable,
               q.level, q.file, q.answers, q.user_id
        FROM exam_questions eq
        JOIN questions q ON eq.question_id = q.id
-       WHERE eq.exam_id = ?`,
+       WHERE eq.exam_id = ?${shouldRandomize ? "\n       ORDER BY RAND()" : ""}`,
       [exam_id],
     );
     res.json(rows);
@@ -127,7 +133,6 @@ exports.addNewQuestionAndLinkToExam = async (req, res) => {
       const fullPath = path.join(uploadDir, filename);
       try {
         fs.writeFileSync(fullPath, uploadedFile.data);
-        console.log("File saved successfully:", fullPath);
       } catch (fileErr) {
         console.error("Error saving file:", fullPath, fileErr);
         return res
