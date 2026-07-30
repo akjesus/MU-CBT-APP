@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import moment from "moment";
 import { getActiveExams, getStudentsForExam, endExam } from "../../api/exams";
 import {
@@ -19,14 +19,19 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  TablePagination,
 } from "@mui/material";
 import axios from "axios";
 
 const Monitoring = () => {
   const [exams, setExams] = useState([]);
+  const [search, setSearch] = useState("");
   const [selectedExam, setSelectedExam] = useState(null);
   const [students, setStudents] = useState([]);
   const [examDetails, setExamDetails] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [confirmEndDialog, setConfirmEndDialog] = useState({
     open: false,
     exam: null,
@@ -44,6 +49,27 @@ const Monitoring = () => {
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const filteredStudents = useMemo(() => {
+    return students.filter(
+      (student) =>
+        `${student.last_name} ${student.first_name} ${student.other_names}`
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        student.registration_number
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+    );
+  }, [students, search]);
 
   const countdownIntervalRef = useRef(null);
   const refetchIntervalRef = useRef(null);
@@ -118,10 +144,12 @@ const Monitoring = () => {
       setSelectedExam(null);
       setStudents([]);
       setExamDetails(null);
+      setPage(0);
       return;
     }
 
     setSelectedExam(exam);
+    setPage(0);
     try {
       const response = await getStudentsForExam(exam.id);
       if (response.status === 204) {
@@ -144,15 +172,13 @@ const Monitoring = () => {
 
   const handleEndExam = async (exam) => {
     try {
-
       await endExam(exam.id);
-      setStudents(null)
+      setStudents(null);
       setExamDetails(null);
       setSelectedExam(null);
       showSnackbar("Exam ended successfully", "success");
       const examsResponse = await getActiveExams();
       setExams(examsResponse.data.exams);
-
     } catch (error) {
       console.error("Error ending exam:", error);
       showSnackbar("Error ending exam", "error");
@@ -242,9 +268,17 @@ const Monitoring = () => {
 
       {selectedExam && examDetails && (
         <Box>
-          <Typography variant="h6" sx={{ marginTop: 4 }}>
-            Active Students
-          </Typography>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 2, marginTop: 4 }}
+          >
+            <Typography variant="h6">Active Students</Typography>
+            <TextField
+              placeholder="Search for Student"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              sx={{ width: "50%" }}
+            />
+          </Box>
           <Table sx={{ marginTop: 2 }} component={Paper}>
             <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
               <TableRow>
@@ -256,35 +290,46 @@ const Monitoring = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {students.map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell>
-                    {student.last_name} {student.first_name}{" "}
-                    {student.other_names}
-                  </TableCell>
-                  <TableCell>{student.registration_number}</TableCell>
-                  <TableCell>{formatTime(student.time_left)}</TableCell>
-                  <TableCell>{student.responses_count}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color={getStatusColor(student.status)}
-                      size="small"
-                    >
-                      {student.status}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {students.length === 0 && (
+              {filteredStudents
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((student) => (
+                  <TableRow key={student.id}>
+                    <TableCell>
+                      {student.last_name} {student.first_name}{" "}
+                      {student.other_names}
+                    </TableCell>
+                    <TableCell>{student.registration_number}</TableCell>
+                    <TableCell>{formatTime(student.time_left)}</TableCell>
+                    <TableCell>{student.responses_count}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color={getStatusColor(student.status)}
+                        size="small"
+                      >
+                        {student.status}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {filteredStudents.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
+                  <TableCell colSpan={5} align="center">
                     No students logged in
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={filteredStudents.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Box>
       )}
       <Snackbar

@@ -22,6 +22,7 @@ import {
   removeFromBlockList,
 } from "../../api/exams";
 import moment from "moment";
+import parse from "html-react-parser";
 
 import {
   Box,
@@ -431,7 +432,7 @@ export default function AdminExams() {
           {examQuestions.map((question, index) => (
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
-              <TableCell>{question.text}</TableCell>
+              <TableCell>{parse(question.text)}</TableCell>
               <TableCell>{question.correct_option}</TableCell>
               <TableCell>{question.instructions || "N/A"}</TableCell>
               <TableCell>{question.score_obtainable}</TableCell>
@@ -845,12 +846,14 @@ export default function AdminExams() {
                     Exam Name
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
-                    Exam Title
+                    Course Code
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
+                    Course Title
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
                     Departments
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Level</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Duration</TableCell>
@@ -872,10 +875,11 @@ export default function AdminExams() {
                   .map((ex, index) => (
                     <TableRow key={ex.id}>
                       <TableCell>{index + 1}</TableCell>
+                      <TableCell>{ex.exam_name}</TableCell>
                       <TableCell>{ex.course_code}</TableCell>
                       <TableCell>{ex.course_name}</TableCell>
                       <TableCell>{ex.departments}</TableCell>
-                      <TableCell>{ex.level}</TableCell>
+
                       <TableCell>
                         {moment(ex.exam_date).format("MMMM Do YYYY")}
                       </TableCell>
@@ -1024,14 +1028,15 @@ export default function AdminExams() {
                     Exam Name
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
-                    Exam Title
+                    Course Code
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Course Title
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
                     Departments
                   </TableCell>
-                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                    Level
-                  </TableCell>
+
                   <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
@@ -1049,17 +1054,16 @@ export default function AdminExams() {
                       ex.course_code
                         .toLowerCase()
                         .includes(search.toLowerCase()) ||
-                      ex.course_name
-                        .toLowerCase()
-                        .includes(search.toLowerCase()),
+                      ex.exam_name.toLowerCase().includes(search.toLowerCase()),
                   )
                   .map((ex, index) => (
                     <TableRow key={ex.id}>
                       <TableCell>{index + 1}</TableCell>
+                      <TableCell>{ex.exam_name}</TableCell>
                       <TableCell>{ex.course_code}</TableCell>
                       <TableCell>{ex.course_name}</TableCell>
                       <TableCell>{ex.departments}</TableCell>
-                      <TableCell>{ex.course_level}</TableCell>
+
                       <TableCell>
                         {moment(ex.exam_date).format("MMMM Do YYYY")}
                       </TableCell>

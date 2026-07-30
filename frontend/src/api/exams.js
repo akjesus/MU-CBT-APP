@@ -323,3 +323,13 @@ export const getBlockList = () => {
     },
   });
 };
+
+export const notifyAlert = (alertData) => {
+  const token = localStorage.getItem("token");
+  return api.post(`/exam-monitoring/alert`, alertData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

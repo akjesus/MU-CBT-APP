@@ -41,6 +41,7 @@ import {
   getExamSession,
   markAttendance,
   signAttendance,
+  notifyAlert,
 } from "../../api/exams";
 import parse from "html-react-parser";
 
@@ -71,12 +72,37 @@ export default function StudentExam() {
     severity: "success",
   });
   const examEndedRef = useRef(false);
+  const tabSwitchCountRef = useRef(0);
+  const tabSwitchReportedRef = useRef(false);
   const showSnackbar = (message, severity) => {
     setSnackbar({ open: true, message, severity });
   };
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Handle tab switch detection
+  const reportTabSwitch = async () => {
+    try {
+      const res = await notifyAlert({
+        student_id: user.id,
+        exam_id: exam_id,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error reporting tab switch:", error);
+    }
+  };
+
+  const handleTabSwitchOrBlur = () => {
+    tabSwitchCountRef.current += 1;
+    console.log(`Tab switches detected: ${tabSwitchCountRef.current}`);
+
+    if (tabSwitchCountRef.current > 5 && !tabSwitchReportedRef.current) {
+      tabSwitchReportedRef.current = true;
+      reportTabSwitch();
+    }
   };
 
   // Prevent navigation and shortcuts
@@ -220,6 +246,27 @@ export default function StudentExam() {
       document.removeEventListener("keydown", preventNavigation);
     };
   }, [examInfo, preventNavigation]);
+
+  // Detect tab switching or opening new tabs
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleTabSwitchOrBlur();
+      }
+    };
+
+    const handleWindowBlur = () => {
+      handleTabSwitchOrBlur();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, []);
 
   const formatTime = (seconds) => {
     if (!seconds) return "00:00";
@@ -418,7 +465,12 @@ export default function StudentExam() {
     if (question.question_type === "Theory") {
       return <div>{parse(question.text)}</div>;
     }
-    return <div>{question.text}</div>;
+    return (
+      <div>
+        Question {`${currentQuestionIndex + 1}:  `}
+        {question.text}
+      </div>
+    );
   };
 
   // Enable fullscreen mode when exam starts
@@ -576,7 +628,6 @@ export default function StudentExam() {
                   alignItems: "center",
                 }}
               >
-                Question {`${currentQuestionIndex + 1}:  `}
                 {renderQuestion(currentQuestion)}
               </Typography>
 
