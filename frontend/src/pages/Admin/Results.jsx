@@ -511,7 +511,7 @@ export default function AdminResults() {
                   </TableCell>
                 </TableRow>
               ))}
-            {results.length === 0 && (
+            {filteredresults.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} align="center">
                   No results found

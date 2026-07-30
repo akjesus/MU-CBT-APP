@@ -59,17 +59,15 @@ const Monitoring = () => {
     setPage(0);
   };
 
-  const filteredStudents = useMemo(() => {
-    return students.filter(
-      (student) =>
-        `${student.last_name} ${student.first_name} ${student.other_names}`
+  const filteredStudents = students.filter(
+      (s) =>
+        `${s.last_name} ${s.first_name} ${s.other_names}`
           .toLowerCase()
           .includes(search.toLowerCase()) ||
-        student.registration_number
+        s.registration_number
           .toLowerCase()
           .includes(search.toLowerCase()),
     );
-  }, [students, search]);
 
   const countdownIntervalRef = useRef(null);
   const refetchIntervalRef = useRef(null);
@@ -173,9 +171,9 @@ const Monitoring = () => {
   const handleEndExam = async (exam) => {
     try {
       await endExam(exam.id);
-      setStudents(null);
-      setExamDetails(null);
-      setSelectedExam(null);
+      setStudents([]);
+      setExamDetails([]);
+      setSelectedExam("");
       showSnackbar("Exam ended successfully", "success");
       const examsResponse = await getActiveExams();
       setExams(examsResponse.data.exams);
