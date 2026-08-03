@@ -113,7 +113,7 @@ export default function Login() {
               align="center"
               sx={{ fontWeight: "bold" }}
             >
-              Maduka University CBT V3.0
+              Maduka University CBT V3.1
             </Typography>
             <form onSubmit={handleSubmit}>
               <TextField

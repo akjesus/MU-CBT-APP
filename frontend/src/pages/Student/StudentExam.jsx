@@ -137,7 +137,7 @@ export default function StudentExam() {
     tabSwitchCountRef.current += 1;
     console.log(`Tab switches detected: ${tabSwitchCountRef.current}`);
 
-    if (tabSwitchCountRef.current >= 8 && !tabSwitchReportedRef.current) {
+    if (tabSwitchCountRef.current >= 10 && !tabSwitchReportedRef.current) {
       reportTabSwitch();
     }
   };
@@ -532,25 +532,25 @@ export default function StudentExam() {
               top: 10,
               left: 10,
               zIndex: 10000,
-              backgroundColor: "#f5f5f5",
+              backgroundColor: "#03a449",
               padding: "8px 8px",
               borderRadius: "8px",
               boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold", color: "white" }}>
               {user?.last_name} {user?.first_name} {user?.other_names}
             </Typography>
-            <Typography variant="body2" sx={{ color: "gray" }}>
+            <Typography variant="body2" sx={{ color: "white" }}>
               Matric No: {user?.matriculation_number}
             </Typography>
-            <Typography variant="body2" sx={{ color: "gray" }}>
+            <Typography variant="body2" sx={{ color: "white" }}>
               Department: {user?.department}
             </Typography>
-            <Typography variant="body2" sx={{ color: "gray" }}>
+            <Typography variant="body2" sx={{ color: "white" }}>
               Level: {user?.level}
             </Typography>
-            <Typography variant="body2" sx={{ color: "black" }}>
+            <Typography variant="body2" sx={{ color: "white" }}>
               Exam: {examInfo?.exam_name}
             </Typography>
           </Box>
@@ -647,10 +647,10 @@ export default function StudentExam() {
                   sx={{
                     p: 2,
                     backgroundColor: "#e3f2fd",
-                    borderLeft: "4px solid #2196f3",
+                    borderLeft: "4px solid #03a449",
                   }}
                 >
-                  <Typography variant="body2" color="primary">
+                  <Typography variant="body2" color="success">
                     <strong>Instructions:</strong>{" "}
                     {currentQuestion.instructions}
                   </Typography>
@@ -861,7 +861,9 @@ export default function StudentExam() {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
+          <Button variant = "outlined" color = "success" onClick={() => setOpenConfirm(false)}>
+            Cancel
+          </Button>
           <Button
             onClick={() => {
               setOpenConfirm(false);

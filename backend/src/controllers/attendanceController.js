@@ -31,7 +31,7 @@ exports.getAttendance = async (req, res) => {
 exports.getTodaysAttendance = async (req, res) => {
   try {
     const [attendanceRecords] = await db.query(
-      `SELECT CONCAT(s.first_name, ' ', s.last_name) AS student_name, 
+      `SELECT CONCAT(s.last_name, ' ', s.first_name, ' ', s.other_names) AS student_name, 
             s.registration_number AS registration_number,
             departments.name AS department,
             exams.exam_name AS exam_name, ea.status,  exam_id,

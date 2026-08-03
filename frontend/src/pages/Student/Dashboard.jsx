@@ -15,6 +15,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
 } from "@mui/material";
 import {
@@ -24,7 +25,6 @@ import {
   CheckCircle,
   PlayArrow,
 } from "@mui/icons-material";
-
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -38,6 +38,7 @@ const StudentDashboard = () => {
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
     exam_id: null,
+    instructions: "",
   });
   const [openExamResultModal, setOpenExamResultModal] = useState(false);
   const [examResult, setExamResult] = useState(null);
@@ -46,29 +47,29 @@ const StudentDashboard = () => {
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });  
+    setSnackbar({ ...snackbar, open: false });
   };
 
- const keyToDelete = Object.keys(localStorage).find((key) =>
-   key.startsWith("exam"),
- );
+  const keyToDelete = Object.keys(localStorage).find((key) =>
+    key.startsWith("exam"),
+  );
 
- if (keyToDelete) {
-  console.log("Deleting localStorage key:", keyToDelete);
-   localStorage.removeItem(keyToDelete);
- }
+  if (keyToDelete) {
+    console.log("Deleting localStorage key:", keyToDelete);
+    localStorage.removeItem(keyToDelete);
+  }
 
-  const handleTakeExamClick = (exam_id) => {
-    setConfirmDialog({ open: true, exam_id });
+  const handleTakeExamClick = (exam_id, instruction) => {
+    setConfirmDialog({ open: true, exam_id, instruction });
   };
 
   const handleConfirmTakeExam = () => {
     navigate(`/student/exam/${confirmDialog.exam_id}`);
-    setConfirmDialog({ open: false, exam_id: null });
+    setConfirmDialog({ open: false, exam_id: null, instruction: "" });
   };
 
   const handleCancelTakeExam = () => {
-    setConfirmDialog({ open: false, exam_id: null });
+    setConfirmDialog({ open: false, exam_id: null, instruction: "" });
   };
 
   const fetchEligibleExams = useCallback(async () => {
@@ -90,7 +91,7 @@ const StudentDashboard = () => {
   useEffect(() => {
     fetchEligibleExams();
     const user = JSON.parse(localStorage.getItem("user"));
-    setUserDetails(user);    
+    setUserDetails(user);
     // Check for exam result from auto-submission
     const savedResult = localStorage.getItem("examResult");
     if (savedResult) {
@@ -101,252 +102,265 @@ const StudentDashboard = () => {
     }
   }, [fetchEligibleExams]);
 
- return (
-   <>
-     <Box>
-       {/* HERO */}
-       <Card
-         sx={{
-           mb: 1,
-           borderRadius: 5,
-           background: "linear-gradient(135deg,#2C2C78 0%, #4338CA 100%)",
-           color: "#fff",
-           overflow: "hidden",
-         }}
-       >
-         <CardContent>
-           <Typography
-             variant="h4"
-             fontWeight={700}
-             sx={{
-               fontSize: { xs: "1.8rem", md: "2.5rem" },
-             }}
-           >
-             Welcome Back 👋
-           </Typography>
+  return (
+    <>
+      <Box>
+        {/* HERO */}
+        <Card
+          sx={{
+            mb: 1,
+            borderRadius: 5,
+            background: "linear-gradient(135deg,#03a449 0%, #03a449 100%)",
+            color: "#fff",
+            overflow: "hidden",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h4"
+              fontWeight={700}
+              sx={{
+                fontSize: { xs: "1.8rem", md: "2.5rem" },
+              }}
+            >
+              Welcome Back
+            </Typography>
 
-           <Typography sx={{ opacity: 0.9, mt: 1 }}>
-             {userDetails.last_name} {userDetails.first_name}{" "}
-             {userDetails.other_names}
-           </Typography>
+            <Typography sx={{ opacity: 0.9, mt: 1, fontSize: { xs: "1.2rem", md: "1.5rem" } }}>
+              {userDetails.last_name} {userDetails.first_name}{" "}
+              {userDetails.other_names}
+            </Typography>
 
-           <Typography color="text.secondary">
-             {" "}
-             You have {eligibleExams.length} Available Exam(s)
-           </Typography>
-         </CardContent>
-       </Card>
+            <Typography color="text.secondary">
+              {" "}
+              You have {eligibleExams.length} Available Exam(s)
+            </Typography>
+          </CardContent>
+        </Card>
 
-       {/* PROFILE */}
-       <Card
-         sx={{
-           borderRadius: 5,
-           mb: 1,
-           boxShadow: 2,
-         }}
-       >
-         <CardContent>
-           <Typography variant="h6" fontWeight={700} mb={2} color="#2C2C78">
-             Student Information
-           </Typography>
+        {/* PROFILE */}
+        <Card
+          sx={{
+            borderRadius: 5,
+            mb: 1,
+            boxShadow: 2,
+          }}
+        >
+          <CardContent>
+            <Typography variant="h6" fontWeight={700} mb={2} color="#2C2C78">
+              Student Details
+            </Typography>
 
-           <Grid container spacing={3}>
-             <Grid item xs={12} md={6}>
-               <Typography>
-                 <strong>Name:</strong> {userDetails.last_name}{" "}
-                 {userDetails.first_name} {userDetails.other_names}
-               </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Typography mt={1}>
+                  <strong>Email:</strong> {userDetails.email || "N/A"}
+                </Typography>
 
-               <Typography mt={1}>
-                 <strong>Email:</strong> {userDetails.email || "N/A"}
-               </Typography>
+                <Typography mt={1}>
+                  <strong>Matric No:</strong>{" "}
+                  {userDetails.matriculation_number || "N/A"}
+                </Typography>
+              </Grid>
 
-               <Typography mt={1}>
-                 <strong>Matric No:</strong>{" "}
-                 {userDetails.matriculation_number || "N/A"}
-               </Typography>
-             </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography>
+                  <strong>Department:</strong> {userDetails.department || "N/A"}
+                </Typography>
 
-             <Grid item xs={12} md={6}>
-               <Typography>
-                 <strong>Department:</strong> {userDetails.department || "N/A"}
-               </Typography>
+                <Typography mt={1}>
+                  <strong>Level:</strong> {userDetails.level || "N/A"}
+                </Typography>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
 
-               <Typography mt={1}>
-                 <strong>Level:</strong> {userDetails.level || "N/A"}
-               </Typography>
-             </Grid>
-           </Grid>
-         </CardContent>
-       </Card>
+        {eligibleExams.length > 0 ? (
+          <>
+            <Typography variant="h5" fontWeight={700} mb={2} color="#2C2C78">
+              Available Examinations
+            </Typography>
+            <Grid container spacing={3}>
+              {eligibleExams.map((exam, index) => (
+                <Grid item xs={12} md={6} lg={4} key={index}>
+                  <Card
+                    sx={{
+                      borderRadius: 5,
+                      height: "100%",
+                      transition: ".3s",
+                      boxShadow: 3,
 
-       {eligibleExams.length > 0 ? (
-         <>
-           <Typography variant="h5" fontWeight={700} mb={2} color="#2C2C78">
-             Available Examinations
-           </Typography>
-           <Grid container spacing={3}>
-             {eligibleExams.map((exam, index) => (
-               <Grid item xs={12} md={6} lg={4} key={index}>
-                 <Card
-                   sx={{
-                     borderRadius: 5,
-                     height: "100%",
-                     transition: ".3s",
-                     boxShadow: 3,
+                      "&:hover": {
+                        transform: "translateY(-6px)",
+                        boxShadow: 8,
+                      },
+                    }}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" fontWeight={700} gutterBottom>
+                        {exam.exam_name}
+                      </Typography>
 
-                     "&:hover": {
-                       transform: "translateY(-6px)",
-                       boxShadow: 8,
-                     },
-                   }}
-                 >
-                   <CardContent>
-                     <Typography variant="h6" fontWeight={700} gutterBottom>
-                       {exam.exam_name}
-                     </Typography>
+                      <Typography
+                        variant="body1"
+                        color="success"
+                        fontWeight={600}
+                      >
+                        {exam.course_name}
+                      </Typography>
 
-                     <Typography
-                       variant="body1"
-                       color="primary"
-                       fontWeight={600}
-                     >
-                       {exam.course_name}
-                     </Typography>
+                      <Box mt={1}>
+                        <Typography variant="body2">
+                          📅{" "}
+                          {moment(exam.exam_date).format("DD MMM YYYY") ||
+                            "N/A"}
+                        </Typography>
 
-                     <Box mt={1}>
-                       <Typography variant="body2">
-                         📅{" "}
-                         {moment(exam.exam_date).format("DD MMM YYYY") || "N/A"}
-                       </Typography>
+                        <Typography variant="body2">
+                          ⏰{" "}
+                          {moment(exam.start_time, "HH:mm").format("hh:mm A") ||
+                            "N/A"}
+                        </Typography>
+                      </Box>
 
-                       <Typography variant="body2">
-                         ⏰{" "}
-                         {moment(exam.start_time, "HH:mm").format("hh:mm A") ||
-                           "N/A"}
-                       </Typography>
-                     </Box>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="success"
+                        startIcon={<PlayArrow />}
+                        sx={{
+                          mt: 3,
+                          borderRadius: 3,
+                        }}
+                        onClick={() => {
+                          handleTakeExamClick(exam.exam_id, exam.instruction);
+                        }}
+                      >
+                        Start Exam
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        ) : (
+          <Card
+            sx={{
+              borderRadius: 4,
+              textAlign: "center",
+              p: 4,
+            }}
+          >
+            <Typography color="text.secondary">
+              No eligible examinations available.
+            </Typography>
+          </Card>
+        )}
 
-                     <Button
-                       fullWidth
-                       variant="contained"
-                       startIcon={<PlayArrow />}
-                       sx={{
-                         mt: 3,
-                         borderRadius: 3,
-                         py: 1.2,
-                         bgcolor: "#2C2C78",
+        {/* RESULT POPUP */}
+        <Dialog
+          open={openExamResultModal}
+          onClose={() => setOpenExamResultModal(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
+            <Box display="flex" alignItems="center" gap={1}>
+              <CheckCircle color="success" />
+              Exam Successfully Submitted
+            </Box>
+          </DialogTitle>
 
-                         "&:hover": {
-                           bgcolor: "#4338CA",
-                         },
-                       }}
-                       onClick={() => handleTakeExamClick(exam.exam_id)}
-                     >
-                       Start Exam
-                     </Button>
-                   </CardContent>
-                 </Card>
-               </Grid>
-             ))}
-           </Grid>
-         </>
-       ) : (
-         <Card
-           sx={{
-             borderRadius: 4,
-             textAlign: "center",
-             p: 4,
-           }}
-         >
-           <Typography color="text.secondary">
-             No eligible examinations available.
-           </Typography>
-         </Card>
-       )}
+          <DialogContent>
+            <Typography>
+              <strong>Exam:</strong> {examResult?.examName}
+            </Typography>
 
-       {/* RESULT POPUP */}
-       <Dialog
-         open={openExamResultModal}
-         onClose={() => setOpenExamResultModal(false)}
-         maxWidth="sm"
-         fullWidth
-       >
-         <DialogTitle>
-           <Box display="flex" alignItems="center" gap={1}>
-             <CheckCircle color="success" />
-             Exam Successfully Submitted
-           </Box>
-         </DialogTitle>
+            <Typography sx={{ mt: 1 }}>
+              <strong>Course:</strong> {examResult?.courseName}
+            </Typography>
 
-         <DialogContent>
-           <Typography>
-             <strong>Exam:</strong> {examResult?.examName}
-           </Typography>
+            <Typography
+              sx={{
+                mt: 2,
+                color: "text.secondary",
+              }}
+            >
+              Submitted at:{" "}
+              {examResult?.timestamp
+                ? new Date(examResult.timestamp).toLocaleString()
+                : ""}
+            </Typography>
+          </DialogContent>
 
-           <Typography sx={{ mt: 1 }}>
-             <strong>Course:</strong> {examResult?.courseName}
-           </Typography>
+          <DialogActions>
+            <Button
+              variant="contained"
+              onClick={() => setOpenExamResultModal(false)}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-           <Typography
-             sx={{
-               mt: 2,
-               color: "text.secondary",
-             }}
-           >
-             Submitted at:{" "}
-             {examResult?.timestamp
-               ? new Date(examResult.timestamp).toLocaleString()
-               : ""}
-           </Typography>
-         </DialogContent>
+        {/* START EXAM CONFIRMATION */}
+        <Dialog
+          open={confirmDialog.open}
+          onClose={handleCancelTakeExam}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ color: "red" }}>
+            Read Examination Instructions Carefully
+          </DialogTitle>
 
-         <DialogActions>
-           <Button
-             variant="contained"
-             onClick={() => setOpenExamResultModal(false)}
-           >
-             Close
-           </Button>
-         </DialogActions>
-       </Dialog>
+          <DialogContent sx={{ p: 3, maxHeight: 380, overflowY: "auto" }}>
+            <Typography sx={{ maxHeight: 380, mt: 4 }}>
+              {confirmDialog.instruction || "No instructions provided."}
+            </Typography>
+            <br></br>
+            <DialogContentText sx={{ whiteSpace: "pre-wrap", mb: 2 }}>
+              Are you ready to start this examination?
+            </DialogContentText>
+          </DialogContent>
 
-       {/* START EXAM CONFIRMATION */}
-       <Dialog open={confirmDialog.open} onClose={handleCancelTakeExam}>
-         <DialogTitle>Start Examination</DialogTitle>
+          <DialogActions>
+            <Button
+              onClick={handleCancelTakeExam}
+              color="success"
+              variant="outlined"
+            >
+              Cancel
+            </Button>
 
-         <DialogContent>
-           <Typography>
-             Once you begin this examination, the timer will start immediately.
-             Are you ready to continue?
-           </Typography>
-         </DialogContent>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleConfirmTakeExam}
+            >
+              Start Exam
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
 
-         <DialogActions>
-           <Button onClick={handleCancelTakeExam}>Cancel</Button>
-
-           <Button variant="contained" onClick={handleConfirmTakeExam}>
-             Start Exam
-           </Button>
-         </DialogActions>
-       </Dialog>
-     </Box>
-
-     <Snackbar
-       open={snackbar.open}
-       autoHideDuration={3000}
-       onClose={handleCloseSnackbar}
-       anchorOrigin={{
-         vertical: "top",
-         horizontal: "center",
-       }}
-     >
-       <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
-         {snackbar.message}
-       </Alert>
-     </Snackbar>
-   </>
- );
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
+  );
 };
 
 export default StudentDashboard;

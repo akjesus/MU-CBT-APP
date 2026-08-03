@@ -1170,7 +1170,7 @@ export default function AdminExams() {
                     S/N
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
-                    Stdent Name
+                    Student Name
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
                     Matric Number
