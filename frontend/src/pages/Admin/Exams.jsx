@@ -61,6 +61,7 @@ import {
   Add,
 } from "@mui/icons-material";
 import { Editor } from "@tinymce/tinymce-react";
+import { red } from "@mui/material/colors";
 
 export default function AdminExams() {
   const editorRef = useRef(null);
@@ -113,7 +114,7 @@ export default function AdminExams() {
     }),
     duration: 30,
     exam_date: new Date().toISOString().split("T")[0],
-    exam_mode: "graded",
+    exam_type: "objective",
     max_score_obtainable: 70,
     display_question_randomly: 1,
     instruction: "Answer all questions",
@@ -285,7 +286,7 @@ export default function AdminExams() {
         start_time: newExam.start_time,
         duration: newExam.duration,
         exam_date: newExam.exam_date,
-        exam_mode: newExam.exam_mode,
+        exam_type: newExam.exam_type,
         max_score_obtainable: newExam.max_score_obtainable,
         display_question_randomly: newExam.display_question_randomly,
         instruction: newExam.instruction,
@@ -333,7 +334,7 @@ export default function AdminExams() {
         }),
         duration: 30,
         exam_date: new Date().toISOString().split("T")[0],
-        exam_mode: "graded",
+        exam_type: "objective",
         max_score_obtainable: 70,
         display_question_randomly: 1,
         instruction: "Answer all questions",
@@ -1043,6 +1044,9 @@ export default function AdminExams() {
                     Duration
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
+                    Exam Type
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", width: "10%" }}>
                     Actions
                   </TableCell>
                 </TableRow>
@@ -1071,6 +1075,7 @@ export default function AdminExams() {
                         {moment(ex.start_time, "HH:mm").format("LT")}
                       </TableCell>
                       <TableCell>{ex.duration} mins</TableCell>
+                      <TableCell>{ex.exam_type}</TableCell>
                       <TableCell>
                         <Box
                           sx={{
@@ -1119,45 +1124,6 @@ export default function AdminExams() {
                               )}
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Edit Exam" arrow>
-                            <IconButton
-                              color="primary"
-                              size="small"
-                              sx={{
-                                bgcolor: "#e3e3fa",
-                                borderRadius: 2,
-                                p: 0.25,
-                                boxShadow: 1,
-                                ":hover": { bgcolor: "#d1d1f7" },
-                              }}
-                              onClick={() => handleOpen(ex, ex.id)}
-                              aria-label="Edit Exam"
-                            >
-                              <Edit fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Manage Questions" arrow>
-                            <IconButton
-                              color="secondary"
-                              size="small"
-                              sx={{
-                                bgcolor: "#e3e3fa",
-                                borderRadius: 2,
-                                p: 0.25,
-                                boxShadow: 1,
-                                ":hover": { bgcolor: "#d1d1f7" },
-                              }}
-                              onClick={() =>
-                                setOpenExamQuestionModal({
-                                  open: true,
-                                  exam: ex,
-                                })
-                              }
-                              aria-label="Manage Questions"
-                            >
-                              <QuestionMark fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -1189,7 +1155,11 @@ export default function AdminExams() {
                 onChange={(e) => setSearchAttendance(e.target.value)}
                 sx={{ width: "50%" }}
               />
-              <Button variant="contained" onClick={() => setFilterModal(true)}>
+              <Button
+                variant="contained"
+                sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
+                onClick={() => setFilterModal(true)}
+              >
                 Filter Attendance
               </Button>
             </Box>
@@ -1404,6 +1374,7 @@ export default function AdminExams() {
               />
               <Button
                 variant="contained"
+                sx={{ bgcolor: "#2C2C78", ":hover": { bgcolor: "#1f1f5c" } }}
                 onClick={() => setBlocklistModal(true)}
               >
                 Block Students
@@ -1784,35 +1755,64 @@ export default function AdminExams() {
                   gap: 1,
                   px: 1.5,
                   py: 1,
-                  backgroundColor: "#f5f5f5",
+                  bgcolor: "#fc2f3d",
                   borderRadius: 1,
                   border: "1px solid #e0e0e0",
                 }}
               >
                 <Typography
                   variant="caption"
-                  sx={{ fontWeight: 600, fontSize: "0.8rem", minWidth: "70px" }}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "0.8rem",
+                    minWidth: "70px",
+                    color: "white",
+                  }}
                 >
-                  Exam Mode:
+                  Exam Type:
                 </Typography>
                 <RadioGroup
                   row
-                  name="exam_mode"
-                  value={newExam.exam_mode}
+                  name="exam_type"
+                  value={newExam.exam_type}
                   onChange={handleChange}
                   sx={{ gap: 0.5 }}
                 >
                   <FormControlLabel
-                    value="graded"
-                    control={<Radio size="small" sx={{ py: 0.25 }} />}
-                    label={<span style={{ fontSize: "0.75rem" }}>Graded</span>}
+                    value="objective"
+                    control={
+                      <Radio
+                        size="small"
+                        sx={{
+                          py: 0.25,
+                          color: "white",
+                          "&.Mui-checked": { color: "white" },
+                        }}
+                      />
+                    }
+                    label={
+                      <span style={{ fontSize: "0.75rem", color: "white" }}>
+                        Objective
+                      </span>
+                    }
                     sx={{ m: 0 }}
                   />
                   <FormControlLabel
-                    value="not graded"
-                    control={<Radio size="small" sx={{ py: 0.25 }} />}
+                    value="theory"
+                    control={
+                      <Radio
+                        size="small"
+                        sx={{
+                          py: 0.25,
+                          color: "white",
+                          "&.Mui-checked": { color: "white" },
+                        }}
+                      />
+                    }
                     label={
-                      <span style={{ fontSize: "0.75rem" }}>Not Graded</span>
+                      <span style={{ fontSize: "0.75rem", color: "white" }}>
+                        Theory
+                      </span>
                     }
                     sx={{ m: 0 }}
                   />
@@ -1906,7 +1906,7 @@ export default function AdminExams() {
                 !newExam.exam_name ||
                 !newExam.department_id ||
                 !newExam.semester ||
-                !newExam.exam_mode ||
+                !newExam.exam_type ||
                 !newExam.session_id ||
                 !newExam.duration ||
                 !newExam.exam_hall
@@ -1968,40 +1968,45 @@ export default function AdminExams() {
                 mt: 2,
               }}
             >
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() =>
-                  setAddQuestionModal({
-                    open: true,
-                    question: null,
-                    title: "Add New Question",
-                    button: "Save Question",
-                    action: (question) =>
-                      handleAddNewQuestion(
-                        openExamQuestionModal.exam,
-                        question,
-                      ),
-                  })
-                }
-              >
-                Add New Objective Question
-              </Button>
-              <Button
-                variant="contained"
-                color="warning"
-                onClick={() =>
-                  setAddTheoryQuestionModal({
-                    open: true,
-                    question: "",
-                    instructions: "",
-                    title: "Add New Theory Question",
-                    button: "Save Theory Question",
-                  })
-                }
-              >
-                Add New Theory Question
-              </Button>
+              {" "}
+              {openExamQuestionModal.exam?.exam_type === "objective" && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() =>
+                    setAddQuestionModal({
+                      open: true,
+                      question: null,
+                      title: "Add New Question",
+                      button: "Save Question",
+                      action: (question) =>
+                        handleAddNewQuestion(
+                          openExamQuestionModal.exam,
+                          question,
+                        ),
+                    })
+                  }
+                >
+                  Add New Objective Question
+                </Button>
+              )}
+              {openExamQuestionModal.exam?.exam_type === "theory" && (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  onClick={() =>
+                    setAddTheoryQuestionModal({
+                      open: true,
+                      question: "",
+                      instructions: "",
+                      title: "Add New Theory Question",
+                      button: "Save Theory Question",
+                    })
+                  }
+                >
+                  Add New Theory Question
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color="error"
@@ -2052,6 +2057,8 @@ export default function AdminExams() {
               margin="dense"
               label="Question Text"
               fullWidth
+              multiline
+              rows={3}
               value={addQuestionModal.question?.text || ""}
               onChange={(e) =>
                 setAddQuestionModal((prev) => ({

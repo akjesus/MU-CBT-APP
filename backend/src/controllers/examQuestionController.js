@@ -3,9 +3,7 @@ const csvParser = require("csv-parser");
 const stream = require("stream");
 const fs = require("fs");
 
-/**
- * 1. GET all questions linked to a specific exam
- */
+
 exports.getQuestionsByExam = async (req, res) => {
   try {
     const { exam_id } = req.params;

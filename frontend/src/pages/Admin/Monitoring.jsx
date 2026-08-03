@@ -220,6 +220,7 @@ const Monitoring = () => {
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 900 }}>S/No</TableCell>
+              <TableCell sx={{ fontWeight: 900 }}>Course Code</TableCell>
               <TableCell sx={{ fontWeight: 900 }}>Exam Name</TableCell>
               <TableCell sx={{ fontWeight: 900 }}>Start Time</TableCell>
               <TableCell sx={{ fontWeight: 900 }}>Duration</TableCell>
@@ -232,6 +233,7 @@ const Monitoring = () => {
                 <TableRow key={ex.id}>
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>{ex.course_code}</TableCell>
+                  <TableCell>{ex.exam_name}</TableCell>
                   <TableCell>
                     {moment(ex.start_time, "HH:mm:ss").format("hh:mm A")}
                   </TableCell>
@@ -239,7 +241,11 @@ const Monitoring = () => {
                   <TableCell>
                     <Button
                       variant="contained"
-                      sx={{ marginRight: 1 }}
+                      sx={{
+                        marginRight: 1,
+                        bgcolor: "#2C2C78",
+                        ":hover": { bgcolor: "#1f1f5c" },
+                      }}
                       onClick={() => handleExamSelect(ex)}
                     >
                       View Details

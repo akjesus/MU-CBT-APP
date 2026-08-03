@@ -6,7 +6,7 @@ class Exam {
       `SELECT exams.id as id, exams.course_id as course_id, courses.name AS course_name, courses.code AS course_code, 
                     exams.session_id, sessions.name AS session_name, levels.name AS course_level,
                     exams.semester, exams.level, exams.exam_name, 
-                    exams.max_score_obtainable, exams.exam_mode, exams.server_time,
+                    exams.max_score_obtainable, exams.exam_type, exams.server_time,
                     exams.start_time, exams.duration, exams.active,
                     exams.exam_date, exams.instruction, exams.exam_hall, exams.display_question_randomly,
                     exams.created_at, exams.updated_at, GROUP_CONCAT(exam_departments.department_id) AS department_id,
@@ -78,7 +78,7 @@ class Exam {
     const [result] = await db.query(
       `INSERT INTO exams 
       (course_id, session_id, semester, level, exam_name, max_score_obtainable, 
-        exam_mode, start_time, duration,  exam_date, instruction, exam_hall,
+        exam_type, start_time, duration,  exam_date, instruction, exam_hall,
         server_time, display_question_randomly, created_at, updated_at) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
@@ -88,7 +88,7 @@ class Exam {
         data.level,
         data.exam_name,
         data.max_score_obtainable,
-        data.exam_mode,
+        data.exam_type,
         data.start_time,
         data.duration,
         data.exam_date,
@@ -103,7 +103,7 @@ class Exam {
   static async update(id, data) {
     await db.query(
       `UPDATE exams SET course_id = ?, session_id = ?, semester = ?, level = ?, exam_name = ?, 
-                             max_score_obtainable = ?, exam_mode = ?, start_time = ?, duration = ?, 
+                             max_score_obtainable = ?, exam_type = ?, start_time = ?, duration = ?, 
                              unit_of_time = ?, exam_date = ?, instruction = ?, exam_hall = ?,
                              show_max_scores = ?, display_question_randomly = ?, allow_multiple_attempts = ?,              
                              unordered_answering = ?, updated_at = NOW() 
@@ -115,7 +115,7 @@ class Exam {
         data.level,
         data.exam_name,
         data.max_score_obtainable,
-        data.exam_mode,
+        data.exam_type,
         data.start_time,
         data.duration,
         data.unit_of_time,
@@ -160,7 +160,7 @@ class Exam {
       `SELECT exams.id as id, exams.course_id as course_id, courses.name AS course_name, courses.code AS course_code, 
                     exams.session_id, sessions.name AS session_name, levels.name AS course_level,
                     exams.semester, exams.level, exams.exam_name,
-                    exams.max_score_obtainable, exams.exam_mode, exams.server_time,
+                    exams.max_score_obtainable, exams.exam_type, exams.server_time,
                     exams.start_time, exams.duration, exams.active,
                     exams.exam_date, exams.instruction, exams.exam_hall, exams.display_question_randomly,
                     exams.created_at, exams.updated_at, GROUP_CONCAT(exam_departments.department_id) AS department_ids,

@@ -10,15 +10,16 @@ router.post("/", async (req, res)=> {
         const {
           first_name,
           last_name,
+          other_names,
           department_name,
           exam_name,
           registration_number,
         } = req.body;
         const alert = "Opened other Tabs/Windows";
         notifier.notify({
-          title: "Possible Malpractice Alert!!",
+          title: "Tab Switch Alert!",
           icon: path.join(__dirname, "../logo.png"),
-          message: `${first_name} ${last_name}: ${registration_number} with IP: ${ip_address} has switched tabs more than 5 times`,
+          message: `${last_name}${other_names} ${first_name}: ${registration_number} with IP: ${ip_address} has switched tabs more than 5 times`,
           sound: true,
           wait: false,
         });
@@ -29,7 +30,7 @@ router.post("/", async (req, res)=> {
         ip_address, alert, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
           [
             exam_name,
-            `${first_name} ${last_name}`,
+            `${last_name}${other_names} ${first_name}`,
             registration_number,
             department_name,
             ip_address,

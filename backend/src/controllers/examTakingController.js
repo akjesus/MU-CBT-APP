@@ -83,7 +83,7 @@ exports.submitExam = async (req, res) => {
       `
             UPDATE exam_monitoring
             SET status='submitted',
-            time_left=0, responses=NULL, updated_at=NOW()
+            time_left=0, updated_at=NOW()
             WHERE exam_id=?
             AND student_id = ?`,
       [student_id, exam_id],
@@ -208,7 +208,7 @@ exports.endExam = async (req, res) => {
             UPDATE exam_monitoring
             SET
             status='submitted',
-            time_left=0, responses=NULL, updated_at=NOW()
+            time_left=0, updated_at=NOW()
             WHERE exam_id=?
             AND student_id = ?
             `,

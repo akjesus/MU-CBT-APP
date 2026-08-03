@@ -3,7 +3,7 @@ const db = require("../config/database");
 class ExamTaking {
   static async checkEligibility(studentId, examId) {
     const [rows] = await db.query(
-      `SELECT e.id AS exam_id, e.course_id, e.level, e.exam_name, e.start_time, e.duration, e.unit_of_time, e.exam_date, e.exam_mode,
+      `SELECT e.id AS exam_id, e.course_id, e.level, e.exam_name, e.start_time, e.duration, e.unit_of_time, e.exam_date, e.exam_type,
                     c.id AS course_id, c.name AS course_name, 
                     s.id AS student_id, s.level_id AS student_level 
              FROM exams e

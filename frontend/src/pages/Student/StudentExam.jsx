@@ -63,7 +63,8 @@ export default function StudentExam() {
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);
   const [examEnded, setExamEnded] = useState(false);
-  const [examInfo, setExamInfo] = useState(null);
+  const [examInfo, setExamInfo] = useState([]);
+  const [isEligible, setIsEligible] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [autoSubmitModalOpen, setAutoSubmitModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -82,16 +83,53 @@ export default function StudentExam() {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  const preventNavigation = useCallback((event) => {
+    const blockedKeys = ["F5", "r", "R", "ArrowLeft", "ArrowRight"];
+
+    if (
+      event.type === "beforeunload" ||
+      (event.type === "keydown" &&
+        (event.key === "F5" ||
+          (event.ctrlKey && (event.key === "r" || event.key === "R")) ||
+          (event.altKey &&
+            (event.key === "ArrowLeft" || event.key === "ArrowRight"))))
+    ) {
+      event.preventDefault();
+      event.returnValue = "";
+      showSnackbar("Navigation blocked during exam", "warning");
+      return false;
+    }
+
+    if (event.type === "popstate") {
+      event.preventDefault();
+      window.history.pushState(null, "", window.location.href);
+      showSnackbar("Navigation blocked during exam", "warning");
+      return false;
+    }
+
+    return true;
+  }, []);
+
   // Handle tab switch detection
   const reportTabSwitch = async () => {
-    try {
-      const res = await notifyAlert({
-        student_id: user.id,
+    if (tabSwitchReportedRef.current) return;
+    tabSwitchReportedRef.current = true;
+     try {
+      await notifyAlert({
+        first_name: user.first_name,
+        last_name: user.last_name,
+        other_names: user.other_names,
+        registration_number: user.matriculation_number,
+        department_name: user.department,
         exam_id: exam_id,
+        exam_name: examInfo?.name,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
       console.error("Error reporting tab switch:", error);
+    } finally {
+      tabSwitchCountRef.current = 0;
+      tabSwitchReportedRef.current = false;
     }
   };
 
@@ -99,26 +137,16 @@ export default function StudentExam() {
     tabSwitchCountRef.current += 1;
     console.log(`Tab switches detected: ${tabSwitchCountRef.current}`);
 
-    if (tabSwitchCountRef.current > 5 && !tabSwitchReportedRef.current) {
-      tabSwitchReportedRef.current = true;
+    if (tabSwitchCountRef.current >= 8 && !tabSwitchReportedRef.current) {
       reportTabSwitch();
     }
   };
 
-  // Prevent navigation and shortcuts
-  const preventNavigation = useCallback((e) => {
-    if (
-      e.key === "F5" ||
-      (e.ctrlKey && e.key === "r") ||
-      (e.ctrlKey && e.shiftKey && e.key === "R") ||
-      (e.altKey && e.key === "ArrowLeft") || // Back
-      (e.altKey && e.key === "ArrowRight") // Forward
-    ) {
-      e.preventDefault();
-      showSnackbar("Navigation blocked during exam", "warning");
-      return false;
+  const handleVisibilityRestore = () => {
+    if (document.visibilityState === "visible") {
+      handleTabSwitchOrBlur();
     }
-  }, []);
+  };
 
   const eligibilityCheck = async () => {
     try {
@@ -134,14 +162,13 @@ export default function StudentExam() {
 
     return true;
   };
-  const [isEligible, setIsEligible] = useState(false);
 
   useEffect(() => {
     const fetchExamData = async () => {
       try {
         setLoading(true);
         const res = await eligibilityCheck();
-        if (res === false) {
+        if (!res) {
           setIsEligible(false);
           return;
         } else {
@@ -198,6 +225,7 @@ export default function StudentExam() {
           await createExamMonitoringSession(activeData);
         }
       } catch (error) {
+        console.log(error);
         showSnackbar("Error loading exam: " + error.message, "error");
         setTimeout(() => navigate("/student/dashboard"), 1000);
       } finally {
@@ -238,20 +266,13 @@ export default function StudentExam() {
     return () => clearInterval(timer);
   }, [timeLeft]);
 
-  // Prevent navigation on exam
-  useEffect(() => {
-    if (!examInfo) return;
-    document.addEventListener("keydown", preventNavigation);
-    return () => {
-      document.removeEventListener("keydown", preventNavigation);
-    };
-  }, [examInfo, preventNavigation]);
-
   // Detect tab switching or opening new tabs
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         handleTabSwitchOrBlur();
+      } else {
+        handleVisibilityRestore();
       }
     };
 
@@ -259,14 +280,28 @@ export default function StudentExam() {
       handleTabSwitchOrBlur();
     };
 
+    const handleWindowFocus = () => {
+      handleVisibilityRestore();
+    };
+
+    window.addEventListener("beforeunload", preventNavigation);
+    window.addEventListener("popstate", preventNavigation);
+    window.addEventListener("keydown", preventNavigation);
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
+
+    window.history.pushState(null, "", window.location.href);
 
     return () => {
+      window.removeEventListener("beforeunload", preventNavigation);
+      window.removeEventListener("popstate", preventNavigation);
+      window.removeEventListener("keydown", preventNavigation);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
     };
-  }, []);
+  }, [preventNavigation]);
 
   const formatTime = (seconds) => {
     if (!seconds) return "00:00";
@@ -515,6 +550,9 @@ export default function StudentExam() {
             <Typography variant="body2" sx={{ color: "gray" }}>
               Level: {user?.level}
             </Typography>
+            <Typography variant="body2" sx={{ color: "black" }}>
+              Exam: {examInfo?.exam_name}
+            </Typography>
           </Box>
           <Box
             sx={{
@@ -555,7 +593,7 @@ export default function StudentExam() {
               </Stack>
             </Box>
           </Box>
-          {currentQuestion.question_type === "Objective" && (
+          {currentQuestion && currentQuestion.question_type === "Objective" && (
             <>
               <Box
                 sx={{
@@ -604,7 +642,7 @@ export default function StudentExam() {
             }}
           >
             <CardContent sx={{ textAlign: "center" }}>
-              {currentQuestion.instructions && (
+              {currentQuestion && currentQuestion.instructions && (
                 <Box
                   sx={{
                     p: 2,
@@ -628,11 +666,11 @@ export default function StudentExam() {
                   alignItems: "center",
                 }}
               >
-                {renderQuestion(currentQuestion)}
+                {currentQuestion && renderQuestion(currentQuestion)}
               </Typography>
 
               {/* Question Image/File if exists */}
-              {currentQuestion.file && (
+              {currentQuestion && currentQuestion.file && (
                 <Box>
                   <img
                     src={`${BASE_URL.replace("/api", "")}/${currentQuestion.file}`}
@@ -642,95 +680,96 @@ export default function StudentExam() {
                 </Box>
               )}
 
-              {currentQuestion.question_type === "Objective" && (
-                <RadioGroup
-                  value={responses[currentQuestion.question_id] || ""}
-                  onChange={(e) =>
-                    handleSelectOption(
-                      currentQuestion.question_id,
-                      e.target.value,
-                    )
-                  }
-                >
-                  {["option_a", "option_b", "option_c", "option_d"].map(
-                    (option, index) => {
-                      const label = String.fromCharCode(65 + index);
-                      const optionText = currentQuestion[option];
+              {currentQuestion &&
+                currentQuestion.question_type === "Objective" && (
+                  <RadioGroup
+                    value={responses[currentQuestion.question_id] || ""}
+                    onChange={(e) =>
+                      handleSelectOption(
+                        currentQuestion.question_id,
+                        e.target.value,
+                      )
+                    }
+                  >
+                    {["option_a", "option_b", "option_c", "option_d"].map(
+                      (option, index) => {
+                        const label = String.fromCharCode(65 + index);
+                        const optionText = currentQuestion[option];
 
-                      if (!optionText) return null;
+                        if (!optionText) return null;
 
-                      const isSelected =
-                        responses[currentQuestion.question_id] === label;
+                        const isSelected =
+                          responses[currentQuestion.question_id] === label;
 
-                      return (
-                        <Box
-                          key={option}
-                          onClick={() =>
-                            handleSelectOption(
-                              currentQuestion.question_id,
-                              label,
-                            )
-                          }
-                          sx={{
-                            mb: 0.5,
-                            p: 1.5,
-                            border: "2px solid #e0e0e0",
-                            borderRadius: 1,
-                            backgroundColor: isSelected ? "#e8f5e9" : "#fff",
-                            borderColor: isSelected ? "#4caf50" : "#e0e0e0",
-                            cursor: "pointer",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              borderColor: "#4caf50",
-                              boxShadow: "0 2px 8px rgba(76,175,80,0.1)",
-                            },
-                          }}
-                        >
-                          <FormControlLabel
-                            value={label}
-                            control={
-                              <Radio
-                                checked={isSelected}
-                                onChange={() =>
-                                  handleSelectOption(
-                                    currentQuestion.question_id,
-                                    label,
-                                  )
-                                }
-                                sx={{ display: "none" }}
-                              />
+                        return (
+                          <Box
+                            key={option}
+                            onClick={() =>
+                              handleSelectOption(
+                                currentQuestion.question_id,
+                                label,
+                              )
                             }
-                            label={
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  gap: 1,
-                                }}
-                              >
-                                {isSelected ? (
-                                  <RadioButtonChecked
-                                    sx={{ color: "#4caf50" }}
-                                  />
-                                ) : (
-                                  <RadioButtonUnchecked
-                                    sx={{ color: "#9e9e9e" }}
-                                  />
-                                )}
-                                <Typography variant="body2" sx={{ flex: 1 }}>
-                                  <strong>{label}.</strong> {optionText}
-                                </Typography>
-                              </Box>
-                            }
-                            sx={{ width: "100%", margin: 0 }}
-                          />
-                        </Box>
-                      );
-                    },
-                  )}
-                </RadioGroup>
-              )}
+                            sx={{
+                              mb: 0.5,
+                              p: 1.5,
+                              border: "2px solid #e0e0e0",
+                              borderRadius: 1,
+                              backgroundColor: isSelected ? "#e8f5e9" : "#fff",
+                              borderColor: isSelected ? "#4caf50" : "#e0e0e0",
+                              cursor: "pointer",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                borderColor: "#4caf50",
+                                boxShadow: "0 2px 8px rgba(76,175,80,0.1)",
+                              },
+                            }}
+                          >
+                            <FormControlLabel
+                              value={label}
+                              control={
+                                <Radio
+                                  checked={isSelected}
+                                  onChange={() =>
+                                    handleSelectOption(
+                                      currentQuestion.question_id,
+                                      label,
+                                    )
+                                  }
+                                  sx={{ display: "none" }}
+                                />
+                              }
+                              label={
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    width: "100%",
+                                    gap: 1,
+                                  }}
+                                >
+                                  {isSelected ? (
+                                    <RadioButtonChecked
+                                      sx={{ color: "#4caf50" }}
+                                    />
+                                  ) : (
+                                    <RadioButtonUnchecked
+                                      sx={{ color: "#9e9e9e" }}
+                                    />
+                                  )}
+                                  <Typography variant="body2" sx={{ flex: 1 }}>
+                                    <strong>{label}.</strong> {optionText}
+                                  </Typography>
+                                </Box>
+                              }
+                              sx={{ width: "100%", margin: 0 }}
+                            />
+                          </Box>
+                        );
+                      },
+                    )}
+                  </RadioGroup>
+                )}
 
               {/* Navigation Buttons */}
               <Box sx={{ display: "flex", gap: 1, mb: 1, mt: 3 }}>
