@@ -3,7 +3,6 @@ const csvParser = require("csv-parser");
 const stream = require("stream");
 const fs = require("fs");
 
-
 exports.getQuestionsByExam = async (req, res) => {
   try {
     const { exam_id } = req.params;
@@ -11,8 +10,7 @@ exports.getQuestionsByExam = async (req, res) => {
       `SELECT display_question_randomly FROM exams WHERE id = ?`,
       [exam_id],
     );
-    const shouldRandomize =
-      randomRows?.[0]?.display_question_randomly === 1;
+    const shouldRandomize = randomRows?.[0]?.display_question_randomly === 1;
     const [rows] = await db.query(
       `SELECT q.id AS question_id, q.course_id, q.text, q.option_a, q.option_b, q.option_c,
               q.option_d, q.correct_option, q.instructions, q.difficulty_level, q.question_type, q.score_obtainable,
@@ -240,6 +238,7 @@ exports.bulkUploadNewQuestions = async (req, res) => {
     bufferStream.end(csvFile.buffer);
 
     const questionsToInsert = []; // for question fields
+    let skippedCount = 0;
     bufferStream
       .pipe(csvParser())
       .on("data", (row) => {
@@ -252,6 +251,13 @@ exports.bulkUploadNewQuestions = async (req, res) => {
           instructions,
           score_obtainable,
         } = row;
+
+        // Skip row if correct_option is missing or empty
+        if (!correct_option || String(correct_option).trim() === "") {
+          console.log("Skipping question row: missing correct_option");
+          skippedCount++;
+          return;
+        }
 
         const firstText = replaceQuestionMarkWithArrow(row.text);
         const text = replaceSuperscript(firstText);
@@ -317,6 +323,12 @@ exports.bulkUploadNewQuestions = async (req, res) => {
 
         res.status(201).json({
           message: `${insertedCount} new questions created & linked to exam`,
+          inserted: insertedCount,
+          skipped: skippedCount,
+          details:
+            skippedCount > 0
+              ? `${skippedCount} row(s) skipped due to missing or empty correct_option field`
+              : "All rows processed successfully",
         });
       });
   } catch (err) {
